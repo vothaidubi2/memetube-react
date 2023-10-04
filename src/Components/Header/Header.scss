@@ -1,0 +1,104 @@
+// .header-page{
+//     position: sticky;
+//     top: 0;
+//     display: flex;
+//     flex-direction: row;
+//     justify-content: space-between;
+//     padding: 0 20px;
+//     height: 60px;
+//     background-color: #0F0F0F;
+//     flex-wrap: wrap;
+//     z-index: 11;
+
+//     .start{
+//         display: flex;
+//         align-items: center;
+//         gap: 10px;
+//         color: white;
+
+//         .menu-icon{
+//             cursor: pointer;
+//             padding: 5px;
+//             font-size: 35px;
+//             border-radius: 50%;
+//         }
+//         .menu-icon:hover{
+//             background-color: #393939;
+//         }
+        
+//         .logo{
+//             display: flex;
+//             align-items: center;
+//             cursor: pointer;
+
+//             .logo-icon{
+//                 font-size: 40px;
+//                 color: red;
+//             }
+//             .logo-content{  
+//                 font-size: x-large;
+//             }
+//         }
+//     }
+//     .middle{
+//         display: flex;
+//         align-items: center;
+//         flex-grow: 2;
+//         justify-content: center;  
+
+//         .search-input{
+//             display: flex;
+//             align-items: center;
+//             height: 35px;
+//             width: 50%;
+            
+
+//             .input-search{
+//                 height: 35px;
+//                 width: 100%;
+//                 border-top-left-radius: 15px;
+//                 border-bottom-left-radius: 15px ;
+//                 border: 1px solid #333;
+//                 padding: 0 20px;
+//                 background-color: #0F0F0F;
+//                 font-weight: 600;
+//                 color: #a4a4a4;
+//                 font-size: medium;
+//             }
+//             .input-search:focus{
+//                 border: 1px solid rgb(36, 164, 255);
+//                 outline: none;
+//             }
+//             .submit-search{
+//                 height: 35px;
+//                 display: flex;
+//                 align-items: center;
+//                 justify-content: center;
+//                 border: none;
+//                 border-top-right-radius: 15px;
+//                 border-bottom-right-radius: 15px;
+//                 width: 70px;
+//                 outline: 1px solid #333;
+//                 background-color: #3e3e3e;
+//                 cursor: pointer;
+//             }
+//         }
+//     }
+//     .end{
+//         color: white;
+//         display: flex;
+//         gap: 20px;
+//         align-items: center;
+//         padding: 0 15px;
+
+//         .end-icon{
+//             font-size: 30px;
+//             cursor: pointer;
+//         }
+//         .avatar{
+//             cursor: pointer;
+//             width: 35px;
+//             height: 35px;
+//         }
+//     }
+// }

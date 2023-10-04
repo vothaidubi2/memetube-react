@@ -1,0 +1,7 @@
+.video-card-action video::-webkit-media-controls-panel {
+    display: none !important;
+  }
+  
+  .video-card-action:hover video::-webkit-media-controls-panel {
+    display: flex !important;
+  }
