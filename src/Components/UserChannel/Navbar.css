@@ -1,0 +1,117 @@
+*{
+    margin:0;
+    padding:0;
+    text-decoration: none;
+    box-sizing: border-box;
+ 
+   
+}
+.container{
+    display:flex;
+}
+
+main{
+    width: 100%;
+    
+}
+.titlenavbar{
+  color: rgb(151,151,151);
+}
+.top_section{
+    display: flex;
+    align-items:center;
+    padding:20px 15px;
+}
+.logo{
+    font-size: 30px;
+}
+.bars{
+    display: flex;
+    font-size: 25px;
+    margin-left: 50px;
+}
+.link{
+    display: flex;
+    color: rgb(144,144,144);
+    padding: 10px 15px;
+    gap: 15px;
+    transition: all 0.5s;
+    position: relative;
+}
+.link:hover{
+    background:rgb(31,31,31);
+
+    transition: all 0.5s;
+}
+
+.active{
+    background: rgb(31,31,31);
+
+}
+.icon, .link_text{
+    font-size: 16px;
+    margin:  6% 0 0 7%;
+    text-align: center;
+}
+
+  .logo {
+    font-size: 20px; /* Giảm kích thước của font chữ */
+    margin: 0;
+  }
+/* Navbar.css */
+
+.container {
+    margin:0;
+    padding: 0;
+    display: flex;
+    height: 100vh; /* Chiều dài 100% của viewport height */
+    box-sizing: border-box;
+  }
+  
+  .sidebar {
+    background-color: rgb(40,40,40);
+    color: rgb(144,144,144);
+    padding: 0;
+    margin: -8px;
+    height: 100%;
+    width: 250px;
+   border: 1px solid rgb(62,62,62);
+   overflow-y: hidden;
+  }
+  .title,
+  .namechanel {
+    white-space: nowrap; /* Ngăn chúng xuống dòng tự động */
+    overflow: hidden; /* Ngăn chúng xuống dòng tự động */
+    text-overflow: ellipsis; /* Hiển thị dấu chấm (...) nếu nội dung quá dài */
+  }
+  .top_section {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+
+  }
+  .title{
+    color:white;
+    font-size: 20px;
+  }
+  .namechanel{
+    color:rgb(151,151,151);
+    font-size: 15px;
+  }
+  .avatarchanel{
+    height: 150px;
+    width: 150px;
+    margin: 15px;
+    border-radius: 50%;
+    display: inline-block;
+
+  }
+  .top_section img{
+   object-fit: cover;
+   
+  }
+
+  /* ... Quy tắc CSS khác ... */
+  
+  
+  
