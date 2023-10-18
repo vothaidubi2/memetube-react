@@ -8,8 +8,7 @@ import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
-import InsertChartIcon from '@mui/icons-material/InsertChart';
-import { Height } from "@mui/icons-material";
+import InsertChartIcon from '@mui/icons-material/InsertChart';                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 const drawerWidth = 240;
 
 
@@ -23,19 +22,19 @@ function Sidebar(props) {
     };
     const menuItem=[
       {
-      path:"/homestudio",
+      path:"/channel/home",
       name:"Overview page",
       icon:ViewQuiltIcon
     },  {
-      path:"/contentstudio",
+      path:"/studio/content",
       name:"Content",
       icon:FileCopyIcon
     },  {
-      path:"/datastudio",
+      path:"/studio/data",
       name:"Analytical data",
       icon:InsertChartIcon
     },  {
-      path:"/commentstudio",
+      path:"/studio/comment",
       name:"Comment",
       icon:ForumOutlinedIcon
     }
