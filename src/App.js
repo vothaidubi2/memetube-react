@@ -9,7 +9,6 @@ import SearchPage from './Components/Search/SearchPage';
 import Sidebar from './Components/Sidebar/Sidebar';
 import VideoDetail from './Components/VideoDetail/VideoDetail';
 
-
 const theme = createTheme({
   palette: {
     mode: 'dark',

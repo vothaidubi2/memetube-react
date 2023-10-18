@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -53,7 +53,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         transition: theme.transitions.create('width'),
         width: '100%',
         [theme.breakpoints.up('md')]: {
-            width: '20ch',
+            width: '65ch',
         },
     },
 }));
@@ -157,7 +157,7 @@ export default function Header() {
     );
 
     //search input
-    const [inputSearch,setInputSearch] = React.useState("");
+    const [inputSearch, setInputSearch] = React.useState("");
 
     return (
         <Box sx={{ flexGrow: 1, position: 'fixed', zIndex: '1000', top: '0', width: '100%' }}>
@@ -179,26 +179,26 @@ export default function Header() {
                             component="div"
                             sx={{ display: 'flex', alignItems: 'center' }}
                         >
-                            <Link to={'/'} style={{ display: 'flex', alignItems: 'center',color:'white',textDecoration:'none' }}>
+                            <Link to={'/'} style={{ display: 'flex', alignItems: 'center', color: 'white', textDecoration: 'none' }}>
                                 <YouTubeIcon className="logo-icon" sx={{ fontSize: '40px', color: 'red' }} />
                                 <h3 className="logo-content">MemeTube</h3>
                             </Link>
                         </Typography>
                     </Box>
-                    <Box sx={{ flex: '2' }}>
-                        <Search sx={{ borderRadius: '20px' }}>
+                    <Box sx={{ flex: '2' ,width:'100%'}}>
+                        <Search sx={{ borderRadius: '20px',width:'100%' }}>
                             <SearchIconWrapper>
                                 <SearchIcon />
                             </SearchIconWrapper>
-                            <Form action={`/search`}>
-                            <StyledInputBase sx={{ width: '100%' }}
-                                placeholder="Search…"
-                                inputProps={{ 'aria-label': 'search' }}
-                                onChange={e => {
-                                    setInputSearch(e.target.value);
-                                    console.log(inputSearch)
-                                }}
-                            />
+                            <Form action={`/search?search=${inputSearch}`} style={{width:'20ch'}}>
+                                <StyledInputBase 
+                                    name='search'
+                                    placeholder="Search…"
+                                    inputProps={{ 'aria-label': 'search' }}
+                                    onChange={e => {
+                                        setInputSearch(e.target.value);
+                                    }}
+                                />
                             </Form>
                         </Search>
                     </Box>
