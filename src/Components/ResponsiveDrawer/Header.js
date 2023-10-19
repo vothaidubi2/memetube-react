@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -17,8 +17,10 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
 import YouTubeIcon from '@mui/icons-material/YouTube';
 import { Form, Link } from 'react-router-dom';
+import SignIn from '../Form/SignIn';
 
 const Search = styled('div')(({ theme }) => ({
+
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
     backgroundColor: alpha(theme.palette.common.white, 0.15),
@@ -53,22 +55,33 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         transition: theme.transitions.create('width'),
         width: '100%',
         [theme.breakpoints.up('md')]: {
-            width: '65ch',
+            width: '20ch',
         },
     },
 }));
 
 export default function Header() {
+    const[openSignIn,setOpenSignIn]=React.useState(false)
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
     const isMenuOpen = Boolean(anchorEl);
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-
+    const signin =()=>{
+        if(openSignIn===true){
+        return (
+            <SignIn />
+        )}
+        else{
+            return null
+        }
+    }
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
     };
-
+    const handleOpenSignIn =()=>{
+        setOpenSignIn(true)
+    }
     const handleMobileMenuClose = () => {
         setMobileMoreAnchorEl(null);
     };
@@ -157,7 +170,7 @@ export default function Header() {
     );
 
     //search input
-    const [inputSearch, setInputSearch] = React.useState("");
+    const [inputSearch,setInputSearch] = React.useState("");
 
     return (
         <Box sx={{ flexGrow: 1, position: 'fixed', zIndex: '1000', top: '0', width: '100%' }}>
@@ -179,26 +192,26 @@ export default function Header() {
                             component="div"
                             sx={{ display: 'flex', alignItems: 'center' }}
                         >
-                            <Link to={'/'} style={{ display: 'flex', alignItems: 'center', color: 'white', textDecoration: 'none' }}>
+                            <Link to={'/'} style={{ display: 'flex', alignItems: 'center',color:'white',textDecoration:'none' }}>
                                 <YouTubeIcon className="logo-icon" sx={{ fontSize: '40px', color: 'red' }} />
                                 <h3 className="logo-content">MemeTube</h3>
                             </Link>
                         </Typography>
                     </Box>
-                    <Box sx={{ flex: '2' ,width:'100%'}}>
-                        <Search sx={{ borderRadius: '20px',width:'100%' }}>
+                    <Box sx={{ flex: '2' }}>
+                        <Search sx={{ borderRadius: '20px' }}>
                             <SearchIconWrapper>
                                 <SearchIcon />
                             </SearchIconWrapper>
-                            <Form action={`/search?search=${inputSearch}`} style={{width:'20ch'}}>
-                                <StyledInputBase 
-                                    name='search'
-                                    placeholder="Search…"
-                                    inputProps={{ 'aria-label': 'search' }}
-                                    onChange={e => {
-                                        setInputSearch(e.target.value);
-                                    }}
-                                />
+                            <Form action={`/search`}>
+                            <StyledInputBase sx={{ width: '100%' }}
+                                placeholder="Search…"
+                                inputProps={{ 'aria-label': 'search' }}
+                                onChange={e => {
+                                    setInputSearch(e.target.value);
+                                    console.log(inputSearch)
+                                }}
+                            />
                             </Form>
                         </Search>
                     </Box>
@@ -223,9 +236,8 @@ export default function Header() {
                                 size="large"
                                 edge="end"
                                 aria-label="account of current user"
-                                aria-controls={menuId}
                                 aria-haspopup="true"
-                                onClick={handleProfileMenuOpen}
+                                onClick={handleOpenSignIn}
                                 color="inherit"
                             >
                                 <AccountCircle />
@@ -248,6 +260,7 @@ export default function Header() {
             </AppBar>
             {renderMobileMenu}
             {renderMenu}
+            {signin()}
         </Box>
     );
 }

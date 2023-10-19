@@ -14,6 +14,8 @@ import Content from './Components/PagesChannel/Content';
 import Comment from './Components/PagesChannel/Comment';
 import DataDetails from './Components/PagesChannel/DataDetails';
 import MyChannel from './Components/PagesChannel/MyChannel';
+import SignIn from './Components/Form/SignIn';
+import SignUp from './Components/Form/SignUp';
 // import Homepage from './Components/pageChannel/Homepage';
 const theme = createTheme({
   palette: {
@@ -56,6 +58,18 @@ const router = createBrowserRouter([
       {
         path: '/channel/home',
         element: <ResponsiveDrawer Showsidebar={Sidebar} Page={MyChannel} />
+      }
+      ,
+      
+      {
+        path: '/signin',
+        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignIn} />
+      }
+      ,
+      
+      {
+        path: '/signup',
+        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignUp} />
       }
     ]
   },
