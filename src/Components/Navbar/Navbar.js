@@ -22,7 +22,7 @@ function Sidebar(props) {
     };
     const menuItem=[
       {
-      path:"/channel/home",
+      path:"/studio/home",
       name:"Overview page",
       icon:ViewQuiltIcon
     },  {

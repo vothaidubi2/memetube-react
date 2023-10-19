@@ -8,6 +8,7 @@ import RecommendVideos from './Components/RecommendVideos/RecommendVideos';
 import SearchPage from './Components/Search/SearchPage';
 import Sidebar from './Components/Sidebar/Sidebar';
 import VideoDetail from './Components/VideoDetail/VideoDetail';
+
 import UserChannel from './Components/UserChannel/Navbar';
 import Homepage from './pagesChannel/Homepage';
 import Content from './pagesChannel/Content';
@@ -16,6 +17,7 @@ import DataDetails from './pagesChannel/DataDetails';
 import MyChannel from './pagesChannel/MyChannel';
 import SignIn from './Components/Loginform/SignIn';
 import SignUp from './Components/Loginform/SignUp';
+
 // import Homepage from './Components/pageChannel/Homepage';
 const theme = createTheme({
   palette: {

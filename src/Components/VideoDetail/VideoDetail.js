@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
@@ -6,9 +6,51 @@ import Typography from "@mui/material/Typography";
 import { CardActionArea } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Box } from "@mui/material";
+import './VideoDetail.scss'
+import { useSearchParams } from "react-router-dom";
+import VideoAPI from "../../utils/VideoAPI";
+import ContentBar from "./ContentBar";
 
 function VideoDetail() {
-  return (
+  let [params] = useSearchParams();
+  const [videoDetail, setVideoDetail] = useState({});
+  const [isAvailable, setIsAvailable] = useState(true);
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const data = await VideoAPI.getOneItem(`/getonevideo?id=${params.get('id')}`);
+        setVideoDetail(data.data);
+      } catch (error) {
+        if (error.response || error.response.status === 404) {
+          setIsAvailable(false);
+        }
+      }
+    };
+    return () => {
+      fetchResults();
+    }
+  }, [params]);
+  const setCount = async () => {
+    await VideoAPI.setCount(`/setcountvideo?id=${params.get('id')}`)
+  }
+  if (!isAvailable) {
+    return <div
+      className="re-videos"
+      style={{
+        display: "flex",
+        flexDirection: 'row',
+        padding: "10px 50px 30px",
+        flexWrap: "wrap",
+        gap: "30px",
+        justifyContent: "space-between",
+        width: '100%'
+      }}
+    >
+      <h1>404 not found</h1>
+    </div>
+  }
+  else return (
     <div
       className="re-videos"
       style={{
@@ -21,17 +63,19 @@ function VideoDetail() {
         width: '100%'
       }}
     >
-      <Box sx={{ flexGrow: '6', flexBasis: '500px', width: '65%', display: 'flex', flexDirection: 'column' }}>
-        <Card sx={{ borderRadius: "10px", display: "flex" }}>
-          <CardActionArea>
+      <Box sx={{ flexGrow: '6', flexBasis: '650px', width: '65%', display: 'flex', flexDirection: 'column' }}>
+        <Card sx={{ borderRadius: "10px", display: "flex", height: '65vh' }}>
+          <CardActionArea >
             <CardMedia
-              controls
-              autoPlay
-              component="video"
+              allow="autoplay; encrypted-media"
+              component="iframe"
+              onLoad={setCount}
+              height={'100%'}
+              allowFullScreen
+              frameBorder={'0'}
               onPlay={e => e.currentTarget.volume = 0.5}
-              height={"100%"}
-              src="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              title="Mãi mãi là của nhau | Bùi Anh Tuấn"
+              src={videoDetail.videourl}
+              title={videoDetail.title}
               width={"100%"}
               poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
             />
@@ -48,25 +92,31 @@ function VideoDetail() {
                             </CardContent> */}
           </CardActionArea>
         </Card>
-        <Card sx={{ borderRadius: "10px", display: "flex", flexDirection: 'column',backgroundImage:'none',
-              boxShadow:'none', }}>
-          <Typography
-            gutterBottom
-            component="h6"
-            sx={{
-              margin:'10px 0',
-              fontSize: '24px',
-              display: "block",
-            }}
-          >
-            Mãi mãi là của nhau | Bùi Anh Tuấn
-          </Typography>
-          <CardActionArea sx={{display:'flex'}}>
-              
-          </CardActionArea>
-        </Card>
+        <Box >
+          <Card sx={{
+            borderRadius: "10px", display: "flex", flexDirection: 'column', background: 'none',
+            boxShadow: 'none',
+          }}>
+            <Typography
+              gutterBottom
+              component="h6"
+              sx={{
+                margin: '10px 0',
+                fontSize: '24px',
+                display: "block",
+              }}
+            >
+              {videoDetail.title}
+            </Typography>
+            <CardActionArea sx={{ display: 'flex' }}>
+            </CardActionArea>
+          </Card>
+          {videoDetail?.channel?.channelname ? (
+            <ContentBar props={videoDetail} />
+          ) : (<></>)}
+        </Box>
       </Box>
-      <Box component="div" sx={{ flexGrow: '1', flexBasis: '300px', width: '30%' }}>
+      <Box component="div" sx={{ flexGrow: '1', flexBasis: '350px', width: '30%' }}>
         <Box
           component="div"
           sx={{

@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import './Sidebar.scss';
 import PropTypes from 'prop-types';
 import Drawer from '@mui/material/Drawer';
-import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import HomeIcon from '@mui/icons-material/Home';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import HistoryIcon from '@mui/icons-material/History';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import { useLocation } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -21,34 +22,47 @@ function Sidebar(props) {
         setMobileOpen(!mobileOpen);
     };
 
+    const location = useLocation();
+    const [view, setView] = useState(location.pathname.slice(1, location.pathname.length) != null ? location.pathname.slice(1, location.pathname.length) : '/');
+
+    const handleChange = (event, nextView) => {
+        setView(nextView);
+    };
+
+    useEffect(() => {
+        return (() => {
+            console.log(location.pathname.slice(1, location.pathname.length))
+        })
+    })
+
     const drawer = (
         <div>
-            <List>
-                {['Home', 'Trending', 'Subscription'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
-                            <ListItemIcon>
-                                {index == 0 ? <HomeIcon /> : index == 1 ? <WhatshotIcon /> : <SubscriptionsIcon />}
-                            </ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
-            <Divider />
-            <List>
-                {['History', 'Your Videos', 'Liked Videos'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
-                        <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
-                            <ListItemIcon>
-                                {index == 0 ? <HistoryIcon /> : index == 1 ? <OndemandVideoIcon /> : <ThumbUpIcon />}
-                            </ListItemIcon>
-                            <ListItemText primary={text} />
-                        </ListItemButton>
-                    </ListItem>
-                ))}
-            </List>
-        </div>
+        <List>
+            {['Home', 'Trending', 'Subscription'].map((text, index) => (
+                <ListItem key={text} disablePadding>
+                    <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
+                        <ListItemIcon>
+                            {index == 0 ? <HomeIcon /> : index == 1 ? <WhatshotIcon /> : <SubscriptionsIcon />}
+                        </ListItemIcon>
+                        <ListItemText primary={text} />
+                    </ListItemButton>
+                </ListItem>
+            ))}
+        </List>
+        <Divider />
+        <List>
+            {['History', 'Your Videos', 'Liked Videos'].map((text, index) => (
+                <ListItem key={text} disablePadding>
+                    <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
+                        <ListItemIcon>
+                            {index == 0 ? <HistoryIcon /> : index == 1 ? <OndemandVideoIcon /> : <ThumbUpIcon />}
+                        </ListItemIcon>
+                        <ListItemText primary={text} />
+                    </ListItemButton>
+                </ListItem>
+            ))}
+        </List>
+    </div>
     );
 
     const container = window !== undefined ? () => window().document.body : undefined;
