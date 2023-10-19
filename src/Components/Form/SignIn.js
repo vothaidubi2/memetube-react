@@ -113,7 +113,7 @@ export default function SignIn() {
               id="password"
               autoComplete="current-password"
             />
-            {/* gooogle******************************************************************************************************* */}
+
         
 
             <FormControlLabel
@@ -145,13 +145,14 @@ export default function SignIn() {
             </Grid>
            
           </Box>
+                      {/* gooogle******************************************************************************************************* */}
           <Grid item sx={{ mt: 3, mb: 2, display: 'flex', alignItems: 'center' }}>
           <GoogleOAuthProvider clientId="916876028025-1c1te58rc1tuoeebbndo3sum77klp7jk.apps.googleusercontent.com">
               <GoogleLogin
   onSuccess={credentialResponse => {
   var data=jwt_decode(credentialResponse.credential)
   console.log(data)
-  const {email}=data
+  const {email,}=data
   console.log(email)
   }}
   onError={() => {
