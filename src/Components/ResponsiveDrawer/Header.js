@@ -70,7 +70,9 @@ export default function Header() {
     const signin =()=>{
         if(openSignIn===true){
         return (
+
             <SignIn onClose={handleCloseSignIn} isOpen={openSignIn} />
+
         )}
         else{
             return null
@@ -85,6 +87,7 @@ export default function Header() {
     const handleCloseSignIn =()=>{
         setOpenSignIn(false)
     }
+
     const handleMobileMenuClose = () => {
         setMobileMoreAnchorEl(null);
     };

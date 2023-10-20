@@ -31,7 +31,6 @@ export default function SignIn({  onClose }) {
   }
 
 
-
   const [openSignIn, setOpenSignIn] = React.useState(true);
   const [openSignUp, setOpenSignUp] = React.useState(false);
   const handleClickOpenSignUp=()=>{
@@ -45,8 +44,10 @@ export default function SignIn({  onClose }) {
  if(openSignUp===false){
   return null
  }else{
+
   return(
    <SignUp onClose={onClose}/>
+
   
   )
   }
@@ -106,7 +107,6 @@ export default function SignIn({  onClose }) {
               id="password"
               autoComplete="current-password"
             />
-            {/* gooogle******************************************************************************************************* */}
         
 
             <FormControlLabel
@@ -138,6 +138,7 @@ export default function SignIn({  onClose }) {
             </Grid>
            
           </Box>
+
           <Grid item sx={{ mt: 3, mb: 2, display: 'flex', alignItems: 'center' }}>
           <GoogleOAuthProvider clientId="916876028025-1c1te58rc1tuoeebbndo3sum77klp7jk.apps.googleusercontent.com">
               <GoogleLogin
@@ -163,7 +164,9 @@ export default function SignIn({  onClose }) {
       
       </Container>
       <DialogActions >
+
       <Button onClick={onClose}>Close</Button>
+
     </DialogActions>
       </Dialog>
       {signup()}
