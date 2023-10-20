@@ -25,6 +25,7 @@ import DateConvert from '../../utils/DayConvert';
 import CircleIcon from '@mui/icons-material/Circle';
 import CheckIcon from '@mui/icons-material/Check';
 import SubscribeAPI from '../../utils/SubscribeAPI';
+import RatingAPI from '../../utils/RatingAPI';
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -78,9 +79,12 @@ const buttonStyles = styled(IconButton)(({ theme }) => ({
 export default function ContentBar({ props }) {
     //fetchdata
     const [isSub, setIsSub] = useState(false);
+    const [rate, setRate] = useState(null);
+    const [countLike, setCountLike] = useState(null);
+    const [countDislike, setCountDislike] = useState(null);
 
     useEffect(() => {
-        const fetchResults = async () => {
+        const fetchSub = async () => {
             try {
                 const data = await SubscribeAPI.getOneItem(`/getsubinfo?iduser=2&idchannel=${props.channel.idchannel}`);
                 if (data.status == 200) {
@@ -92,10 +96,34 @@ export default function ContentBar({ props }) {
                 }
             }
         };
+        const fetchRate = async () => {
+            try {
+                const data = await RatingAPI.getOneItem(`/getratinginfo?iduser=2&idvideo=${props.idvideo}`);
+                if (data.status == 200) {
+                    setRate(data.data.rate)
+                    console.log("rate:", data.data)
+                }
+            } catch (error) {
+                if (error.response || error.response.status === 404) {
+                    setRate(null);
+                    console.log("error:", error)
+                }
+            }
+        };
+        const fetchCountRate = async () => {
+            const rateData = await RatingAPI.countRating(`/countrating?idvideo=${props.idvideo}`);
+            if (rateData.status == 200) {
+                setCountLike(rateData.data.like)
+                setCountDislike(rateData.data.dislike)
+                console.log("count:", rateData.data)
+            }
+        };
         return () => {
-            fetchResults();
+            fetchSub();
+            fetchRate();
+            fetchCountRate();
         }
-    }, [isSub])
+    }, [isSub, rate])
 
     //change data sub,like/dislike
     const addSub = async () => {
@@ -118,10 +146,48 @@ export default function ContentBar({ props }) {
                 setIsSub(false)
             }
         } catch (error) {
-            
+
         }
     }
 
+    const modifyRate = async (inputRate) => {
+        if(rate != null){
+            try {
+                const data = await RatingAPI.updateRate(`/updaterate?iduser=2&idvideo=${props.idvideo}&rate=${inputRate}`);
+                if (data.status == 200) {
+                    setRate(inputRate)
+                }
+            } catch (error) {
+                if (error.response || error.response.status === 400) {
+                    setRate(null)
+                }
+            }
+        }else{
+            try {
+                const data = await RatingAPI.addRate(`/addrate?iduser=2&idvideo=${props.idvideo}&rate=${inputRate}`);
+                if (data.status == 201) {
+                    setRate(inputRate)
+                }
+            } catch (error) {
+                if (error.response || error.response.status === 400) {
+                    setRate(null)
+                }
+            }
+        }
+    }
+
+    const deleteRate = async () => {
+        try {
+            const data = await RatingAPI.deleteRate(`/deleterate?iduser=2&idvideo=${props.idvideo}`);
+            if (data.status == 200) {
+                setRate(null)
+            }
+        } catch (error) {
+
+        }
+    }
+
+    //layout
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -240,12 +306,24 @@ export default function ContentBar({ props }) {
                     <Box sx={{ flexGrow: 1 }} />
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: '10px' }}>
                         <buttonStyles sx={{ '& :hover': { background: 'none' } }} size="large" aria-label="show 4 new mails" color="inherit">
-                            <Button component="label" variant="secondary" sx={{ color: 'white', border: '1px solid #aaa', borderRadius: '15px 0 0 15px' }} startIcon={<ThumbUpIcon />}>
-                                <NumberFormatter value={195131242} />
-                            </Button>
-                            <Button component="label" variant="secondary" sx={{ color: 'white', borderRadius: '0 15px 15px 0', border: '1px solid #aaa' }} startIcon={<ThumbDownIcon />}>
-                                <NumberFormatter value={1250} />
-                            </Button>
+                            {rate != null && rate ?
+                                <Button onClick={()=>deleteRate()} component="label" variant="secondary" sx={{ color: '#90CAF9', border: '1px solid #aaa', borderRadius: '15px 0 0 15px' }} startIcon={<ThumbUpIcon />}>
+                                    {countLike < 1000 ? countLike : <NumberFormatter value={countLike} />}
+                                </Button> :
+                                <Button onClick={()=>modifyRate(true)} component="label" variant="secondary" sx={{ color: 'white', border: '1px solid #aaa', borderRadius: '15px 0 0 15px' }} startIcon={<ThumbUpIcon />}>
+                                    {countLike < 1000 ? countLike : <NumberFormatter value={countLike} />}
+                                </Button>
+                            }
+                            {rate != null && rate == false ?
+                                <Button onClick={()=>deleteRate()} component="label" variant="secondary" sx={{ color: '#90CAF9', borderRadius: '0 15px 15px 0', border: '1px solid #aaa' }} startIcon={<ThumbDownIcon />}>
+                                    {countDislike < 1000 ? countDislike : <NumberFormatter value={countDislike} />}
+                                </Button>
+                                :
+                                <Button onClick={()=>modifyRate(false)} component="label" variant="secondary" sx={{ color: 'white', borderRadius: '0 15px 15px 0', border: '1px solid #aaa' }} startIcon={<ThumbDownIcon />}>
+                                    {countDislike < 1000 ? countDislike : <NumberFormatter value={countDislike} />}
+                                </Button>
+
+                            }
                         </buttonStyles>
                         <buttonStyles
                             size="large"
