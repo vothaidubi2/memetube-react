@@ -11,22 +11,19 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import GoogleIcon from '@mui/icons-material/Google';
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
 import SignUp from '../../Components/Form/SignUp';
 import jwt_decode from "jwt-decode";
-// TODO remove, this demo shouldn't need to reset the theme.
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
-export default function SignIn() {
-
-  function createdatauser(username, password, email, status,role,avatar) {
+export default function SignIn({  onClose }) {
+  var bcrypt = require('bcryptjs');
+  var salt = bcrypt.genSaltSync(10);
+  var hash = bcrypt.hashSync("password", salt);
+  function createdatauser(email,password, status,role,avatar) {
     return {
-      username,
-      password,
       email,
+      password,
       status,
       role,
       avatar
@@ -47,16 +44,13 @@ export default function SignIn() {
  if(openSignUp===false){
   return null
  }else{
-  console.log('vaoday')
+
   return(
-   <SignUp/>
+   <SignUp onClose={onClose}/>
+
   
   )
   }
-  }
-  const handleClickCloseAll=()=>{
-    setOpenSignIn(false)
-    setOpenSignUp(false)
   }
 
   const handleSubmit = (event) => {
@@ -113,7 +107,6 @@ export default function SignIn() {
               id="password"
               autoComplete="current-password"
             />
-
         
 
             <FormControlLabel
@@ -145,15 +138,18 @@ export default function SignIn() {
             </Grid>
            
           </Box>
-                      {/* gooogle******************************************************************************************************* */}
+
           <Grid item sx={{ mt: 3, mb: 2, display: 'flex', alignItems: 'center' }}>
           <GoogleOAuthProvider clientId="916876028025-1c1te58rc1tuoeebbndo3sum77klp7jk.apps.googleusercontent.com">
               <GoogleLogin
   onSuccess={credentialResponse => {
   var data=jwt_decode(credentialResponse.credential)
   console.log(data)
-  const {email,}=data
-  console.log(email)
+  const {email,picture}=data
+  const user=[
+    createdatauser(email,hash,1,1,picture)
+  ]
+  console.log(user)
   }}
   onError={() => {
     console.log('Login Failed');
@@ -168,7 +164,9 @@ export default function SignIn() {
       
       </Container>
       <DialogActions >
-      <Button onClick={handleClickCloseAll}>Close</Button>
+
+      <Button onClick={onClose}>Close</Button>
+
     </DialogActions>
       </Dialog>
       {signup()}

@@ -70,7 +70,9 @@ export default function Header() {
     const signin =()=>{
         if(openSignIn===true){
         return (
-            <SignIn />
+
+            <SignIn onClose={handleCloseSignIn} isOpen={openSignIn} />
+
         )}
         else{
             return null
@@ -82,6 +84,10 @@ export default function Header() {
     const handleOpenSignIn =()=>{
         setOpenSignIn(true)
     }
+    const handleCloseSignIn =()=>{
+        setOpenSignIn(false)
+    }
+
     const handleMobileMenuClose = () => {
         setMobileMoreAnchorEl(null);
     };
@@ -154,16 +160,16 @@ export default function Header() {
                 </IconButton>
                 <p>Notifications</p>
             </MenuItem>
-            <MenuItem onClick={handleProfileMenuOpen}>
-                <IconButton
-                    size="large"
-                    aria-label="account of current user"
-                    aria-controls="primary-search-account-menu"
-                    aria-haspopup="true"
-                    color="inherit"
-                >
-                    <AccountCircle />
-                </IconButton>
+            <MenuItem onClick={handleOpenSignIn}>
+            <IconButton
+                                size="large"
+                                edge="end"
+                                aria-label="account of current user"
+                                aria-haspopup="true"
+                                color="inherit"
+                            >
+                                <AccountCircle />
+                            </IconButton>
                 <p>Profile</p>
             </MenuItem>
         </Menu>

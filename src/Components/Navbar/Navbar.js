@@ -8,8 +8,7 @@ import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
-import InsertChartIcon from '@mui/icons-material/InsertChart';
-import { Height } from "@mui/icons-material";
+import InsertChartIcon from '@mui/icons-material/InsertChart';                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
 const drawerWidth = 240;
 
 

@@ -18,27 +18,15 @@ import SignIn from '../../Components/Form/SignIn';
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
-export default function SignUp() {
+
+export default function SignUp({onClose}) {
+
   const [openSignIn, setOpenSignIn] = React.useState(false);
   const [openSignUp, setOpenSignUp] = React.useState(true);
   const handleClickOpenSignIn = () => {
     setOpenSignIn(true);
     setOpenSignUp(false)
   };
-
-  const handleCloseSignIn = () => {
-    setOpenSignIn(false);
-  };
-  const handleClickOpenSignUp=()=>{
-    setOpenSignIn(false)
-    setOpenSignUp(true)
-
-
-  }
-  const handleClickCloseAll=()=>{
-    setOpenSignIn(false)
-    setOpenSignUp(false)
-  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -54,8 +42,9 @@ export default function SignUp() {
      return null
     }else{
      return(
-      <SignIn/>
-     
+      <SignIn onClose={onClose}/>
+
+
      )
      }
      }
@@ -154,7 +143,7 @@ export default function SignUp() {
     
       </Container>
       <DialogActions >
-      <Button onClick={handleClickCloseAll}>Close</Button>
+      <Button onClick={onClose}>Close</Button>
     </DialogActions>
       </Dialog>
       {signin()}
