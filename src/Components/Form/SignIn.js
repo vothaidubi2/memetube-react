@@ -11,26 +11,51 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import SignUp from '../../Components/Form/SignUp';
+import jwt_decode from "jwt-decode";
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+export default function SignIn({  onClose }) {
+  var bcrypt = require('bcryptjs');
+  var salt = bcrypt.genSaltSync(10);
+  var hash = bcrypt.hashSync("password", salt);
+  function createdatauser(email,password, status,role,avatar) {
+    return {
+      email,
+      password,
+      status,
+      role,
+      avatar
+    };
+  }
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
-// TODO remove, this demo shouldn't need to reset the theme.
 
-const defaultTheme = createTheme();
+  const [openSignIn, setOpenSignIn] = React.useState(true);
+  const [openSignUp, setOpenSignUp] = React.useState(false);
+  const handleClickOpenSignUp=()=>{
+    setOpenSignIn(false)
+    setOpenSignUp(true)
 
-export default function SignIn() {
+
+  }
+  const signup =()=>{
+
+ if(openSignUp===false){
+  return null
+ }else{
+  return(
+   <SignUp onClose={onClose}/>
+  
+  )
+  }
+  }
+  const handleClickCloseAll=()=>{
+    setOpenSignIn(false)
+    setOpenSignUp(false)
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -39,9 +64,15 @@ export default function SignIn() {
       password: data.get('password'),
     });
   };
-
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <>
+    <Dialog
+    fullWidth="sm"
+    maxWidth="sm"
+    open={openSignIn}
+  >
+
+
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -79,6 +110,9 @@ export default function SignIn() {
               id="password"
               autoComplete="current-password"
             />
+            {/* gooogle******************************************************************************************************* */}
+        
+
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
@@ -98,15 +132,47 @@ export default function SignIn() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
+              <Link href="#" variant="body2" onClick={handleClickOpenSignUp}>
+              {"Don't have an account? Sign Up"}
                 </Link>
+                  
+          
               </Grid>
+            
             </Grid>
+           
           </Box>
+          <Grid item sx={{ mt: 3, mb: 2, display: 'flex', alignItems: 'center' }}>
+          <GoogleOAuthProvider clientId="916876028025-1c1te58rc1tuoeebbndo3sum77klp7jk.apps.googleusercontent.com">
+              <GoogleLogin
+  onSuccess={credentialResponse => {
+  var data=jwt_decode(credentialResponse.credential)
+  console.log(data)
+  const {email,picture}=data
+  const user=[
+    createdatauser(email,hash,1,1,picture)
+  ]
+  console.log(user)
+  }}
+  onError={() => {
+    console.log('Login Failed');
+  }}
+/>
+
+                </GoogleOAuthProvider>
+      
+    </Grid>
+    
         </Box>
-        <Copyright sx={{ mt: 8, mb: 4 }} />
+      
       </Container>
-    </ThemeProvider>
+      <DialogActions >
+      <Button onClick={onClose}>Close</Button>
+    </DialogActions>
+      </Dialog>
+      {signup()}
+      </>
+
   );
+
 }

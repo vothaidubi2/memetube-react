@@ -11,24 +11,20 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { Chip, Dialog, DialogActions, DialogContent } from '@mui/material';
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import SignIn from '../../Components/Form/SignIn';
 
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
-
-
-export default function SignUp() {
-  const [open, setOpen] = React.useState(true);
-
-  const handleClickOpen = () => {
-    setOpen(true);
+export default function SignUp({onClose}) {
+  const [openSignIn, setOpenSignIn] = React.useState(false);
+  const [openSignUp, setOpenSignUp] = React.useState(true);
+  const handleClickOpenSignIn = () => {
+    setOpenSignIn(true);
+    setOpenSignUp(false)
   };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -37,20 +33,25 @@ export default function SignUp() {
       password: data.get('password'),
     });
   };
+  const signin =()=>{
 
+    if(openSignIn===false){
+     return null
+    }else{
+     return(
+      <SignIn onClose={onClose}/>
+     
+     )
+     }
+     }
   return (
-    < >
-        <React.Fragment>
-          
-
-              <Dialog
-                fullWidth="sm"
-                maxWidth="sm"
-                open={open}
-                onClose={handleClose}
-              >
-
-<Container component="main" maxWidth="xs">
+    <>
+    <Dialog
+    fullWidth="sm"
+    maxWidth="sm"
+    open={openSignUp}
+  >
+      <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
           sx={{
@@ -68,14 +69,15 @@ export default function SignUp() {
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={12}>
                 <TextField
+                  autoComplete="username"
+                  name="username"
                   required
                   fullWidth
-                  id="Username "
-                  label="Username"
-                  name="Username"
-                  autoComplete="family-name"
+                  id="username"
+                  label="username"
+                  autoFocus
                 />
               </Grid>
               <Grid item xs={12}>
@@ -103,7 +105,7 @@ export default function SignUp() {
                 <TextField
                   required
                   fullWidth
-                  name="password"
+                  name="re-password"
                   label="Re-Password"
                   type="password"
                   id="re-password"
@@ -127,7 +129,7 @@ export default function SignUp() {
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
+                <Link to="" variant="body2" onClick={handleClickOpenSignIn} >
                   Already have an account? Sign in
                 </Link>
               </Grid>
@@ -135,13 +137,12 @@ export default function SignUp() {
           </Box>
         </Box>
     
-        <DialogActions >
-                  <Button onClick={handleClose}>Close</Button>
-                </DialogActions>
       </Container>
-          
-              </Dialog>
-            </React.Fragment>
-    </>
+      <DialogActions >
+      <Button onClick={onClose}>Close</Button>
+    </DialogActions>
+      </Dialog>
+      {signin()}
+      </>
   );
 }

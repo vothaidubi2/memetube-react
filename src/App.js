@@ -8,16 +8,14 @@ import RecommendVideos from './Components/RecommendVideos/RecommendVideos';
 import SearchPage from './Components/Search/SearchPage';
 import Sidebar from './Components/Sidebar/Sidebar';
 import VideoDetail from './Components/VideoDetail/VideoDetail';
-
-import UserChannel from './Components/UserChannel/Navbar';
-import Homepage from './pagesChannel/Homepage';
-import Content from './pagesChannel/Content';
-import Comment from './pagesChannel/Comment';
-import DataDetails from './pagesChannel/DataDetails';
-import MyChannel from './pagesChannel/MyChannel';
-import SignIn from './Components/Loginform/SignIn';
-import SignUp from './Components/Loginform/SignUp';
-
+import UserChannel from './Components/Navbar/Navbar';
+import Homepage from './Components/PagesChannel/Homepage';
+import Content from './Components/PagesChannel/Content';
+import Comment from './Components/PagesChannel/Comment';
+import DataDetails from './Components/PagesChannel/DataDetails';
+import MyChannel from './Components/PagesChannel/MyChannel';
+import SignIn from './Components/Form/SignIn';
+import SignUp from './Components/Form/SignUp';
 // import Homepage from './Components/pageChannel/Homepage';
 const theme = createTheme({
   palette: {
@@ -65,13 +63,13 @@ const router = createBrowserRouter([
       
       {
         path: '/signin',
-        element: <ResponsiveDrawer Showsidebar={UserChannel} Page={SignIn} />
+        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignIn} />
       }
       ,
       
       {
         path: '/signup',
-        element: <ResponsiveDrawer Showsidebar={UserChannel} Page={SignUp} />
+        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignUp} />
       }
     ]
   },
