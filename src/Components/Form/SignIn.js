@@ -51,10 +51,6 @@ export default function SignIn({  onClose }) {
   )
   }
   }
-  const handleClickCloseAll=()=>{
-    setOpenSignIn(false)
-    setOpenSignUp(false)
-  }
 
   const handleSubmit = (event) => {
     event.preventDefault();
