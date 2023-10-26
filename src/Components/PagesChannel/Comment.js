@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { visuallyHidden } from "@mui/utils";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -13,12 +13,17 @@ import {
   Button,
   Collapse,
   Divider,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
 } from "@mui/material";
 
 import { Link } from "react-router-dom";
+import VideoAPI from "../../utils/VideoAPI";
 function createdatauser(
   idcomment,
   nameuser,
@@ -131,11 +136,34 @@ export default function Comment() {
     updatedStatus[index] = !updatedStatus[index];
     setFavoriteClicked(updatedStatus);
   };
+  const [videoComment, setIdvideoComment] = React.useState();
+  const [listVIdeoComment,setListVideoComment] = useState([])
+
+  const handleChangeSelectComment = (event) => {
+    setIdvideoComment(event.target.value);
+    console.log(event.target.value)
+  };
+  
+  const dataVideoComment = async()=>{
+    const data = await VideoAPI.getOneItem("/listvideobycomment")
+    if(data?.data.length>0){
+      let listretult = [];
+      for(let i=0;i<data.data.length;i++){
+        const result = await VideoAPI.getOneItem(`/getonevideo?id=${data.data[i]}`)
+        listretult.push(result.data)
+      }
+      setListVideoComment(listretult)
+      console.log(listretult)
+    }
+  }
+  useEffect(()=>{
+    dataVideoComment()
+  },[])
 
   const commentuser = (index) => {
     return (
-      <>
-        <div className="allinformation">
+      <Box sx={{ display: 'flex', width: '100%' }}>
+        <div className="allinformation" style={{ flexBasis: '1', flex: '2' }}>
           {rows.map((row, rowIndex) => {
             return (
               <React.Fragment key={rowIndex}>
@@ -220,24 +248,6 @@ export default function Comment() {
                       </Box>
                     </div>
                   </Box>
-
-                  <Box
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                    }}
-                  >
-                    <img
-                      className="smallimage"
-                      src={row.videocommet}
-                      alt=""
-                      width={"50%"}
-                    />
-                    <Typography sx={{ marginLeft: "3%" }}>
-                      {row.namevideocomment}
-                    </Typography>
-                  </Box>
                 </Box>
 
                 <Box>
@@ -254,7 +264,25 @@ export default function Comment() {
             );
           })}
         </div>
-      </>
+        <Box
+          sx={{
+            flexDirection: 'column', flexBasis: '1',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+          }}
+        >
+          <img
+            className="smallimage"
+            src={rows[0].videocommet}
+            alt=""
+            width={"50%"}
+          />
+          <Typography sx={{ marginLeft: "3%" }}>
+            {rows[0].namevideocomment}
+          </Typography>
+        </Box>
+      </Box>
     );
   };
 
@@ -381,10 +409,28 @@ export default function Comment() {
             Channel comments
           </Typography>
           <Divider sx={{ marginBottom: "10px" }} light />
-          <div className="iconfilter" style={{ padding: "1% 2%" }}>
-            {/* ... */}
-          </div>
-          <Divider sx={{ marginBottom: "2px" }} light />
+          <Box sx={{ minWidth: 120 ,maxWidth:'50%'}}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Video</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={videoComment}
+                label="Age"
+                onChange={handleChangeSelectComment}
+              >
+                {listVIdeoComment&&listVIdeoComment.map((item,key)=>{
+                  return(
+                    <MenuItem key={key} value={item.idvideo}>{item.title}</MenuItem>
+                  )
+                }
+                  
+                )}
+                
+              </Select>
+            </FormControl>
+          </Box>
+          <Divider sx={{ marginBottom: "2px",marginTop:'10px' }} light />
           {/* Render commentuser based on replyingToIndex */}
           {commentuser(replyingToIndex)}
         </Grid>

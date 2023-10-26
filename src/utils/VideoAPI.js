@@ -5,6 +5,15 @@ class VideoAPI {
             .then((res) => res.json())
             .then(data => data.data);
     }
+    getallByUser = async (url) => {
+        return await axios.get(process.env.REACT_APP_BASE_DOMAIN + url)
+        .then(data => data.data)
+    }
+    getByCate = async (url) => {
+        return await fetch(process.env.REACT_APP_BASE_DOMAIN + url)
+            .then((res) => res.json())
+            .then(data => data.data);
+    }
     searchData = async (url) => {
         return await fetch(process.env.REACT_APP_BASE_DOMAIN + url)
             .then((res) => res.json())
@@ -13,6 +22,14 @@ class VideoAPI {
     getOneItem = async (url) => {
         return await axios.get(process.env.REACT_APP_BASE_DOMAIN + url)
     }
+    deleteItem = async (url) => {
+        return await axios.delete(process.env.REACT_APP_BASE_DOMAIN + url)
+    }
+    postVideo = async (url,content) => {
+        return await axios.post(process.env.REACT_APP_BASE_DOMAIN + url, content)
+            .then(data => data);
+    }
+
     setCount = async (url) => {
         return await
             fetch(process.env.REACT_APP_BASE_DOMAIN + url, {
