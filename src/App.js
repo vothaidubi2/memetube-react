@@ -16,6 +16,11 @@ import DataDetails from './Components/PagesChannel/DataDetails';
 import MyChannel from './Components/PagesChannel/MyChannel';
 import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
+import Stream from './Components/Stream/Stream';
+import { UserContext } from './Components/Cookie/UserContext';
+import jwt_decode from "jwt-decode";
+import getCookie from './Components/Cookie/getCookie';
+import { useState ,useEffect} from 'react';
 // import Homepage from './Components/pageChannel/Homepage';
 const theme = createTheme({
   palette: {
@@ -71,17 +76,34 @@ const router = createBrowserRouter([
         path: '/signup',
         element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignUp} />
       }
+      ,
+      
+      {
+        path: '/stream',
+        element: <ResponsiveDrawer Page={Stream} />
+      }
     ]
   },
 ]);
 
 
 function App() {
+  const [userData, setUserData] = useState(null);
+  useEffect(() => {
+    const tokenCookie = getCookie('user');
+    if (tokenCookie) {
+      const decodedToken = jwt_decode(tokenCookie);
+      setUserData(decodedToken);
+    }
+  }, []); 
+
   return (
+    <UserContext.Provider value={userData}>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <RouterProvider router={router}/>
     </ThemeProvider>
+    </UserContext.Provider>
   );
 }
 

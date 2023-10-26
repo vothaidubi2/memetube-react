@@ -160,7 +160,7 @@ export default function Comment() {
     dataVideoComment()
   },[])
 
-  const commentuser = (index) => {
+  const commentuser = () => {
     return (
       <Box sx={{ display: 'flex', width: '100%' }}>
         <div className="allinformation" style={{ flexBasis: '1', flex: '2' }}>
@@ -432,7 +432,7 @@ export default function Comment() {
           </Box>
           <Divider sx={{ marginBottom: "2px",marginTop:'10px' }} light />
           {/* Render commentuser based on replyingToIndex */}
-          {commentuser(replyingToIndex)}
+          {commentuser()}
         </Grid>
       </Grid>
       <Grid></Grid>
