@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -30,55 +30,59 @@ import {
   DialogTitle,
 } from "@mui/material";
 import UploadFile from "./UploadFile";
-function createData(
-  linkvideo,
-  name,
-  status,
-  datecreate,
-  views,
-  comment,
-  percentlike
-) {
-  return {
-    linkvideo,
-    name,
-    status,
-    datecreate,
-    views,
-    comment,
-    percentlike,
-  };
-}
+import VideoAPI from "../../utils/VideoAPI";
+import FirebaseConfig from "../../utils/FirebaseConfig";
+import VideoFirebaseConfig from "../../utils/VideoFirebaseConfig";
+import Moment from 'react-moment';
+// function createData(
+//   linkvideo,
+//   name,
+//   status,
+//   datecreate,
+//   views,
+//   comment,
+//   percentlike
+// ) {
+//   return {
+//     linkvideo,
+//     name,
+//     status,
+//     datecreate,
+//     views,
+//     comment,
+//     percentlike,
+//   };
+// }
 
-const rows = [
-  createData(
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-    "video1",
-    true,
-    "6/6/2023",
-    15000,
-    325,
-    6
-  ),
-  createData(
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-    "video2",
-    true,
-    "6/6/2023",
-    9700,
-    419,
-    7
-  ),
-  createData(
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-    "video3",
-    false,
-    "6/6/2023",
-    100000,
-    9,
-    2
-  ),
-];
+// const rows = [
+//   createData(
+//     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
+//     "video1",
+//     true,
+//     "6/6/2023",
+//     15000,
+//     325,
+//     6
+//   ),
+//   createData(
+//     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
+//     "video2",
+//     true,
+//     "6/6/2023",
+//     9700,
+//     419,
+//     7
+//   ),
+//   createData(
+//     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
+//     "video3",
+//     false,
+//     "6/6/2023",
+//     100000,
+//     9,
+//     2
+//   ),
+// ];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -109,14 +113,14 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: "linkvideo",
-    numeric: false,
-    disablePadding: true,
+    id: "idvideo",
+    // numeric: true,
+    // disablePadding: true,
     label: "Video ",
   },
   {
-    id: "name",
-    numeric: true,
+    id: "title",
+    numeric: false,
     disablePadding: false,
     label: "Name video ",
   },
@@ -127,29 +131,29 @@ const headCells = [
     label: "Display mode",
   },
   {
-    id: "datecreate",
+    id: "datecreated",
     numeric: true,
     disablePadding: false,
     label: "Publication date",
   },
   {
-    id: "views",
+    id: "viewcount",
     numeric: true,
     disablePadding: false,
     label: "Views",
   },
-  {
-    id: "comment",
-    numeric: true,
-    disablePadding: false,
-    label: "Comment",
-  },
-  {
-    id: "percentlike",
-    numeric: true,
-    disablePadding: false,
-    label: "Like(%)",
-  },
+  // {
+  //   id: "comment",
+  //   numeric: true,
+  //   disablePadding: false,
+  //   label: "Comment",
+  // },
+  // {
+  //   id: "percentlike",
+  //   numeric: true,
+  //   disablePadding: false,
+  //   label: "Like(%)",
+  // },
 ];
 
 function EnhancedTableHead(props) {
@@ -253,7 +257,7 @@ function EnhancedTableToolbar(props) {
 
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton>
+          <IconButton onClick={() => props.handleDeleteVideo(props.listVideo)}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
@@ -274,11 +278,35 @@ EnhancedTableToolbar.propTypes = {
 
 export default function Content() {
   const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("calories");
+  const [orderBy, setOrderBy] = React.useState("title");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+
+  //fetchdata
+  const [rows, setRows] = useState([])
+  const [totalVideo, setTotalVideo] = useState(0)
+  const fetchDataVideo = async () => {
+    const data = await VideoAPI.getallByUser(`/videobyiduser?iduser=${1}`)
+    setTotalVideo(data.total)
+    setRows(data.data)
+    console.log("vao", data.total)
+  }
+  const handleDeleteVideo = async(item)=>{
+    for(let i = 0;i<item.length;i++){
+      const data = await VideoAPI.deleteItem(`/deletevideo?id=${item[i].idvideo}`)
+      console.log("xoa",data)
+      FirebaseConfig.DeleteVideo(item[i].imageurl)
+      FirebaseConfig.DeleteImage(item[i].videourl)
+    }
+    fetchDataVideo()
+  }
+
+  useEffect(() => {
+    fetchDataVideo()
+  }, [])
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -288,14 +316,16 @@ export default function Content() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.name);
-      setSelected(newSelected);
+      const newSelected = rows.map((n) => n.idvideo);
+      // setSelected(newSelected);
+      setSelected(rows);
       return;
     }
     setSelected([]);
   };
 
   const handleClick = (event, name) => {
+
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
@@ -311,7 +341,7 @@ export default function Content() {
         selected.slice(selectedIndex + 1)
       );
     }
-
+    console.log("name:", newSelected[0])
     setSelected(newSelected);
   };
 
@@ -332,7 +362,7 @@ export default function Content() {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - totalVideo) : 0;
 
   const visibleRows = React.useMemo(
     () =>
@@ -340,7 +370,7 @@ export default function Content() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage]
+    [totalVideo, order, orderBy, page, rowsPerPage]
   );
   const [open, setOpen] = React.useState(false);
 
@@ -351,6 +381,7 @@ export default function Content() {
   const handleClose = () => {
     setOpen(false);
   };
+
   return (
     <Box sx={{ width: "100%" }}>
       <Grid item xs>
@@ -368,7 +399,7 @@ export default function Content() {
         </Typography>
       </Grid>
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar numSelected={selected.length} listVideo={selected} handleDeleteVideo={handleDeleteVideo}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -381,11 +412,11 @@ export default function Content() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={totalVideo}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.name);
+              {visibleRows?.map((row, index) => {
+                const isItemSelected = isSelected(row);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
@@ -393,14 +424,14 @@ export default function Content() {
                     hover
                     role="checkbox"
                     tabIndex={-1}
-                    key={row.name}
+                    key={row.idvideo}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
                         aria-checked={isItemSelected}
-                        onClick={(event) => handleClick(event, row.name)}
+                        onClick={(event) => handleClick(event, row)}
                         color="primary"
                         checked={isItemSelected}
                         inputProps={{
@@ -423,7 +454,7 @@ export default function Content() {
                         <img
                           onClick={handleClickOpen}
                           className="smallimage"
-                          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU"
+                          src={row.imageurl}
                           alt=""
                           width={"50%"}
                         />
@@ -453,14 +484,14 @@ export default function Content() {
                       </TableCell>
                     </TableCell>
 
-                    <TableCell align="right">{row.name}</TableCell>
+                    <TableCell align="right">{row.title}</TableCell>
                     <TableCell align="right">
                       {row.status ? "public" : "prive"}
                     </TableCell>
-                    <TableCell align="right">{row.datecreate}</TableCell>
-                    <TableCell align="right">{row.views}</TableCell>
-                    <TableCell align="right">{row.comment}</TableCell>
-                    <TableCell align="right">{row.percentlike}</TableCell>
+                    <TableCell align="right"><Moment format="yyyy-MM-DD HH:mm:ss">{row.datecreated}</Moment></TableCell>
+                    <TableCell align="right">{row.viewcount}</TableCell>
+                    {/* <TableCell align="right">{row.comment}</TableCell> */}
+                    {/* <TableCell align="right">{row.percentlike}</TableCell> */}
                   </TableRow>
                 );
               })}
@@ -474,13 +505,12 @@ export default function Content() {
                 </TableRow>
               )}
             </TableBody>
-            5
           </Table>
         </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={totalVideo}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

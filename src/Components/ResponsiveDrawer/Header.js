@@ -50,15 +50,15 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
+    color: 'inherit',
+    '& .MuiInputBase-input': {
+        padding: theme.spacing(1, 1, 1, 0),
+        // vertical padding + font size from searchIcon
+        paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+        transition: theme.transitions.create('width'),
+        width: '100%',
+        [theme.breakpoints.up('md')]: {
+        },
     },
   },
 }));
@@ -256,23 +256,24 @@ export default function Header() {
               </Link>
             </Typography>
           </Box>
-          <Box sx={{ flex: "2" }}>
-            <Search sx={{ borderRadius: "20px" }}>
-              <SearchIconWrapper>
-                <SearchIcon />
-              </SearchIconWrapper>
-              <Form action={`/search`}>
-                <StyledInputBase
-                  sx={{ width: "100%" }}
-                  placeholder="Search…"
-                  inputProps={{ "aria-label": "search" }}
-                  onChange={(e) => {
-                    setInputSearch(e.target.value);
-                  }}
-                />
-              </Form>
-            </Search>
-          </Box>
+           <Box sx={{ flex: '2' }}>
+                        <Search sx={{ borderRadius: '20px' }}>
+                            <SearchIconWrapper>
+                                <SearchIcon />
+                            </SearchIconWrapper>
+                            <Form action={`/search?search=${inputSearch}`} style={{width:'100%'}}>
+                                <StyledInputBase sx={{width:'100%'}}
+                                    name='search'
+                                    autoComplete="off"
+                                    placeholder="Search…"
+                                    inputProps={{ 'aria-label': 'search' }}
+                                    onChange={e => {
+                                        setInputSearch(e.target.value);
+                                    }}
+                                />
+                            </Form>
+                        </Search>
+                    </Box>
           <Box sx={{ display: "flex", flex: "1", justifyItems: "end" }}>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" } }}>

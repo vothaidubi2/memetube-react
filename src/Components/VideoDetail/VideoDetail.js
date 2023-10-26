@@ -56,7 +56,7 @@ function VideoDetail() {
       style={{
         display: "flex",
         flexDirection: 'row',
-        padding: "10px 50px 30px",
+        padding: "10px 70px 30px",
         flexWrap: "wrap",
         gap: "30px",
         justifyContent: "space-between",
@@ -64,16 +64,19 @@ function VideoDetail() {
       }}
     >
       <Box sx={{ flexGrow: '6', flexBasis: '650px', width: '65%', display: 'flex', flexDirection: 'column' }}>
-        <Card sx={{ borderRadius: "10px", display: "flex", height: '65vh' }}>
+        <Card sx={{ borderRadius: "10px", display: "flex",maxHeight:'508px' }}>
           <CardActionArea >
             <CardMedia
-              allow="autoplay; encrypted-media"
-              component="iframe"
-              onLoad={setCount}
+              component="video"
               height={'100%'}
+              controls 
+              autoPlay
               allowFullScreen
               frameBorder={'0'}
-              onPlay={e => e.currentTarget.volume = 0.5}
+              onLoadStart={e => {
+                e.currentTarget.volume = 0.3;
+                setCount()
+              }}
               src={videoDetail.videourl}
               title={videoDetail.title}
               width={"100%"}
