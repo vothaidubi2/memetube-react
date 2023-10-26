@@ -9,7 +9,7 @@ import InputBase from '@mui/material/InputBase';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MoreIcon from '@mui/icons-material/MoreVert';
-import { Avatar, Button, TextField, makeStyles } from '@mui/material';
+import { Alert, Avatar, Button, Collapse, Divider, TextField, makeStyles } from '@mui/material';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -26,6 +26,10 @@ import CircleIcon from '@mui/icons-material/Circle';
 import CheckIcon from '@mui/icons-material/Check';
 import SubscribeAPI from '../../utils/SubscribeAPI';
 import RatingAPI from '../../utils/RatingAPI';
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import DoneIcon from "@mui/icons-material/Done";
+import CloseIcon from "@mui/icons-material/Close";
+import CommentAPI from '../../utils/CommentAPI';
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -82,6 +86,8 @@ export default function ContentBar({ props }) {
     const [rate, setRate] = useState(null);
     const [countLike, setCountLike] = useState(null);
     const [countDislike, setCountDislike] = useState(null);
+    //data comment
+    const [rows, setRows] = useState([]);
 
     useEffect(() => {
         const fetchSub = async () => {
@@ -101,12 +107,10 @@ export default function ContentBar({ props }) {
                 const data = await RatingAPI.getOneItem(`/getratinginfo?iduser=2&idvideo=${props.idvideo}`);
                 if (data.status == 200) {
                     setRate(data.data.rate)
-                    console.log("rate:", data.data)
                 }
             } catch (error) {
                 if (error.response || error.response.status === 404) {
                     setRate(null);
-                    console.log("error:", error)
                 }
             }
         };
@@ -115,7 +119,6 @@ export default function ContentBar({ props }) {
             if (rateData.status == 200) {
                 setCountLike(rateData.data.like)
                 setCountDislike(rateData.data.dislike)
-                console.log("count:", rateData.data)
             }
         };
         return () => {
@@ -151,7 +154,7 @@ export default function ContentBar({ props }) {
     }
 
     const modifyRate = async (inputRate) => {
-        if(rate != null){
+        if (rate != null) {
             try {
                 const data = await RatingAPI.updateRate(`/updaterate?iduser=2&idvideo=${props.idvideo}&rate=${inputRate}`);
                 if (data.status == 200) {
@@ -162,7 +165,7 @@ export default function ContentBar({ props }) {
                     setRate(null)
                 }
             }
-        }else{
+        } else {
             try {
                 const data = await RatingAPI.addRate(`/addrate?iduser=2&idvideo=${props.idvideo}&rate=${inputRate}`);
                 if (data.status == 201) {
@@ -186,6 +189,71 @@ export default function ContentBar({ props }) {
 
         }
     }
+
+    //comment
+    const fetchBaseCmt = async () => {
+        const data = await RatingAPI.countRating(`/getallbasecmt?idvideo=${props.idvideo}`);
+        if (data.status == 200) {
+            setRows(data.data)
+        }
+    };
+
+    const [replyingToIndex, setReplyingToIndex] = useState(
+        Array(rows.length).fill(false)
+    );
+    const [openAlertIndex, setOpenAlertIndex] = useState(
+        Array(rows.length).fill(false)
+    );
+    const [openWatchReplyComment, setopenWatchReplyComment] = useState(
+        Array(rows.length).fill(false)
+    );
+    const [isThumbUpClicked, setThumbUpClicked] = useState(
+        Array(rows.length).fill(false)
+    );
+    const [isThumbDownClicked, setThumbDownClicked] = useState(
+        Array(rows.length).fill(false)
+    );
+    const [isFavoriteClicked, setFavoriteClicked] = useState(
+        Array(rows.length).fill(false)
+    );
+    const handleReplyClick = (index) => {
+        const updatedStatus = [...replyingToIndex];
+        updatedStatus[index] = !updatedStatus[index];
+        setReplyingToIndex(updatedStatus);
+        const updateStatusAlert = [...openAlertIndex];
+        updateStatusAlert[index] = !updateStatusAlert[index];
+        setOpenAlertIndex(updateStatusAlert);
+    };
+
+    const handleAlertClose = (index) => () => {
+        const updatedStatus = [...openAlertIndex];
+        updatedStatus[index] = false;
+        setOpenAlertIndex(updatedStatus);
+    };
+    const watchUserReply = (index) => {
+        const updatedStatus = [...openWatchReplyComment];
+        updatedStatus[index] = !updatedStatus[index];
+        setopenWatchReplyComment(updatedStatus);
+    };
+    const handleThumbUpClicked = (index) => {
+        console.log(isThumbUpClicked);
+        const updatedStatus = [...isThumbUpClicked];
+        console.log(updatedStatus);
+        updatedStatus[index] = !updatedStatus[index];
+        setThumbUpClicked(updatedStatus);
+        if (isThumbUpClicked[index] === false) {
+            isThumbDownClicked[index] = false;
+        }
+    };
+
+    const handleThumbDownClicked = (index) => {
+        const updatedStatus = [...isThumbDownClicked];
+        updatedStatus[index] = !updatedStatus[index];
+        setThumbDownClicked(updatedStatus);
+        if (isThumbDownClicked[index] === false) {
+            isThumbUpClicked[index] = false;
+        }
+    };
 
     //layout
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -223,6 +291,20 @@ export default function ContentBar({ props }) {
         setValue(newValue);
     };
     //comments
+    const [inputComment, setInputComment] = useState();
+
+
+    const handleEnterCmt = async (event) => {
+        if (event.key === 'Enter') {
+            await CommentAPI.postComment(`/postcomment?idvideo=${props.idvideo}&iduser=3&contents=${inputComment}&date=2023-10-24`);
+            fetchBaseCmt();
+            setInputComment('');
+        }
+    };
+    const handleComment = (event) => {
+        setInputComment(event.target.value);
+    }
+
     const [anchorOrder, setAnchorOrder] = React.useState(null);
     const openMenuComment = Boolean(anchorOrder);
     const handleClick = (event) => {
@@ -230,6 +312,117 @@ export default function ContentBar({ props }) {
     };
     const closeMenuComment = () => {
         setAnchorOrder(null);
+    };
+    const watchcommentuser = (index) => {
+        if (openWatchReplyComment[index] === true) {
+            return (
+                <>
+                    <div className="allinformation">
+                        {rows.map((row, rowIndex) => {
+                            return (
+                                <React.Fragment key={rowIndex}>
+                                    <Box sx={{ display: "flex", margin: "3% 0" }}>
+                                        <Avatar
+                                            alt="Remy Sharp"
+                                            src={row.avatar}
+                                            sx={{ width: 56, height: 56, marginRight: "1rem" }}
+                                        />
+                                        <div className="informationuserandtime">
+                                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                <Link to="https://google.com">
+                                                    <Typography color={"text.secondary"}>
+                                                        {row.nameuser} -
+                                                    </Typography>
+                                                </Link>
+                                                <div className="content">
+                                                    <Typography color={"text.secondary"}>
+                                                        {" "}
+                                                        - {row.timecomment}
+                                                    </Typography>
+                                                </div>
+                                            </Box>
+                                            <Typography>{row.contentcomment} </Typography>
+                                        </div>
+                                    </Box>
+                                    <Box></Box>
+                                </React.Fragment>
+                            );
+                        })}
+                    </div>
+                </>
+            );
+        } else {
+            return null;
+        }
+    };
+
+    const replycomment = (index) => {
+        if (openAlertIndex[index] === true) {
+            return (
+                <>
+                    <div className="allinformation">
+                        {rows.map((row, rowIndex) => {
+                            return (
+                                <React.Fragment key={rowIndex}>
+                                    <Box sx={{ display: "flex", width: '100%', overflow: 'unset' }}>
+                                        <div className="informationuserandtime" style={{ width: '100%', overflow: 'unset' }}>
+                                            <Collapse in={index === rowIndex} sx={{ width: '100%', overflow: 'unset' }}>
+                                                <Alert icon={false} sx={{ display: 'flex', flexDirection: 'column' }}>
+                                                    {/* <Box
+                                                        sx={{
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            width:'100%'
+                                                        }}
+                                                    >
+                                                        <Button onClick={handleAlertClose(rowIndex)}>
+                                                            Sumbit
+                                                            <DoneIcon />
+                                                        </Button>
+                                                        <Button onClick={handleAlertClose(rowIndex)}>
+                                                            Cancel
+                                                            <CloseIcon />
+                                                        </Button>
+                                                    </Box> */}
+
+                                                    {/* <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
+                                                        <Link to="https://google.com">
+                                                            <Avatar
+                                                                alt="Remy Sharp"
+                                                                src={row.avatar}
+                                                                sx={{
+                                                                    width: 40,
+                                                                    height: 40,
+                                                                    marginRight: "1rem",
+                                                                }}
+                                                            />
+                                                        </Link>
+                                                        <TextField
+                                                            sx={{marginLeft: "1rem",flexBasis:'500px',flexGrow:'2'}}
+                                                            id="outlined-multiline-static"
+                                                            label="Title (required)"
+                                                            multiline
+                                                            rows={3}
+                                                        />
+                                                    </Box> */}
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: "15px" }}>
+                                                        <Avatar sx={{ color: 'action.active', my: 0.5 }} src="https://img.freepik.com/premium-vector/young-smiling-man-avatar-man-with-brown-beard-mustache-hair-wearing-yellow-sweater-sweatshirt-3d-vector-people-character-illustration-cartoon-minimal-style_365941-860.jpg" />
+                                                        <TextField sx={{ width: '100%' }} id="input-with-sx" label="Your comment" variant="standard" />
+                                                    </Box>
+                                                </Alert>
+                                            </Collapse>
+                                        </div>
+                                    </Box>
+                                    <Box></Box>
+                                </React.Fragment>
+                            );
+                        })}
+                    </div>
+                </>
+            );
+        } else {
+            return null;
+        }
     };
 
     const menuId = 'primary-search-account-menu';
@@ -307,19 +500,19 @@ export default function ContentBar({ props }) {
                     <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: '10px' }}>
                         <buttonStyles sx={{ '& :hover': { background: 'none' } }} size="large" aria-label="show 4 new mails" color="inherit">
                             {rate != null && rate ?
-                                <Button onClick={()=>deleteRate()} component="label" variant="secondary" sx={{ color: '#90CAF9', border: '1px solid #aaa', borderRadius: '15px 0 0 15px' }} startIcon={<ThumbUpIcon />}>
+                                <Button onClick={() => deleteRate()} component="label" variant="secondary" sx={{ color: '#90CAF9', border: '1px solid #aaa', borderRadius: '15px 0 0 15px' }} startIcon={<ThumbUpIcon />}>
                                     {countLike < 1000 ? countLike : <NumberFormatter value={countLike} />}
                                 </Button> :
-                                <Button onClick={()=>modifyRate(true)} component="label" variant="secondary" sx={{ color: 'white', border: '1px solid #aaa', borderRadius: '15px 0 0 15px' }} startIcon={<ThumbUpIcon />}>
+                                <Button onClick={() => modifyRate(true)} component="label" variant="secondary" sx={{ color: 'white', border: '1px solid #aaa', borderRadius: '15px 0 0 15px' }} startIcon={<ThumbUpIcon />}>
                                     {countLike < 1000 ? countLike : <NumberFormatter value={countLike} />}
                                 </Button>
                             }
                             {rate != null && rate == false ?
-                                <Button onClick={()=>deleteRate()} component="label" variant="secondary" sx={{ color: '#90CAF9', borderRadius: '0 15px 15px 0', border: '1px solid #aaa' }} startIcon={<ThumbDownIcon />}>
+                                <Button onClick={() => deleteRate()} component="label" variant="secondary" sx={{ color: '#90CAF9', borderRadius: '0 15px 15px 0', border: '1px solid #aaa' }} startIcon={<ThumbDownIcon />}>
                                     {countDislike < 1000 ? countDislike : <NumberFormatter value={countDislike} />}
                                 </Button>
                                 :
-                                <Button onClick={()=>modifyRate(false)} component="label" variant="secondary" sx={{ color: 'white', borderRadius: '0 15px 15px 0', border: '1px solid #aaa' }} startIcon={<ThumbDownIcon />}>
+                                <Button onClick={() => modifyRate(false)} component="label" variant="secondary" sx={{ color: 'white', borderRadius: '0 15px 15px 0', border: '1px solid #aaa' }} startIcon={<ThumbDownIcon />}>
                                     {countDislike < 1000 ? countDislike : <NumberFormatter value={countDislike} />}
                                 </Button>
 
@@ -352,7 +545,7 @@ export default function ContentBar({ props }) {
                     <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                         <TabList textColor='inherit' indicatorColor='primary' onChange={handleChange} aria-label="lab API tabs example">
                             <Tab label="Description" value="1" />
-                            <Tab label="Comment" value="2" />
+                            <Tab label="Comment" value="2" onClick={fetchBaseCmt} />
                         </TabList>
                     </Box>
                     <TabPanel value="1">
@@ -402,10 +595,114 @@ export default function ContentBar({ props }) {
                                     </Menu>
                                 </Box>
                             </Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: "15px" }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: "15px" }} action={`/watch?id=${props.idvideo}`}>
                                 <Avatar sx={{ color: 'action.active', my: 0.5 }} src="https://img.freepik.com/premium-vector/young-smiling-man-avatar-man-with-brown-beard-mustache-hair-wearing-yellow-sweater-sweatshirt-3d-vector-people-character-illustration-cartoon-minimal-style_365941-860.jpg" />
-                                <TextField sx={{ width: '100%' }} id="input-with-sx" label="Your comment" variant="standard" />
+                                <TextField value={inputComment} onKeyPress={(e) => handleEnterCmt(e)} onChange={(event) => handleComment(event)} name="contents" sx={{ width: '100%' }} id="input-with-sx" label="Your comment" variant="standard" />
                             </Box>
+                            <Divider sx={{ marginBottom: "2px" }} light />
+                            <div className="allinformation" style={{ width: '100%' }}>
+                                {rows != null ?
+                                    (
+                                        rows.map((row, rowIndex) => {
+                                            return (
+                                                <React.Fragment key={rowIndex}>
+                                                    <Box sx={{ width: '100%' }} component='div'>
+                                                        <Box
+                                                            sx={{
+                                                                width: '100%',
+                                                                display: "flex",
+                                                                margin: "2% 3%",
+                                                                justifyContent: "space-between", // Căn chỉnh sang hai phía
+                                                                alignItems: "center", // Căn chỉnh theo chiều dọc
+                                                            }}
+                                                        >
+                                                            <Box sx={{ display: "flex", alignItems: "center", width: '100%' }}>
+                                                                <Avatar
+                                                                    alt="Remy Sharp"
+                                                                    src="https://img.freepik.com/premium-vector/young-smiling-man-avatar-man-with-brown-beard-mustache-hair-wearing-yellow-sweater-sweatshirt-3d-vector-people-character-illustration-cartoon-minimal-style_365941-860.jpg"
+                                                                    sx={{ width: 56, height: 56, marginRight: "1rem" }}
+                                                                />
+                                                                <div style={{ width: '100%' }} className="informationuserandtime">
+                                                                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                                        <Link to="https://google.com">
+                                                                            <Typography color={"text.secondary"}>
+                                                                                {row.users.username} -
+                                                                            </Typography>
+                                                                        </Link>
+
+                                                                        <div className="content">
+                                                                            <Typography color={"text.secondary"}>
+                                                                                - {row.datecreated}
+                                                                            </Typography>
+                                                                        </div>
+                                                                    </Box>
+                                                                    <Typography>{row.contents} </Typography>
+                                                                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                                                                        <Typography
+                                                                            sx={{ cursor: 'pointer' }}
+                                                                            color={"text.secondary"}
+                                                                            variant="none"
+                                                                            onClick={() => handleReplyClick(rowIndex)} // Clicking "Reply" shows replycomment
+                                                                        >
+                                                                            Reply
+                                                                        </Typography>
+                                                                        <Typography
+                                                                            sx={{ width: "auto", margin: " 0 20px", cursor: 'pointer' }}
+                                                                            color={"text.secondary"}
+                                                                            variant="none"
+                                                                            onClick={() => watchUserReply(rowIndex)} // Clicking "1 Reply" shows commentuser
+                                                                        >
+                                                                            Show replies
+                                                                        </Typography>
+                                                                        <IconButton
+                                                                            aria-label="fingerprint"
+                                                                            onClick={() => {
+                                                                                handleThumbUpClicked(rowIndex);
+                                                                            }}
+                                                                            style={{
+                                                                                color: isThumbUpClicked[rowIndex] ? "red" : "gray",
+                                                                            }}
+                                                                        >
+                                                                            <ThumbUpIcon />
+                                                                        </IconButton>
+                                                                        <IconButton
+                                                                            aria-label="fingerprint"
+                                                                            onClick={() => {
+                                                                                handleThumbDownClicked(rowIndex);
+                                                                            }}
+                                                                            style={{
+                                                                                color: isThumbDownClicked[rowIndex]
+                                                                                    ? "red"
+                                                                                    : "gray",
+                                                                            }}
+                                                                        >
+                                                                            <ThumbDownIcon />
+                                                                        </IconButton>
+
+                                                                    </Box>
+                                                                </div>
+                                                            </Box>
+
+
+                                                        </Box>
+
+                                                        <Box>
+                                                            <Box
+                                                                sx={{
+                                                                    margin: "0% 5%",
+                                                                }}
+                                                            >
+                                                                {replycomment(rowIndex)}
+                                                                {watchcommentuser(rowIndex)}
+                                                            </Box>
+                                                        </Box>
+                                                    </Box>
+                                                </React.Fragment>
+                                            );
+                                        })
+                                    )
+                                    : <></>}
+                            </div>
                         </Box>
                     </TabPanel>
                 </TabContext>

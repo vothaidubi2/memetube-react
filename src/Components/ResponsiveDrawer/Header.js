@@ -55,7 +55,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         transition: theme.transitions.create('width'),
         width: '100%',
         [theme.breakpoints.up('md')]: {
-            width: '20ch',
+            
         },
     },
 }));
@@ -209,15 +209,16 @@ export default function Header() {
                             <SearchIconWrapper>
                                 <SearchIcon />
                             </SearchIconWrapper>
-                            <Form action={`/search`}>
-                            <StyledInputBase sx={{ width: '100%' }}
-                                placeholder="Search…"
-                                inputProps={{ 'aria-label': 'search' }}
-                                onChange={e => {
-                                    setInputSearch(e.target.value);
-                                    console.log(inputSearch)
-                                }}
-                            />
+                            <Form action={`/search?search=${inputSearch}`} style={{width:'100%'}}>
+                                <StyledInputBase sx={{width:'100%'}}
+                                    name='search'
+                                    autoComplete="off"
+                                    placeholder="Search…"
+                                    inputProps={{ 'aria-label': 'search' }}
+                                    onChange={e => {
+                                        setInputSearch(e.target.value);
+                                    }}
+                                />
                             </Form>
                         </Search>
                     </Box>
@@ -250,7 +251,7 @@ export default function Header() {
                             </IconButton>
                         </Box>
                         <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                            <IconButton
+                            <IconButton 
                                 size="large"
                                 aria-label="show more"
                                 aria-controls={mobileMenuId}
