@@ -132,7 +132,7 @@ export default function Comment() {
     setFavoriteClicked(updatedStatus);
   };
 
-  const commentuser = (index) => {
+  const commentuser = () => {
     return (
       <>
         <div className="allinformation">
@@ -386,7 +386,7 @@ export default function Comment() {
           </div>
           <Divider sx={{ marginBottom: "2px" }} light />
           {/* Render commentuser based on replyingToIndex */}
-          {commentuser(replyingToIndex)}
+          {commentuser()}
         </Grid>
       </Grid>
       <Grid></Grid>
