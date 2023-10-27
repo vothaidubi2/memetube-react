@@ -11,37 +11,29 @@ import { styled } from "@mui/material/styles";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
-import { CircularProgress, Link } from "@mui/material";
+import { Link } from "@mui/material";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Chip from "@mui/material/Chip";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import VideoAPI from "../../utils/VideoAPI";
-import ChannelAPI from "../../utils/ChannelAPI";
-import CategoryAPI from "../../utils/CategoryAPI";
-import ImageAPI from "../../utils/ImageAPI";
-import format from 'date-fns/format';
-
 
 const steps = ["uploadvideo", "Detail", "Display mode"];
 const stepsupdate = ["Detail", "Display mode"];
 
 export default function UploadFile({ active }) {
-  // const createUserDate = () => {
-  //   return {
-  //     file, titleValue, descriptionValue, status, selectedImage
-  //   }
-  // }
-  const [titleValue, setTitleValue] = useState('');
-  const [descriptionValue, setDescriptionValue] = useState('');
+  const createUserDate=()=>{
+    return{
+      file,titleValue,descriptionValue,status,selectedImage
+  }
+  }
+  const [titleValue,setTitleValue]=useState('');
+  const [descriptionValue,setDescriptionValue] =useState('');
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
-  const [status, setStatus] = useState(0)
-  const [file, setFile] = useState('');
-  const [pathVideo, setPathVideo] = useState();
-  const [selectedImage, setSelectedImage] = useState();
-  const [uploadedImage, setUploadedImg] = useState();
+  const [status,setStatus]=useState('')
+  const [file,setFile]=useState('');
+  const [selectedImage, setSelectedImage] = useState(false);
 
   let stepsvalue = () => {
     if (active === null) {
@@ -52,15 +44,15 @@ export default function UploadFile({ active }) {
   };
 
 
-  const handleFileChange = async (event) => {
-    event.preventDefault();
-    setTitleValue(titleRef.current.value)
-    setDescriptionValue(descriptionRef.current.value)
-    if (event.target.files[0]) {
-      setSelectedImage(event.target.files[0]);
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Use URL.createObjectURL to create a temporary URL for the selected image
+      const imageUrl = URL.createObjectURL(file);
+      setSelectedImage(imageUrl);
     }
   };
-
   const VisuallyHiddenInput = styled("input")({
     clip: "rect(0 0 0 0)",
     clipPath: "inset(50%)",
@@ -72,10 +64,9 @@ export default function UploadFile({ active }) {
     whiteSpace: "nowrap",
     width: 1,
   });
-  const handlestatus = (event) => {
-    setStatus(event.target.value)
-    console.log(event.target.value)
-  }
+const handlestatus =(event)=>{
+  setStatus(event.target.value)
+}
   const FormComponent1 = () => {
     return (
       <FormControl
@@ -122,9 +113,7 @@ export default function UploadFile({ active }) {
               multiline
               rows={2}
               inputRef={titleRef}
-              name="title"
               placeholder="Add a title to describe your video"
-              defaultValue={titleValue}
             />
             <TextField
               sx={{ width: "100%", margin: "2% 0 0 0" }}
@@ -132,10 +121,8 @@ export default function UploadFile({ active }) {
               label="Describe"
               multiline
               rows={5}
-              name="describes"
               inputRef={descriptionRef}
               placeholder="Introduce your video to viewers"
-              defaultValue={descriptionValue}
             />
             <Typography sx={{ margin: "2% 0 0 0" }}>Small picture</Typography>
             <Typography
@@ -184,14 +171,14 @@ export default function UploadFile({ active }) {
                   </Typography>
                   <VisuallyHiddenInput
                     type="file"
-                    onChange={(e) => handleFileChange(e)}
+                    onChange={handleFileChange}
                   />
                 </Box>
               </Button>
 
               {selectedImage && (
                 <img
-                  src={URL.createObjectURL(selectedImage)}
+                  src={selectedImage}
                   alt="Selected Thumbnail"
                   style={{
                     marginLeft: "10px",
@@ -203,21 +190,20 @@ export default function UploadFile({ active }) {
             </Box>
           </div>
           <div className="videomedia" style={{ flex: "20%", marginTop: "0%" }}>
-            <CardMedia
-              component="video"
-              src={file}
-
-            />
+          <CardMedia
+            component="iframe"
+            src={file}
+          />
             <CardContent sx={{ border: "1px solid gray" }}>
               <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
                 Video link
               </Typography>
 
               <Link
-                href={file}
+                href=    {file}
                 sx={{ textDecoration: "underline", fontSize: "18px" }}
               >
-                {file}
+               {file}
               </Link>
 
               <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
@@ -253,24 +239,23 @@ export default function UploadFile({ active }) {
               <RadioGroup
                 sx={{ padding: "0 5%" }}
                 aria-labelledby="demo-radio-buttons-group-label"
-                // defaultChecked="private"
+                defaultValue="female"
                 name="radio-buttons-group"
                 value={status}
                 onChange={handlestatus}
+               
               >
                 <FormControlLabel
-                name="status"
-                  value="0"
-                  control={<Radio name="status"/>}
-                  label="Private"
+                  value="private"
+                  control={<Radio />}
+                  label="Private "
                 />
                 <Typography sx={{ padding: "0 4%", color: "text.secondary" }}>
                   Only you and the people you choose can see your videos
                 </Typography>
                 <FormControlLabel
-                name="status"
-                  value="1"
-                  control={<Radio name="status"/>}
+                  value="public"
+                  control={<Radio />}
                   label="Public"
                 />
                 <Typography sx={{ padding: "0 4%", color: "text.secondary" }}>
@@ -280,20 +265,20 @@ export default function UploadFile({ active }) {
             </CardContent>
           </div>
           <div className="videomedia" style={{ flex: "20%", marginTop: "0%" }}>
-            <CardMedia
-              component="video"
-              src={file}
-            />
+          <CardMedia
+            component="iframe"
+            src={file}
+          />
             <CardContent sx={{ border: "1px solid gray" }}>
               <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
                 Video link
               </Typography>
 
               <Link
-                href={file}
+                href=    {file}
                 sx={{ textDecoration: "underline", fontSize: "18px" }}
               >
-                {file}
+               {file}
               </Link>
 
               <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
@@ -334,8 +319,8 @@ export default function UploadFile({ active }) {
     const newActiveStep =
       isLastStep() && !allStepsCompleted()
         ? // It's the last step, but not all steps have been completed,
-        // find the first step that has been completed
-        stepsvalue().findIndex((step, i) => !(i in completed))
+          // find the first step that has been completed
+          stepsvalue().findIndex((step, i) => !(i in completed))
         : activeStep + 1;
     setActiveStep(newActiveStep);
   };
@@ -348,59 +333,29 @@ export default function UploadFile({ active }) {
     setActiveStep(step);
   };
 
-  const handleComplete = async (event) => {
-    if (activeStep === 0) {
-      const file = event.target.files[0]
-      setPathVideo(event.target.files[0])
-      setFile(URL.createObjectURL(file))
-    } else if (activeStep === 1) {
-      setTitleValue(titleRef.current.value)
-      setDescriptionValue(descriptionRef.current.value)
-    }
+  const handleComplete = (event) => {
+if(activeStep===0){
+  const file= event.target.files[0]
+  setFile(URL.createObjectURL(file))
+}else if(activeStep===1){
+  setTitleValue(titleRef.current.value) 
+  setDescriptionValue( descriptionRef.current.value) 
+}
+
+
+
+
+
+
     const newCompleted = completed;
     newCompleted[activeStep] = true;
     setCompleted(newCompleted);
     handleNext();
   };
 
-  // loading button
-  const [loadingButton, setLoadingButton] = useState(false);
-  const handleFinish = async () => {
-    setLoadingButton(true)
-    let imageData = new FormData();
-    imageData.append('files', selectedImage)
-    const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
-    let formVideo = new FormData()
-    formVideo.append('files', pathVideo)
-    const videoUrl = await ImageAPI.uploadImage("/uploadvideo", formVideo)
-    const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${1}`)
-    const category = await CategoryAPI.getOneItem(`/getcatebyid?id=${1}`)
-    // const formattedDateTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-    const form = {
-      title: titleValue,
-      imageurl: imageurl,
-      describes: descriptionValue,
-      videourl: videoUrl,
-      datecreated: '',
-      channel: channel,
-      category: category,
-      status: status,
-      viewcount: 0
-    }
-    console.log(form)
-    const data = await VideoAPI.postVideo('/postvideo', form)
-    if (data.status == 201) {
-      setLoadingButton(false)
-    }
-    const newCompleted = completed;
-    newCompleted[activeStep] = true;
-    setCompleted(newCompleted);
-    handleNext();
-  }
-
-  // const upload = () => {
-  //   console.log(createUserDate())
-  // };
+  const upload = () => {
+   console.log( createUserDate())
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -416,14 +371,13 @@ export default function UploadFile({ active }) {
       <div>
         {allStepsCompleted() ? (
           <React.Fragment>
-
-            <Typography sx={{ mt: 2, mb: 1, textAlign: 'center' }}>
+            <Typography sx={{ mt: 2, mb: 1 }}>
               All steps completed - you&apos;re finished
             </Typography>
-            {/* <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
               <Box sx={{ flex: "1 1 auto" }} />
               <Button onClick={upload}>Upload File</Button>
-            </Box> */}
+            </Box>
           </React.Fragment>
         ) : (
           <React.Fragment>
@@ -446,9 +400,9 @@ export default function UploadFile({ active }) {
                 }
               })()}
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "row", pt: 4 }}>
+            <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
               <Button
-                color="inherit" ủ
+                color="inherit"ủ
                 disabled={activeStep === 0}
                 onClick={handleBack}
                 sx={{ mr: 1 }}
@@ -468,21 +422,11 @@ export default function UploadFile({ active }) {
                     Step {activeStep + 1} already completed
                   </Typography>
                 ) : (
-                  <>
+                  <Button onClick={handleComplete}>
                     {completedSteps() === totalSteps() - 1
-                      ? <>
-                        {!loadingButton ?
-                          <Button onClick={handleFinish}>
-                            <>Finish</>
-                          </Button> :
-                          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                            <CircularProgress />
-                          </Box>
-                        }</>
-                      : <Button onClick={handleComplete}>
-                        Complete Step
-                      </Button>}
-                  </>
+                      ? "Finish"
+                      : "Complete Step"}
+                  </Button>
                 ))}
             </Box>
           </React.Fragment>

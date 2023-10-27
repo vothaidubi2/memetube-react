@@ -60,7 +60,6 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
         [theme.breakpoints.up('md')]: {
         },
     },
-  },
 }));
 let boolean = false;
 export default function Header() {

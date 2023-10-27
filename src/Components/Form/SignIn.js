@@ -21,12 +21,20 @@ import UsersAPI from "../../utils/UsersAPI";
 import { Alert, AlertTitle } from "@mui/material";
 import setCookie from "../Cookie/setCookie";
 export default function SignIn({ onClose }) {
-
   const [data, setData] = React.useState({
     email: "",
     password: "",
-    isGoogle:""
+    isGoogle:"false"
   });
+  const [dataGoogle,setDataGoogle]=React.useState({
+    email:"",
+    password:"",
+    status:1,
+    google:1,
+    datecreated:"",
+    role:1,
+    avatar:""
+  })
   let token = "";
   const [openSignIn, setOpenSignIn] = React.useState(true);
   const [openSignUp, setOpenSignUp] = React.useState(false);
@@ -64,12 +72,11 @@ export default function SignIn({ onClose }) {
       [name]: value,
     }));
   };
-
   const signinToToken = async () => {
     try {
       const jsonData = JSON.stringify(data);
-      console.log('data',data)
       const dataReceive = await UsersAPI.sendUser("/authenticate", jsonData);
+      console.log(data)
       if (dataReceive.status === 200) {
         // Xử lý khi phản hồi thành công (status 200)
         token = dataReceive.data;
@@ -91,17 +98,49 @@ export default function SignIn({ onClose }) {
       });
     }
   };
-  React.useEffect( () => {
-    console.log(data); // Sau khi data đã được cập nhật
-    if (data.isGoogle === "true") {
-       signinToToken();
-    }
-  }, [data]);
+
   const handleSignIn =  (event) => {
     event.preventDefault();
-    setData({...data,isGoogle:"true"})
+    signinToToken()
 
   };
+    const generateRandomPassword = () => {
+    // Hàm này tạo mật khẩu ngẫu nhiên, bạn có thể thay đổi cách tạo mật khẩu theo ý muốn
+    const randomPassword = Math.random().toString(36).slice(-8); // Tạo mật khẩu 8 ký tự ngẫu nhiên
+    return randomPassword;
+  }
+  const login = async()=>{
+ try {
+      const jsonData = JSON.stringify(dataGoogle);
+      console.log('data',data)
+      const dataReceive = await UsersAPI.sendUser("/addAccount", jsonData);
+      if (dataReceive.status === 200) {
+        // Xử lý khi phản hồi thành công (status 200)
+        token = dataReceive.data;
+        setCookie("user", JSON.stringify(token));
+        console.log(token)
+        setOpenSignIn(onClose);
+      } else {
+        setState({
+          ...state,
+          open: true,
+          titleError: "Email or password is not correct",
+        });
+      }
+    } catch (error) {
+      setState({
+        ...state,
+        open: true,
+        titleError: "Email or password is not correct",
+      });
+    }
+  }
+   React.useEffect(() => {
+if(dataGoogle.email!==''){
+  login();
+}
+
+  }, [dataGoogle]);
 
   return (
     <>
@@ -206,10 +245,18 @@ export default function SignIn({ onClose }) {
                 <GoogleLogin
                   onSuccess={(credentialResponse) => {
                     var data = jwt_decode(credentialResponse.credential);
-                    const { email, picture } = data;
-                    console.log(data);
+    setDataGoogle({
+      ...dataGoogle,
+      email:data.email,
+      password:generateRandomPassword(),
+      avatar:data.picture
+    })
+
                   }}
-                  onError={() => {}}
+                  onError={() => {
+
+                    console.log('error')
+                  }}
                 />
               </GoogleOAuthProvider>
             </Grid>
