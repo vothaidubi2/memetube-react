@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -30,6 +30,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import CommentAPI from '../../utils/CommentAPI';
+import { UserContext } from '../Cookie/UserContext';
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -81,6 +82,7 @@ const buttonStyles = styled(IconButton)(({ theme }) => ({
 }));
 
 export default function ContentBar({ props }) {
+    const userData = useContext(UserContext)
     //fetchdata
     const [isSub, setIsSub] = useState(false);
     const [rate, setRate] = useState(null);
@@ -88,28 +90,29 @@ export default function ContentBar({ props }) {
     const [countDislike, setCountDislike] = useState(null);
     //data comment
     const [rows, setRows] = useState([]);
+    const [listReplyCmt, setListReplyCmt] = useState([]);
 
     useEffect(() => {
         const fetchSub = async () => {
             try {
-                const data = await SubscribeAPI.getOneItem(`/getsubinfo?iduser=2&idchannel=${props.channel.idchannel}`);
+                const data = await SubscribeAPI.getOneItem(`/getsubinfo?iduser=${userData.Iduser}&idchannel=${props.channel.idchannel}`);
                 if (data.status == 200) {
                     setIsSub(true)
                 }
             } catch (error) {
-                if (error.response || error.response.status === 404) {
+                if (error.response) {
                     setIsSub(false);
                 }
             }
         };
         const fetchRate = async () => {
             try {
-                const data = await RatingAPI.getOneItem(`/getratinginfo?iduser=2&idvideo=${props.idvideo}`);
+                const data = await RatingAPI.getOneItem(`/getratinginfo?iduser=${userData.Iduser}&idvideo=${props.idvideo}`);
                 if (data.status == 200) {
                     setRate(data.data.rate)
                 }
             } catch (error) {
-                if (error.response || error.response.status === 404) {
+                if (error.response) {
                     setRate(null);
                 }
             }
@@ -131,12 +134,12 @@ export default function ContentBar({ props }) {
     //change data sub,like/dislike
     const addSub = async () => {
         try {
-            const data = await SubscribeAPI.addSub(`/addsub?iduser=2&idchannel=${props.channel.idchannel}`);
+            const data = await SubscribeAPI.addSub(`/addsub?iduser=${userData.Iduser}&idchannel=${props.channel.idchannel}`);
             if (data.status == 201) {
                 setIsSub(true)
             }
         } catch (error) {
-            if (error.response || error.response.status === 400) {
+            if (error.response) {
                 setIsSub(false);
             }
         }
@@ -144,7 +147,7 @@ export default function ContentBar({ props }) {
 
     const deleteSub = async () => {
         try {
-            const data = await SubscribeAPI.deleteSub(`/deletesub?iduser=2&idchannel=${props.channel.idchannel}`);
+            const data = await SubscribeAPI.deleteSub(`/deletesub?iduser=${userData.Iduser}&idchannel=${props.channel.idchannel}`);
             if (data.status == 200) {
                 setIsSub(false)
             }
@@ -156,23 +159,23 @@ export default function ContentBar({ props }) {
     const modifyRate = async (inputRate) => {
         if (rate != null) {
             try {
-                const data = await RatingAPI.updateRate(`/updaterate?iduser=2&idvideo=${props.idvideo}&rate=${inputRate}`);
+                const data = await RatingAPI.updateRate(`/updaterate?iduser=${userData.Iduser}&idvideo=${props.idvideo}&rate=${inputRate}`);
                 if (data.status == 200) {
                     setRate(inputRate)
                 }
             } catch (error) {
-                if (error.response || error.response.status === 400) {
+                if (error.response ) {
                     setRate(null)
                 }
             }
         } else {
             try {
-                const data = await RatingAPI.addRate(`/addrate?iduser=2&idvideo=${props.idvideo}&rate=${inputRate}`);
+                const data = await RatingAPI.addRate(`/addrate?iduser=${userData.Iduser}&idvideo=${props.idvideo}&rate=${inputRate}`);
                 if (data.status == 201) {
                     setRate(inputRate)
                 }
             } catch (error) {
-                if (error.response || error.response.status === 400) {
+                if (error.response ) {
                     setRate(null)
                 }
             }
@@ -181,7 +184,7 @@ export default function ContentBar({ props }) {
 
     const deleteRate = async () => {
         try {
-            const data = await RatingAPI.deleteRate(`/deleterate?iduser=2&idvideo=${props.idvideo}`);
+            const data = await RatingAPI.deleteRate(`/deleterate?iduser=${userData.Iduser}&idvideo=${props.idvideo}`);
             if (data.status == 200) {
                 setRate(null)
             }
@@ -195,6 +198,15 @@ export default function ContentBar({ props }) {
         const data = await RatingAPI.countRating(`/getallbasecmt?idvideo=${props.idvideo}`);
         if (data.status == 200) {
             setRows(data.data)
+            console.log("basecmt", data.data)
+        }
+    };
+    //reply comment
+    const fetchReplyCmt = async (idbasecmt) => {
+        const data = await RatingAPI.countRating(`/getallreplycmt?idvideo=${props.idvideo}&idbasecmt=${idbasecmt}`);
+        if (data.status == 200) {
+            setListReplyCmt(data.data)
+            console.log("replycmt", data.data)
         }
     };
 
@@ -213,10 +225,8 @@ export default function ContentBar({ props }) {
     const [isThumbDownClicked, setThumbDownClicked] = useState(
         Array(rows.length).fill(false)
     );
-    const [isFavoriteClicked, setFavoriteClicked] = useState(
-        Array(rows.length).fill(false)
-    );
     const handleReplyClick = (index) => {
+        
         const updatedStatus = [...replyingToIndex];
         updatedStatus[index] = !updatedStatus[index];
         setReplyingToIndex(updatedStatus);
@@ -230,30 +240,31 @@ export default function ContentBar({ props }) {
         updatedStatus[index] = false;
         setOpenAlertIndex(updatedStatus);
     };
-    const watchUserReply = (index) => {
-        const updatedStatus = [...openWatchReplyComment];
+    const watchUserReply = (index,idbasecmt) => {
+        fetchReplyCmt(idbasecmt)
+        const updatedStatus = openWatchReplyComment.map((_, i) => i === index ? openWatchReplyComment[i] : false);
         updatedStatus[index] = !updatedStatus[index];
         setopenWatchReplyComment(updatedStatus);
     };
-    const handleThumbUpClicked = (index) => {
-        console.log(isThumbUpClicked);
-        const updatedStatus = [...isThumbUpClicked];
-        console.log(updatedStatus);
-        updatedStatus[index] = !updatedStatus[index];
-        setThumbUpClicked(updatedStatus);
-        if (isThumbUpClicked[index] === false) {
-            isThumbDownClicked[index] = false;
-        }
-    };
+  const handleThumbUpClicked = (index) => {
+    console.log(isThumbUpClicked);
+    const updatedStatus = [...isThumbUpClicked];
+    console.log(updatedStatus);
+    updatedStatus[index] = !updatedStatus[index];
+    setThumbUpClicked(updatedStatus);
+    if (isThumbUpClicked[index] === false) {
+      isThumbDownClicked[index] = false;
+    }
+  };
 
-    const handleThumbDownClicked = (index) => {
-        const updatedStatus = [...isThumbDownClicked];
-        updatedStatus[index] = !updatedStatus[index];
-        setThumbDownClicked(updatedStatus);
-        if (isThumbDownClicked[index] === false) {
-            isThumbUpClicked[index] = false;
-        }
-    };
+  const handleThumbDownClicked = (index) => {
+    const updatedStatus = [...isThumbDownClicked];
+    updatedStatus[index] = !updatedStatus[index];
+    setThumbDownClicked(updatedStatus);
+    if (isThumbDownClicked[index] === false) {
+      isThumbUpClicked[index] = false;
+    }
+  };
 
     //layout
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -296,7 +307,7 @@ export default function ContentBar({ props }) {
 
     const handleEnterCmt = async (event) => {
         if (event.key === 'Enter') {
-            await CommentAPI.postComment(`/postcomment?idvideo=${props.idvideo}&iduser=3&contents=${inputComment}&date=2023-10-24`);
+            await CommentAPI.postComment(`/postcomment?idvideo=${props.idvideo}&iduser=${userData.Iduser}&contents=${inputComment}`);
             fetchBaseCmt();
             setInputComment('');
         }
@@ -318,30 +329,30 @@ export default function ContentBar({ props }) {
             return (
                 <>
                     <div className="allinformation">
-                        {rows.map((row, rowIndex) => {
+                        {listReplyCmt && listReplyCmt.map((row, rowIndex) => {
                             return (
                                 <React.Fragment key={rowIndex}>
                                     <Box sx={{ display: "flex", margin: "3% 0" }}>
                                         <Avatar
                                             alt="Remy Sharp"
-                                            src={row.avatar}
+                                            src={row.users.avatar}
                                             sx={{ width: 56, height: 56, marginRight: "1rem" }}
                                         />
                                         <div className="informationuserandtime">
                                             <Box sx={{ display: "flex", alignItems: "center" }}>
                                                 <Link to="https://google.com">
                                                     <Typography color={"text.secondary"}>
-                                                        {row.nameuser} -
+                                                        {row.users.email} -
                                                     </Typography>
                                                 </Link>
                                                 <div className="content">
                                                     <Typography color={"text.secondary"}>
                                                         {" "}
-                                                        - {row.timecomment}
+                                                        - <DateConvert date={row.datecreated} />
                                                     </Typography>
                                                 </div>
                                             </Box>
-                                            <Typography>{row.contentcomment} </Typography>
+                                            <Typography>{row.contents} </Typography>
                                         </div>
                                     </Box>
                                     <Box></Box>
@@ -619,21 +630,20 @@ export default function ContentBar({ props }) {
                                                             <Box sx={{ display: "flex", alignItems: "center", width: '100%' }}>
                                                                 <Avatar
                                                                     alt="Remy Sharp"
-                                                                    src="https://img.freepik.com/premium-vector/young-smiling-man-avatar-man-with-brown-beard-mustache-hair-wearing-yellow-sweater-sweatshirt-3d-vector-people-character-illustration-cartoon-minimal-style_365941-860.jpg"
+                                                                    src={row.users.avatar}
                                                                     sx={{ width: 56, height: 56, marginRight: "1rem" }}
                                                                 />
                                                                 <div style={{ width: '100%' }} className="informationuserandtime">
                                                                     <Box sx={{ display: "flex", alignItems: "center" }}>
                                                                         <Link to="https://google.com">
                                                                             <Typography color={"text.secondary"}>
-                                                                                {row.users.username} -
+                                                                                {row.users.email} -
                                                                             </Typography>
                                                                         </Link>
 
                                                                         <div className="content">
                                                                             <Typography color={"text.secondary"}>
-                                                                                - {row.datecreated}
-                                                                            </Typography>
+                                                                                - <DateConvert date={row.datecreated} />                                                                            </Typography>
                                                                         </div>
                                                                     </Box>
                                                                     <Typography>{row.contents} </Typography>
@@ -650,7 +660,7 @@ export default function ContentBar({ props }) {
                                                                             sx={{ width: "auto", margin: " 0 20px", cursor: 'pointer' }}
                                                                             color={"text.secondary"}
                                                                             variant="none"
-                                                                            onClick={() => watchUserReply(rowIndex)} // Clicking "1 Reply" shows commentuser
+                                                                            onClick={() => watchUserReply(rowIndex,row.idcomment)} // Clicking "1 Reply" shows commentuser
                                                                         >
                                                                             Show replies
                                                                         </Typography>

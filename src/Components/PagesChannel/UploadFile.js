@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -22,22 +22,19 @@ import ChannelAPI from "../../utils/ChannelAPI";
 import CategoryAPI from "../../utils/CategoryAPI";
 import ImageAPI from "../../utils/ImageAPI";
 import format from 'date-fns/format';
+import { UserContext } from "../Cookie/UserContext";
 
 
 const steps = ["uploadvideo", "Detail", "Display mode"];
 const stepsupdate = ["Detail", "Display mode"];
 
 export default function UploadFile({ active }) {
-  // const createUserDate = () => {
-  //   return {
-  //     file, titleValue, descriptionValue, status, selectedImage
-  //   }
-  // }
+  const userData = useContext(UserContext)
   const [titleValue, setTitleValue] = useState('');
   const [descriptionValue, setDescriptionValue] = useState('');
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
-  const [status, setStatus] = useState(0)
+  const [status, setStatus] = useState(false)
   const [file, setFile] = useState('');
   const [pathVideo, setPathVideo] = useState();
   const [selectedImage, setSelectedImage] = useState();
@@ -260,7 +257,7 @@ export default function UploadFile({ active }) {
               >
                 <FormControlLabel
                 name="status"
-                  value="0"
+                  value="false"
                   control={<Radio name="status"/>}
                   label="Private"
                 />
@@ -269,7 +266,7 @@ export default function UploadFile({ active }) {
                 </Typography>
                 <FormControlLabel
                 name="status"
-                  value="1"
+                  value="true"
                   control={<Radio name="status"/>}
                   label="Public"
                 />
@@ -373,7 +370,7 @@ export default function UploadFile({ active }) {
     let formVideo = new FormData()
     formVideo.append('files', pathVideo)
     const videoUrl = await ImageAPI.uploadImage("/uploadvideo", formVideo)
-    const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${1}`)
+    const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${userData.Iduser}`)
     const category = await CategoryAPI.getOneItem(`/getcatebyid?id=${1}`)
     // const formattedDateTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
     const form = {
