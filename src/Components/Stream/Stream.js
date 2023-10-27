@@ -165,7 +165,7 @@ export default function Stream() {
             title="1147 views"
             subheader="Comment"
           />
-          <Card sx={{ maxHeight: "63vh", overflowY: "auto" }} ref={ref}>
+          <Card sx={{ maxHeight: "58vh", overflowY: "auto" }} ref={ref}>
             <CssBaseline />
             <List>
               {messages.map(({ primary, secondary, person }, index) => (
@@ -220,7 +220,7 @@ export default function Stream() {
   const adminStream = () => {
     return (
       <>
-      <Card sx={{position:"relative"}}>
+      <Card sx={{position:"relative", maxHeight: "70vh" }}>
         <CardHeader
           avatar={
             <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
@@ -258,9 +258,9 @@ export default function Stream() {
     <>
       <Box
         className="Allinformation"
-        sx={{ padding: "1% 7%", width: "100%", display: "flex" }}
+        sx={{ padding: "1% 7%", width: "100%", display: "flex"}}
       >
-        <Box className="informationVideo" sx={{ width: "65%", margin: "0 1%" }}>
+        <Box className="informationVideo" sx={{  width: "65%", margin: "0 1%" }}>
           {adminStream()}
         </Box>
 

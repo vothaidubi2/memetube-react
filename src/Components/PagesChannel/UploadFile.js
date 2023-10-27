@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -17,23 +17,26 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Chip from "@mui/material/Chip";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-
+import VideoAPI from "../../utils/VideoAPI";
+import ChannelAPI from "../../utils/ChannelAPI";
+import CategoryAPI from "../../utils/CategoryAPI";
+import ImageAPI from "../../utils/ImageAPI";
+import format from 'date-fns/format';
+import { UserContext } from "../Cookie/UserContext";
 const steps = ["uploadvideo", "Detail", "Display mode"];
 const stepsupdate = ["Detail", "Display mode"];
 
 export default function UploadFile({ active }) {
-  const createUserDate=()=>{
-    return{
-      file,titleValue,descriptionValue,status,selectedImage
-  }
-  }
-  const [titleValue,setTitleValue]=useState('');
-  const [descriptionValue,setDescriptionValue] =useState('');
+    const userData = useContext(UserContext)
+  const [titleValue, setTitleValue] = useState('');
+  const [descriptionValue, setDescriptionValue] = useState('');
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
-  const [status,setStatus]=useState('')
-  const [file,setFile]=useState('');
-  const [selectedImage, setSelectedImage] = useState(false);
+  const [status, setStatus] = useState(false)
+  const [file, setFile] = useState('');
+  const [pathVideo, setPathVideo] = useState();
+  const [selectedImage, setSelectedImage] = useState();
+  const [uploadedImage, setUploadedImg] = useState();
 
   let stepsvalue = () => {
     if (active === null) {
@@ -42,8 +45,6 @@ export default function UploadFile({ active }) {
       return stepsupdate;
     }
   };
-
-
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -249,6 +250,10 @@ const handlestatus =(event)=>{
                   value="private"
                   control={<Radio />}
                   label="Private "
+                name="status"
+                  value="false"
+                  control={<Radio name="status"/>}
+                  label="Private"
                 />
                 <Typography sx={{ padding: "0 4%", color: "text.secondary" }}>
                   Only you and the people you choose can see your videos
@@ -256,6 +261,9 @@ const handlestatus =(event)=>{
                 <FormControlLabel
                   value="public"
                   control={<Radio />}
+                name="status"
+                  value="true"
+                  control={<Radio name="status"/>}
                   label="Public"
                 />
                 <Typography sx={{ padding: "0 4%", color: "text.secondary" }}>
@@ -342,11 +350,35 @@ if(activeStep===0){
   setDescriptionValue( descriptionRef.current.value) 
 }
 
-
-
-
-
-
+  // loading button
+  const [loadingButton, setLoadingButton] = useState(false);
+  const handleFinish = async () => {
+    setLoadingButton(true)
+    let imageData = new FormData();
+    imageData.append('files', selectedImage)
+    const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
+    let formVideo = new FormData()
+    formVideo.append('files', pathVideo)
+    const videoUrl = await ImageAPI.uploadImage("/uploadvideo", formVideo)
+    const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${userData.Iduser}`)
+    const category = await CategoryAPI.getOneItem(`/getcatebyid?id=${1}`)
+    // const formattedDateTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+    const form = {
+      title: titleValue,
+      imageurl: imageurl,
+      describes: descriptionValue,
+      videourl: videoUrl,
+      datecreated: '',
+      channel: channel,
+      category: category,
+      status: status,
+      viewcount: 0
+    }
+    console.log(form)
+    const data = await VideoAPI.postVideo('/postvideo', form)
+    if (data.status == 201) {
+      setLoadingButton(false)
+    }
     const newCompleted = completed;
     newCompleted[activeStep] = true;
     setCompleted(newCompleted);

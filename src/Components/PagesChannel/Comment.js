@@ -24,6 +24,8 @@ import {
 
 import { Link } from "react-router-dom";
 import VideoAPI from "../../utils/VideoAPI";
+import CommentAPI from "../../utils/CommentAPI";
+import DateConvert from "../../utils/DayConvert";
 function createdatauser(
   idcomment,
   nameuser,
@@ -137,18 +139,24 @@ export default function Comment() {
     setFavoriteClicked(updatedStatus);
   };
   const [videoComment, setIdvideoComment] = React.useState();
-  const [listVIdeoComment,setListVideoComment] = useState([])
+  const [listVIdeoComment, setListVideoComment] = useState([])
+  const [listComment, setListComment] = useState([])
+  const [currentVideo, setCurrentVideo] = useState({})
 
-  const handleChangeSelectComment = (event) => {
+  const handleChangeSelectComment = async(event) => {
     setIdvideoComment(event.target.value);
-    console.log(event.target.value)
+    const currentVideo = await VideoAPI.getOneItem(`/getonevideo?id=${event.target.value}`)
+    const listComment = await CommentAPI.getAllBaseCmt(`/getallbasecmt?idvideo=${event.target.value}`)
+    setCurrentVideo(currentVideo.data)
+    setListComment(listComment.data)
+    // console.log("vao",result.data)
   };
-  
-  const dataVideoComment = async()=>{
+
+  const dataVideoComment = async () => {
     const data = await VideoAPI.getOneItem("/listvideobycomment")
-    if(data?.data.length>0){
+    if (data?.data.length > 0) {
       let listretult = [];
-      for(let i=0;i<data.data.length;i++){
+      for (let i = 0; i < data.data.length; i++) {
         const result = await VideoAPI.getOneItem(`/getonevideo?id=${data.data[i]}`)
         listretult.push(result.data)
       }
@@ -156,15 +164,15 @@ export default function Comment() {
       console.log(listretult)
     }
   }
-  useEffect(()=>{
+  useEffect(() => {
     dataVideoComment()
-  },[])
+  }, [])
 
   const commentuser = () => {
     return (
       <Box sx={{ display: 'flex', width: '100%' }}>
         <div className="allinformation" style={{ flexBasis: '1', flex: '2' }}>
-          {rows.map((row, rowIndex) => {
+          {listComment && listComment.map((row, rowIndex) => {
             return (
               <React.Fragment key={rowIndex}>
                 <Box
@@ -178,24 +186,24 @@ export default function Comment() {
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Avatar
                       alt="Remy Sharp"
-                      src={row.avatar}
+                      src={row.users.avatar}
                       sx={{ width: 56, height: 56, marginRight: "1rem" }}
                     />
                     <div className="informationuserandtime">
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <Link to="https://google.com">
                           <Typography color={"text.secondary"}>
-                            {row.nameuser} -
+                            {row.users.email} -
                           </Typography>
                         </Link>
 
                         <div className="content">
                           <Typography color={"text.secondary"}>
-                            - {row.timecomment}
+                            - <DateConvert date={row.datecreated} />
                           </Typography>
                         </div>
                       </Box>
-                      <Typography>{row.contentcomment} </Typography>
+                      <Typography>{row.contents} </Typography>
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <Typography
                           color={"text.secondary"}
@@ -270,17 +278,22 @@ export default function Comment() {
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
+            paddingRight:'30px'
           }}
         >
-          <img
-            className="smallimage"
-            src={rows[0].videocommet}
-            alt=""
-            width={"50%"}
-          />
-          <Typography sx={{ marginLeft: "3%" }}>
-            {rows[0].namevideocomment}
-          </Typography>
+          {currentVideo && (
+            <>
+              <img
+                className="smallimage"
+                src={currentVideo.imageurl}
+                alt=""
+                width={"200px"}
+              />
+              <Typography sx={{maxWidth:'200px'}}>
+                {currentVideo.title}
+              </Typography>
+            </>
+          )}
         </Box>
       </Box>
     );
@@ -409,7 +422,7 @@ export default function Comment() {
             Channel comments
           </Typography>
           <Divider sx={{ marginBottom: "10px" }} light />
-          <Box sx={{ minWidth: 120 ,maxWidth:'50%'}}>
+          <Box sx={{ minWidth: 120, maxWidth: '50%' }}>
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">Video</InputLabel>
               <Select
@@ -419,18 +432,18 @@ export default function Comment() {
                 label="Age"
                 onChange={handleChangeSelectComment}
               >
-                {listVIdeoComment&&listVIdeoComment.map((item,key)=>{
-                  return(
+                {listVIdeoComment && listVIdeoComment.map((item, key) => {
+                  return (
                     <MenuItem key={key} value={item.idvideo}>{item.title}</MenuItem>
                   )
                 }
-                  
+
                 )}
-                
+
               </Select>
             </FormControl>
           </Box>
-          <Divider sx={{ marginBottom: "2px",marginTop:'10px' }} light />
+          <Divider sx={{ marginBottom: "2px", marginTop: '10px' }} light />
           {/* Render commentuser based on replyingToIndex */}
           {commentuser()}
         </Grid>

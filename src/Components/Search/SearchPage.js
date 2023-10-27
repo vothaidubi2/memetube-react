@@ -8,8 +8,15 @@ import CircleIcon from '@mui/icons-material/Circle';
 import { Box } from "@mui/material";
 import { Link, useSearchParams } from "react-router-dom";
 import VideoAPI from "../../utils/VideoAPI";
+import DateConvert from "../../utils/DayConvert";
+import numeral from "numeral";
 
 function SearchPage() {
+  const NumberFormatter = ({ value }) => {
+    const formattedValue = numeral(value).format('0.0a');
+    return <>{formattedValue}</>;
+  };
+
   let [params] = useSearchParams();
   const [videosList, setVideosList] = useState([]);
   useEffect(() => {
@@ -92,8 +99,8 @@ function SearchPage() {
                             alignItems: "center",
                           }}
                         >
-                          {item.viewcount} <CircleIcon sx={{ fontSize: "12px" }} />
-                          {item.datecreated}
+                          {(item.viewcount >= 1000 ? <NumberFormatter value={item.viewcount} /> : item.viewcount)} Views <CircleIcon sx={{ fontSize: '12px' }} />
+                          <DateConvert date={item.datecreated} />
                         </Typography>
                       </CardContent>
                     </div>
