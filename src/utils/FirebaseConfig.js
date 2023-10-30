@@ -79,6 +79,5 @@ console.error("Error deleting Video:", error);
         });
     };
 }
-// export    default firepadRef;
 export { child, refDatabase, push, onValue ,firepadRef};
 export default new FirebaseConfig

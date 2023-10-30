@@ -41,6 +41,7 @@ import MyChannel from './Components/PagesChannel/MyChannel';
 import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
 import Update from './Components/Form/Update';
+import ForgotPass from './Components/Form/ForgotPass';
 import Stream from './Components/Stream/Stream';
 import Stream1 from './Components/Stream/Stream1';
 import { UserContext } from './Components/Cookie/UserContext';
@@ -131,8 +132,8 @@ const router = createBrowserRouter([
 
       {
         path: '/update',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={Sidebar} Page={Update} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      }
+        element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={Update} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+      },
     ]
   },
 ]);

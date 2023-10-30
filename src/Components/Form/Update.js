@@ -1,68 +1,84 @@
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
+import * as React from "react";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import CssBaseline from "@mui/material/CssBaseline";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import { styled } from "@mui/material/styles";
-import ImageAPI from '../../utils/ImageAPI';
-import UsersAPI from '../../utils/UsersAPI';
-import setCookie from '../Cookie/setCookie';
+import ImageAPI from "../../utils/ImageAPI";
+import UsersAPI from "../../utils/UsersAPI";
+import setCookie from "../Cookie/setCookie";
 import { Alert, AlertTitle } from "@mui/material";
 import Snackbar, { SnackbarOrigin } from "@mui/material/Snackbar";
-import { UserContext } from '../Cookie/UserContext';
-
+import { UserContext } from "../Cookie/UserContext";
+import FirebaseConfig from "../../utils/FirebaseConfig";
+import { jwtDecode } from "jwt-decode";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
-export default function SignUp({onClose}) {
-  let dataUser=React.useContext(UserContext)
-
+export default function Update({ onClose,openUpdate }) {
+  let dataUser = React.useContext(UserContext);
   const [selectedImage, setSelectedImage] = React.useState();
-  const [openSignIn, setOpenSignIn] = React.useState(false);
-  const [openSignUp, setOpenSignUp] = React.useState(true);
-
-const sendData=async ()=>{
-
-}
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-
-      let newpass= data.get('New-password')
-      let oldpass= data.get('Old-Password')
-      let renewpass=data.get('re-Newpassword')
-      console.log(handleFormSubmit(newpass,oldpass,renewpass))
-    if(handleFormSubmit(oldpass,newpass,renewpass)===true){
+    let newpass = data.get("New-password");
+    let oldpass = data.get("Old-Password");
+    let renewpass = data.get("re-Newpassword");
+    if (handleFormSubmit(oldpass, newpass, renewpass) === true) {
       let imageData = new FormData();
       imageData.append('files', selectedImage)
       const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
-      const formdata ={
-        email:dataUser.Email,
-        password:newpass,
-        status:1,
-        google:0,
-        datecreated:"",
-        role:1,
-        avatar:imageurl
-      }
-      try {
-        const jsonData = JSON.stringify(formdata);
-        const dataReceive = await UsersAPI.sendUser("/addAccount", jsonData);
-      } catch (error) {
-        console.log('errror')
-      }
-    }
+     
+        try {
+          let id=dataUser.Iduser
+          const dataReceive = await UsersAPI.updateUser( `/updateUser?id=${id}&password=${newpass}&oldPassword=${oldpass}&image=${imageurl}`
+          );
+           if(dataReceive.status===200){
+            console.log('cu',dataUser.Avatar)
+            // await FirebaseConfig.DeleteImage(dataUser.Avatar);
+           }
+           
 
+        } catch (error) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Password is incorrect ",
+          });
+  
+          // await FirebaseConfig.DeleteImage(imageurl);
+        }
+
+        //  const dataReceiveTOken = await UsersAPI.sendUser("/authenticate", jsonData);
+        //  console.log(data)
+        //  if (dataReceive.status === 200) {
+        //    // Xử lý khi phản hồi thành công (status 200)
+        //   //  token = dataReceiveTOken.data;
+        //    setCookie("user", JSON.stringify(token));
+
+        //  } else {
+        //    setState({
+        //      ...state,
+        //      open: true,
+        //      titleError: "Error",
+        //    });
+        //  }
+        // token = dataReceive.data;
+        // setCookie("user", JSON.stringify(token));
+        // console.log(token)
+        // setOpenSignIn(onClose);
+     
+    }
   };
 
   const [state, setState] = React.useState({
@@ -72,7 +88,8 @@ const sendData=async ()=>{
     titleError: "Something is wrong ",
   });
   const { vertical, horizontal, open, titleError } = state;
-  const handleFormSubmit = (oldpass,newpass,renewpass) => {
+  const handleFormSubmit = (oldpass, newpass, renewpass) => {
+    console.log("new pass", newpass);
     let isValid = true; // Mặc định là hợp lệ
 
     // Kiểm tra mật khẩu có hơn 8 kí tự
@@ -92,6 +109,7 @@ const sendData=async ()=>{
       });
       isValid = false;
     }
+
     if (renewpass.length < 8) {
       setState({
         ...state,
@@ -100,7 +118,6 @@ const sendData=async ()=>{
       });
       isValid = false;
     }
-
 
     // Kiểm tra mật khẩu và mật khẩu nhập lại trùng khớp
     if (renewpass !== newpass) {
@@ -117,37 +134,33 @@ const sendData=async ()=>{
   const handleClose = () => {
     setState({ ...state, open: false });
   };
-     const handleFileChange = async (event) => {
-      event.preventDefault();
-      if (event.target.files[0]) {
-        setSelectedImage(event.target.files[0]);
-      }
-    };
-     const VisuallyHiddenInput = styled("input")({
-      clip: "rect(0 0 0 0)",
-      clipPath: "inset(50%)",
-      height: 1,
-      overflow: "hidden",
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      whiteSpace: "nowrap",
-      width: 1,
-    });
+  const handleFileChange = async (event) => {
+    event.preventDefault();
+    if (event.target.files[0]) {
+      setSelectedImage(event.target.files[0]);
+    }
+  };
+  const VisuallyHiddenInput = styled("input")({
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    height: 1,
+    overflow: "hidden",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    whiteSpace: "nowrap",
+    width: 1,
+  });
 
   return (
     <>
-    <Dialog
-    fullWidth="sm"
-    maxWidth="sm"
-    open={openSignUp}
-  >
-    <Box sx={{ width: 500 }}>
+      <Dialog fullWidth="sm" maxWidth="sm" open={openUpdate}>
+        <Box sx={{ width: 500 }}>
           <Snackbar
             anchorOrigin={{ vertical, horizontal }}
             open={open}
             onClose={handleClose}
-            message="I love snacks"
+            message="s"
             key={vertical + horizontal}
             autoHideDuration={3000}
           >
@@ -160,64 +173,65 @@ const sendData=async ()=>{
             </Alert>
           </Snackbar>
         </Box>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-              
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Update Profile
-          </Typography>
-        
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <Box
+            sx={{
+              marginTop: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+              Update Profile
+            </Typography>
 
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-     
-            <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="Old-Password"
-                  label="Old-Password"
-                  type="Old-Password"
-                  id="Old-Password"
-                  autoComplete="Old-password"
-                />
+            <Box
+              component="form"
+              noValidate
+              onSubmit={handleSubmit}
+              sx={{ mt: 3 }}
+            >
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="Old-Password"
+                    label="Old-Password"
+                    type="Old-Password"
+                    id="Old-Password"
+                    autoComplete="Old-password"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="New-password"
+                    label="New-password"
+                    type="New-password"
+                    id="New-password"
+                    autoComplete="New-password"
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="re-Newpassword"
+                    label="Re-enter the new Password"
+                    type="re-Newpassword"
+                    id="re-Newpassword"
+                    autoComplete="re-Newpassword"
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="New-password"
-                  label="New-password"
-                  type="New-password"
-                  id="New-password"
-                  autoComplete="New-password"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="re-Newpassword"
-                  label="Re-enter the new Password"
-                  type="re-Newpassword"
-                  id="re-Newpassword"
-                  autoComplete="re-Newpassword"
-                />
-              </Grid>
-
-            </Grid>
-            <Button
+              <Button
                 component="label"
                 sx={{
                   width: "150px",
@@ -247,7 +261,6 @@ const sendData=async ()=>{
                     onChange={(e) => handleFileChange(e)}
                   />
                 </Box>
-
               </Button>
               {selectedImage && (
                 <img
@@ -260,29 +273,26 @@ const sendData=async ()=>{
                   }}
                 />
               )}
-              
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              onClick={sendData}
-            >
-              Update 
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-              </Grid>
-            </Grid>
-          </Box>
-        </Box>
-    
-      </Container>
-      <DialogActions >
-      <Button onClick={onClose}>Close</Button>
-    </DialogActions>
-      </Dialog>
 
-      </>
+              <Button
+              onClick={onClose}
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Update
+              </Button>
+              <Grid container justifyContent="flex-end">
+                <Grid item></Grid>
+              </Grid>
+            </Box>
+          </Box>
+        </Container>
+        <DialogActions>
+          <Button onClick={onClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
