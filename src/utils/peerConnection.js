@@ -1,4 +1,4 @@
-import firepadRef ,{ child } from "./FirebaseConfig";
+import { child, firepadRef } from "./FirebaseConfig";
 import { store } from "../index";
 import { onChildAdded, push,set, update  } from "firebase/database";
 

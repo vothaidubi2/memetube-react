@@ -13,10 +13,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MailIcon from "@mui/icons-material/Mail";
+import VideoCallIcon from '@mui/icons-material/VideoCall';
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import { Form, Link, useNavigate    } from "react-router-dom";
+import { Form, Link, useNavigate } from "react-router-dom";
 import SignIn from "../Form/SignIn";
 import { Avatar } from "@mui/material";
 import { UserContext } from "../Cookie/UserContext";
@@ -105,7 +106,7 @@ export default function Header() {
         setAvatarUser(null);
 
         setDataUser(null);
-        navigate('/'); 
+        navigate('/');
         return <>{handleMenuClose()}</>;
     };
     const handleMobileMenuClose = () => {
@@ -171,12 +172,12 @@ export default function Header() {
             <MenuItem>
                 <IconButton size="large" aria-label="show 4 new mails" color="inherit">
                     <Badge badgeContent={4} color="error">
-                        <MailIcon />
+                        <VideoCallIcon />
                     </Badge>
                 </IconButton>
                 <p>Messages</p>
             </MenuItem>
-            <MenuItem>
+            {/* <MenuItem>
                 <IconButton
                     size="large"
                     aria-label="show 17 new notifications"
@@ -187,7 +188,7 @@ export default function Header() {
                     </Badge>
                 </IconButton>
                 <p>Notifications</p>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={handleOpenSignIn}>
                 <IconButton
                     size="large"
@@ -283,11 +284,9 @@ export default function Header() {
                                 aria-label="show 4 new mails"
                                 color="inherit"
                             >
-                                <Badge badgeContent={4} color="error">
-                                    <MailIcon />
-                                </Badge>
+                                <a href={'/stream'} style={{color:'white', fontSize:'35px'}}><VideoCallIcon /></a>
                             </IconButton>
-                            <IconButton
+                            {/* <IconButton
                                 size="large"
                                 aria-label="show 17 new notifications"
                                 color="inherit"
@@ -295,7 +294,7 @@ export default function Header() {
                                 <Badge badgeContent={17} color="error">
                                     <NotificationsIcon />
                                 </Badge>
-                            </IconButton>
+                            </IconButton> */}
                             <IconButton
                                 size="large"
                                 edge="end"

@@ -38,7 +38,7 @@ function Sidebar(props) {
             name: "Overview page",
             icon: ViewQuiltIcon
         }, {
-            path: "/studio/content",
+            path: `/studio/content`,
             name: "Content",
             icon: FileCopyIcon
         }, {
@@ -62,7 +62,8 @@ function Sidebar(props) {
                     <div className="title">{currentChannel.channelname}</div>
                     <div className="namechanel">{currentChannel.users.email}</div>
                 </div>
-                <List  >
+                {dataUser &&(
+                    <List  >
                     {menuItem.map((item, index) => (
                         <Link to={item.path} className="titlenavbar">
                             <ListItem disablePadding>
@@ -84,6 +85,7 @@ function Sidebar(props) {
                     }
 
                 </List>
+                )}
 
             </div>
         ))

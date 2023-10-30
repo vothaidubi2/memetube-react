@@ -303,6 +303,7 @@ export default function ContentBar({ props }) {
     };
     //comments
     const [inputComment, setInputComment] = useState();
+    const [inputReplyComment, setInputReplyComment] = useState();
 
 
     const handleEnterCmt = async (event) => {
@@ -312,8 +313,19 @@ export default function ContentBar({ props }) {
             setInputComment('');
         }
     };
+    const handleEnterReplyCmt = async (event,idbasecmt) => {
+        if (event.key === 'Enter') {
+            await CommentAPI.postComment(`/postreplycomment?idvideo=${props.idvideo}&iduser=${userData.Iduser}&contents=${inputReplyComment}&idbasecmt=${idbasecmt.idcomment}`);
+            fetchReplyCmt(idbasecmt.idcomment);
+            setInputReplyComment('');
+        }
+    };
     const handleComment = (event) => {
         setInputComment(event.target.value);
+    }
+
+    const handleReplyComment = (event) => {
+        setInputReplyComment(event.target.value);
     }
 
     const [anchorOrder, setAnchorOrder] = React.useState(null);
@@ -379,46 +391,9 @@ export default function ContentBar({ props }) {
                                         <div className="informationuserandtime" style={{ width: '100%', overflow: 'unset' }}>
                                             <Collapse in={index === rowIndex} sx={{ width: '100%', overflow: 'unset' }}>
                                                 <Alert icon={false} sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                    {/* <Box
-                                                        sx={{
-                                                            display: "flex",
-                                                            alignItems: "center",
-                                                            width:'100%'
-                                                        }}
-                                                    >
-                                                        <Button onClick={handleAlertClose(rowIndex)}>
-                                                            Sumbit
-                                                            <DoneIcon />
-                                                        </Button>
-                                                        <Button onClick={handleAlertClose(rowIndex)}>
-                                                            Cancel
-                                                            <CloseIcon />
-                                                        </Button>
-                                                    </Box> */}
-
-                                                    {/* <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
-                                                        <Link to="https://google.com">
-                                                            <Avatar
-                                                                alt="Remy Sharp"
-                                                                src={row.avatar}
-                                                                sx={{
-                                                                    width: 40,
-                                                                    height: 40,
-                                                                    marginRight: "1rem",
-                                                                }}
-                                                            />
-                                                        </Link>
-                                                        <TextField
-                                                            sx={{marginLeft: "1rem",flexBasis:'500px',flexGrow:'2'}}
-                                                            id="outlined-multiline-static"
-                                                            label="Title (required)"
-                                                            multiline
-                                                            rows={3}
-                                                        />
-                                                    </Box> */}
                                                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: "15px" }}>
                                                         <Avatar sx={{ color: 'action.active', my: 0.5 }} src="https://img.freepik.com/premium-vector/young-smiling-man-avatar-man-with-brown-beard-mustache-hair-wearing-yellow-sweater-sweatshirt-3d-vector-people-character-illustration-cartoon-minimal-style_365941-860.jpg" />
-                                                        <TextField sx={{ width: '100%' }} id="input-with-sx" label="Your comment" variant="standard" />
+                                                        <TextField value={inputReplyComment} onKeyPress={(e) => handleEnterReplyCmt(e,row)} onChange={(event) => handleReplyComment(event)} sx={{ width: '100%' }} id="input-with-sx" label="Your comment" variant="standard" />
                                                     </Box>
                                                 </Alert>
                                             </Collapse>

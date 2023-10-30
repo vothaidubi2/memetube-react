@@ -31,9 +31,9 @@ import {
 } from "@mui/material";
 import UploadFile from "./UploadFile";
 import VideoAPI from "../../utils/VideoAPI";
-import FirebaseConfig from "../../utils/FirebaseConfig";
 import Moment from 'react-moment';
 import { UserContext } from "../Cookie/UserContext";
+import FirebaseConfig from "../../utils/FirebaseConfig";
 
 
 function descendingComparator(a, b, orderBy) {
@@ -158,67 +158,68 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-function EnhancedTableToolbar(props) {
-  const { numSelected } = props;
 
-  return (
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(
-              theme.palette.primary.main,
-              theme.palette.action.activatedOpacity
-            ),
-        }),
-      }}
-    >
-      {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <>
-          <Typography
-            sx={{ flex: "1 1 100%" }}
-            variant="h6"
-            id="tableTitle"
-            component="div"
-          >
-            Nutrition
-          </Typography>
-        </>
-      )}
-
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton onClick={() => props.handleDeleteVideo(props.listVideo)}>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-    </Toolbar>
-  );
-}
-
-EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-};
 
 export default function Content() {
+  function EnhancedTableToolbar(props) {
+    const { numSelected } = props;
+  
+    return (
+      <Toolbar
+        sx={{
+          pl: { sm: 2 },
+          pr: { xs: 1, sm: 1 },
+          ...(numSelected > 0 && {
+            bgcolor: (theme) =>
+              alpha(
+                theme.palette.primary.main,
+                theme.palette.action.activatedOpacity
+              ),
+          }),
+        }}
+      >
+        {numSelected > 0 ? (
+          <Typography
+            sx={{ flex: "1 1 100%" }}
+            color="inherit"
+            variant="subtitle1"
+            component="div"
+          >
+            {numSelected} selected
+          </Typography>
+        ) : (
+          <>
+            <Typography
+              sx={{ flex: "1 1 100%" }}
+              variant="h6"
+              id="tableTitle"
+              component="div"
+            >
+              Nutrition
+            </Typography>
+          </>
+        )}
+  
+        {numSelected > 0 ? (
+          <Tooltip title="Delete">
+            <IconButton onClick={() => handleDeleteVideo(props.listVideo)}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Tooltip title="Filter list">
+            <IconButton>
+              <FilterListIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Toolbar>
+    );
+  }
+  
+  EnhancedTableToolbar.propTypes = {
+    numSelected: PropTypes.number.isRequired,
+  };
   const userData = useContext(UserContext)
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("title");
@@ -244,6 +245,7 @@ export default function Content() {
       FirebaseConfig.DeleteVideo(item[i].imageurl)
       FirebaseConfig.DeleteImage(item[i].videourl)
     }
+    setRows(rows.filter(row => row.idvideo !=item[0].idvideo))
     fetchDataVideo()
   }
 
@@ -251,6 +253,7 @@ export default function Content() {
     if (!open) {
       fetchDataVideo()
     }
+    fetchDataVideo()
   }, [open])
 
   const handleRequestSort = (event, property) => {
@@ -347,7 +350,7 @@ export default function Content() {
         </Typography>
       </Grid>
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
-        <EnhancedTableToolbar numSelected={selected.length} listVideo={selected} handleDeleteVideo={handleDeleteVideo} />
+        <EnhancedTableToolbar numSelected={selected.length} listVideo={selected} handleDeleteVideo={()=>handleDeleteVideo()} />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
