@@ -1,0 +1,40 @@
+
+
+
+
+
+
+.muted {
+  color: #fff;
+
+  position: absolute;
+  top: 10px;
+  background: #353b48;
+  border-radius: 50%;
+  height: 22px;
+  width: 22px!important;
+}
+
+.hide {
+  display: none;
+}
+
+
+
+.name {
+  color: white;
+  bottom: 10px;
+  position: absolute;
+  left: 20px;
+}
+
+@media (max-width: 800px) {
+  .participant{
+    min-height: 0px;
+  }
+  .avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 50px;
+  }
+}

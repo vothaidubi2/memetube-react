@@ -1,5 +1,28 @@
 import './App.css';
-
+import firepadRef, {
+  child,
+  db,
+  onValue,
+  push,
+  refDatabase,
+} from "./utils/FirebaseConfig";
+import "./App.css";
+import { useContext, useEffect, useState } from "react";
+import { userRole } from "./utils/FirebaseConfig";
+import {
+  setMainStream,
+  addParticipant,
+  setUser,
+  removeParticipant,
+  updateParticipant,
+} from "./Components/Store/actioncreator";
+import { connect } from "react-redux";
+import {
+  onChildAdded,
+  onChildChanged,
+  onChildRemoved,
+  onDisconnect,
+} from "firebase/database";
 import ResponsiveDrawer from './Components/ResponsiveDrawer/ResponsiveDrawer';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -16,21 +39,32 @@ import DataDetails from './Components/PagesChannel/DataDetails';
 import MyChannel from './Components/PagesChannel/MyChannel';
 import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
+import Update from './Components/Form/Update';
 import Stream from './Components/Stream/Stream';
+import Stream1 from './Components/Stream/Stream1';
 import { UserContext } from './Components/Cookie/UserContext';
 import jwt_decode from "jwt-decode";
 import getCookie from './Components/Cookie/getCookie';
-import { useState ,useEffect} from 'react';
-// import Homepage from './Components/pageChannel/Homepage';
+import NotFound from './Components/ResponsiveDrawer/NotFound';
+
 const theme = createTheme({
   palette: {
     mode: 'dark',
   },
 });
-
+function isUserLoggedIn() {
+  const token = getCookie('user');
+  return !!token; // Kiểm tra xem có token hay không
+}
 const router = createBrowserRouter([
+{  path:'/*',
+  element:<NotFound />},
   {
+
+   
+    
     element: <Layout/>,
+
     children: [
       {
         path: '/',
@@ -46,23 +80,23 @@ const router = createBrowserRouter([
       }
       ,{
         path: '/studio/home',
-        element: <ResponsiveDrawer Showsidebar={UserChannel} Page={Homepage} />
+        element: isUserLoggedIn() ?  <ResponsiveDrawer Showsidebar={UserChannel} Page={Homepage} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       },{
         path: '/studio/content',
-        element: <ResponsiveDrawer Showsidebar={UserChannel} Page={Content} />
+        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={Content} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       },{
         path: '/studio/data',
-        element: <ResponsiveDrawer Showsidebar={UserChannel} Page={DataDetails} />
+        element: isUserLoggedIn() ?  <ResponsiveDrawer Showsidebar={UserChannel} Page={DataDetails} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       },
       {
         path: '/studio/comment',
-        element: <ResponsiveDrawer Showsidebar={UserChannel} Page={Comment} />
+        element: isUserLoggedIn() ?  <ResponsiveDrawer Showsidebar={UserChannel} Page={Comment} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
       
       {
         path: '/channel/home',
-        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={MyChannel} />
+        element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={MyChannel} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
       
@@ -80,14 +114,104 @@ const router = createBrowserRouter([
       
       {
         path: '/stream',
-        element: <ResponsiveDrawer Page={Stream} />
+        element:isUserLoggedIn() ?   <ResponsiveDrawer  Page={Stream} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+      }
+      ,
+      
+      {
+        path: '/teststream',
+        element: <ResponsiveDrawer Page={Stream1} />
+      }
+      ,
+      
+      {
+        path: '/update',
+        element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={Update} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
     ]
   },
 ]);
 
 
-function App() {
+function App(props) {
+  let dataUser = useContext(UserContext);
+  let EmailUser=null
+  if(dataUser!=null){
+    EmailUser=dataUser.Email
+  }
+  const [showChat, setShowChat] = useState(false);
+  const getUserStream = async () => {
+    const localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    return localStream;
+  };
+  const connectedRef = refDatabase(db, ".info/connected");
+  const participantRef = child(firepadRef, "participants");
+  useEffect(() => {
+    
+    const getEffect = async () => {
+      const stream = await getUserStream();
+      stream.getVideoTracks()[0].enabled = false;
+      props.setMainStream(stream);
+
+      onValue(refDatabase(db, ".info/connected"), (snap) => {
+        if (snap.val()) {
+          const defaultPreference = {
+            audio: false,
+            video: false,
+            screen: false,
+            master: userRole,
+          };
+          console.log("day la user: ", EmailUser);
+          const userStatusRef = push(participantRef, {
+            EmailUser,
+            preferences: defaultPreference,
+          });
+          props.setUser({
+            [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
+          });
+          console.log("props:",props);
+          onDisconnect(userStatusRef).remove();
+        }
+      });
+    };
+    getEffect();
+  }, []);
+
+  const isUserSet = !!props.user;
+  const isStreamSet = !!props.stream;
+
+  useEffect(() => {
+    if (isStreamSet && isUserSet) {
+      onChildAdded(participantRef, (snap) => {
+        const preferenceUpdateEvent = child(
+          child(participantRef, snap.key),
+          "preferences"
+        );
+        onChildChanged(preferenceUpdateEvent, (preferenceSnap) => {
+          console.log("cai key:",preferenceSnap.key)
+          props.updateParticipant({
+            [snap.key]: {
+              [preferenceSnap.key]: preferenceSnap.val(),
+            },
+          });
+        });
+        const { EmailUser: name, preferences = {} } = snap.val();
+        props.addParticipant({
+          [snap.key]: {
+            name,
+            ...preferences,
+          },
+        });
+      });
+      onChildRemoved(participantRef, (snap) => {
+        props.removeParticipant(snap.key);
+      });
+    }
+  }, [isStreamSet, isUserSet]);
   const [userData, setUserData] = useState(null);
   useEffect(() => {
     const tokenCookie = getCookie('user');
@@ -106,5 +230,19 @@ function App() {
     </UserContext.Provider>
   );
 }
-
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    stream: state.mainStream,
+    user: state.currentUser,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setMainStream: (stream) => dispatch(setMainStream(stream)),
+    addParticipant: (user) => dispatch(addParticipant(user)),
+    setUser: (user) => dispatch(setUser(user)),
+    removeParticipant: (userId) => dispatch(removeParticipant(userId)),
+    updateParticipant: (user) => dispatch(updateParticipant(user)),
+  };
+};
+export default connect(mapStateToProps, mapDispatchToProps)(App);
