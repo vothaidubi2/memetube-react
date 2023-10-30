@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -32,57 +32,9 @@ import {
 import UploadFile from "./UploadFile";
 import VideoAPI from "../../utils/VideoAPI";
 import FirebaseConfig from "../../utils/FirebaseConfig";
-import VideoFirebaseConfig from "../../utils/VideoFirebaseConfig";
 import Moment from 'react-moment';
-// function createData(
-//   linkvideo,
-//   name,
-//   status,
-//   datecreate,
-//   views,
-//   comment,
-//   percentlike
-// ) {
-//   return {
-//     linkvideo,
-//     name,
-//     status,
-//     datecreate,
-//     views,
-//     comment,
-//     percentlike,
-//   };
-// }
+import { UserContext } from "../Cookie/UserContext";
 
-// const rows = [
-//   createData(
-//     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-//     "video1",
-//     true,
-//     "6/6/2023",
-//     15000,
-//     325,
-//     6
-//   ),
-//   createData(
-//     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-//     "video2",
-//     true,
-//     "6/6/2023",
-//     9700,
-//     419,
-//     7
-//   ),
-//   createData(
-//     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-//     "video3",
-//     false,
-//     "6/6/2023",
-//     100000,
-//     9,
-//     2
-//   ),
-// ];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -142,18 +94,6 @@ const headCells = [
     disablePadding: false,
     label: "Views",
   },
-  // {
-  //   id: "comment",
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: "Comment",
-  // },
-  // {
-  //   id: "percentlike",
-  //   numeric: true,
-  //   disablePadding: false,
-  //   label: "Like(%)",
-  // },
 ];
 
 function EnhancedTableHead(props) {
@@ -245,14 +185,16 @@ function EnhancedTableToolbar(props) {
           {numSelected} selected
         </Typography>
       ) : (
-        <Typography
-          sx={{ flex: "1 1 100%" }}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
-          Nutrition
-        </Typography>
+        <>
+          <Typography
+            sx={{ flex: "1 1 100%" }}
+            variant="h6"
+            id="tableTitle"
+            component="div"
+          >
+            Nutrition
+          </Typography>
+        </>
       )}
 
       {numSelected > 0 ? (
@@ -277,6 +219,7 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function Content() {
+  const userData = useContext(UserContext)
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("title");
   const [selected, setSelected] = React.useState([]);
@@ -284,20 +227,20 @@ export default function Content() {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-
+  const [open, setOpen] = React.useState(false);
   //fetchdata
   const [rows, setRows] = useState([])
   const [totalVideo, setTotalVideo] = useState(0)
   const fetchDataVideo = async () => {
-    const data = await VideoAPI.getallByUser(`/videobyiduser?iduser=${1}`)
+    const data = await VideoAPI.getallByUser(`/videobyiduser?iduser=${userData.Iduser}`)
     setTotalVideo(data.total)
     setRows(data.data)
     console.log("vao", data.total)
   }
-  const handleDeleteVideo = async(item)=>{
-    for(let i = 0;i<item.length;i++){
+  const handleDeleteVideo = async (item) => {
+    for (let i = 0; i < item.length; i++) {
       const data = await VideoAPI.deleteItem(`/deletevideo?id=${item[i].idvideo}`)
-      console.log("xoa",data)
+      console.log("xoa", data)
       FirebaseConfig.DeleteVideo(item[i].imageurl)
       FirebaseConfig.DeleteImage(item[i].videourl)
     }
@@ -305,8 +248,10 @@ export default function Content() {
   }
 
   useEffect(() => {
-    fetchDataVideo()
-  }, [])
+    if (!open) {
+      fetchDataVideo()
+    }
+  }, [open])
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -372,9 +317,11 @@ export default function Content() {
       ),
     [totalVideo, order, orderBy, page, rowsPerPage]
   );
-  const [open, setOpen] = React.useState(false);
 
-  const handleClickOpen = () => {
+  const [currentVideo, setCurrentVideo] = React.useState(null);
+
+  const handleClickOpen = (video) => {
+    setCurrentVideo(video)
     setOpen(true);
   };
 
@@ -392,6 +339,7 @@ export default function Content() {
             fontWeight: "bold",
             marginBottom: "10px",
             margin: "10px 25px 0 25px",
+            cursor:'pointer'
           }}
           gutterBottom
         >
@@ -399,7 +347,7 @@ export default function Content() {
         </Typography>
       </Grid>
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
-        <EnhancedTableToolbar numSelected={selected.length} listVideo={selected} handleDeleteVideo={handleDeleteVideo}/>
+        <EnhancedTableToolbar numSelected={selected.length} listVideo={selected} handleDeleteVideo={handleDeleteVideo} />
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -452,7 +400,7 @@ export default function Content() {
                         padding="none"
                       >
                         <img
-                          onClick={handleClickOpen}
+                          onClick={() => handleClickOpen(row)}
                           className="smallimage"
                           src={row.imageurl}
                           alt=""
@@ -473,7 +421,7 @@ export default function Content() {
                           <DialogContent
                             sx={{ backgroundColor: "rgb(40,40,40)" }}
                           >
-                            <UploadFile active={1} />
+                            <UploadFile active={1} video={currentVideo} />
                           </DialogContent>
                           <DialogActions
                             sx={{ backgroundColor: "rgb(40,40,40)" }}

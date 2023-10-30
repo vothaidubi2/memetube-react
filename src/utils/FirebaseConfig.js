@@ -1,4 +1,3 @@
-
 import { initializeApp } from "firebase/app";
 import { push, onValue, getDatabase, child,ref as refDatabase} from "firebase/database";
 import { getAnalytics } from "firebase/analytics";
@@ -77,7 +76,7 @@ class FirebaseConfig{
         deleteObject(desertRef).then(() => {
             console.log("Video deleted successfully");
         }).catch((error) => {
-            console.error("Error deleting Video:", error);
+console.error("Error deleting Video:", error);
         });
     };
 }
