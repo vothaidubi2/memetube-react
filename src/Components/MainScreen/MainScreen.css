@@ -1,0 +1,13 @@
+.main-screen{
+    width: 125vh;
+    position: relative;
+    display: flex;
+}
+
+.wrapper{
+    width: 100%;
+}
+
+.footer{
+    height: 10vh;
+}

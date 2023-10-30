@@ -16,7 +16,7 @@ import MailIcon from "@mui/icons-material/Mail";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import { Form, Link, useNavigate } from "react-router-dom";
+import { Form, Link, useNavigate    } from "react-router-dom";
 import SignIn from "../Form/SignIn";
 import { Avatar } from "@mui/material";
 import { UserContext } from "../Cookie/UserContext";
@@ -63,8 +63,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 let boolean = false;
 export default function Header() {
+    const navigate = useNavigate();
     let tempdataUser = useContext(UserContext);
-    console.log(getCookie("user"));
     const [AvatarUser, setAvatarUser] = useState(null);
     const [dataUser, setDataUser] = useState(null);
     useEffect(() => {
@@ -103,7 +103,9 @@ export default function Header() {
     const handleLogout = () => {
         removeCookie("user");
         setAvatarUser(null);
+
         setDataUser(null);
+        navigate('/'); 
         return <>{handleMenuClose()}</>;
     };
     const handleMobileMenuClose = () => {
