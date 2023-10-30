@@ -302,10 +302,10 @@ export default function Header() {
                                 onClick={handleProfileMenuOpen}
                                 color="inherit"
                             >
-                                {AvatarUser == undefined ? (
-                                    <AccountCircle />
-                                ) : (
+                                {AvatarUser ? (
                                     <Avatar alt="Remy Sharp" src={AvatarUser} />
+                                ) : (
+                                    <AccountCircle />
                                 )}
                             </IconButton>
                         </Box>

@@ -7,5 +7,8 @@ class CommentAPI{
     postComment = async (url) => {
         return await axios.post(process.env.REACT_APP_BASE_DOMAIN + url)
     }
+    deleteComment = async (url) => {
+        return await axios.delete(process.env.REACT_APP_BASE_DOMAIN + url)
+    }
 }
 export default new CommentAPI
