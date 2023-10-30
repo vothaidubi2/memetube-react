@@ -142,10 +142,12 @@ export default function Comment() {
     const currentVideo = await VideoAPI.getOneItem(`/getonevideo?id=${current.video.idvideo}`)
     setCurrentVideo(currentVideo.data)
     setListComment(listComment.data)
-    const data = await RatingAPI.countRating(`/getallreplycmt?idvideo=${current.video.idvideo}&idbasecmt=${current.idbasecmt}`);
-    if (data.status == 200) {
-      setListReplyCmt(data.data)
-      console.log("replycmt", data.data)
+    if(current.idbasecmt!=null){
+      const data = await RatingAPI.countRating(`/getallreplycmt?idvideo=${current.video.idvideo}&idbasecmt=${current.idbasecmt}`);
+      if (data.status == 200) {
+        setListReplyCmt(data.data)
+        console.log("replycmt", data.data)
+      }
     }
   }
 

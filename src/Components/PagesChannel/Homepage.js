@@ -21,6 +21,8 @@ import WalletAPI from "../../utils/WalletAPI";
 import { UserContext } from "../Cookie/UserContext";
 import axios from "axios";
 import { DialogContentText, TextField } from "@mui/material";
+import ChannelAPI from "../../utils/ChannelAPI";
+import SubscribeAPI from "../../utils/SubscribeAPI";
 
 const NumberFormatter = ({ value }) => {
   const formattedValue = numeral(value).format('0,0');
@@ -29,25 +31,59 @@ const NumberFormatter = ({ value }) => {
 
 export default function OutlinedCard() {
   const userData = useContext(UserContext)
+  const [currentBalance, setCurrentBalance] = useState()
+  const [currentChannel, setCurrentChannel] = useState()
+  const [totalSub, setTotalSub] = useState()
+  const [totalView, setTotalView] = useState()
+  const [top1Video, setTop1Video] = useState()
   const updateBalance = async (amount) => {
     const data = await axios.post(`${process.env.REACT_APP_BASE_DOMAIN}/createpayment?amount=${amount}&iduser=${userData.Iduser}`)
     window.location.href = data.data;
   }
+
+  const getCurrentChannel = async () => {
+    const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${userData.Iduser}`)
+    const total = await SubscribeAPI.getAllItem(`/getallsubscribe?idchannel=${channel.idchannel}`)
+    const sumView = await ChannelAPI.getOneItem(`/sumviewvideo`)
+    const top1Video = await ChannelAPI.getOneItem(`/gettop1video`)
+    setCurrentChannel(channel)
+    setTotalSub(total.data.length)
+    setTotalView(sumView)
+    setTop1Video(top1Video.viewcount)
+  }
+
+  const getbalance = async () => {
+    try {
+      const data = await axios.get(`${process.env.REACT_APP_BASE_DOMAIN}/findwalletbyiduser?iduser=${userData.Iduser}`)
+      if (data.status == 200) {
+        setCurrentBalance(data.data.balance);
+      } else {
+        setCurrentBalance(0);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   useEffect(() => {
     if (userData) {
-      console.log("vao day", userData.Iduser)
+      getbalance()
+      getCurrentChannel()
     }
   }, [userData])
 
   function FormDialog() {
-    const [open, setOpen] = React.useState(false);
+    const [openAmount, setOpenAmount] = React.useState(false);
     const [amount, setAmount] = useState();
     const handleClickOpen = () => {
-      setOpen(true);
+      setOpenAmount(true);
+    };
+    const handleClose = () => {
+      setOpenAmount(false);
     };
 
     const handleUpdateBalance = () => {
-      if(amount>0){
+      if (amount > 0) {
         updateBalance(amount)
       }
       // setOpen(false);
@@ -56,7 +92,7 @@ export default function OutlinedCard() {
     return (
       <div>
         <ToggleButton onClick={() => handleClickOpen()}>Deposit</ToggleButton>
-        <Dialog open={open} onClose={handleClose}>
+        <Dialog open={openAmount} onClose={handleClose}>
           <DialogTitle>Amount</DialogTitle>
           <DialogContent>
             <DialogContentText>
@@ -114,7 +150,7 @@ export default function OutlinedCard() {
               component="div"
               sx={{ marginBottom: "45px" }}
             >
-              1B
+              {totalSub}
             </Typography>
             <Divider sx={{ marginBottom: "10px" }} light />
             <Typography
@@ -123,37 +159,26 @@ export default function OutlinedCard() {
             >
               Summary
             </Typography>
-            <Typography
+            {/* <Typography
               sx={{ fontSize: 13, marginBottom: "5px" }}
               color="text.secondary"
               gutterBottom
             >
               Last 28 days
-            </Typography>
+            </Typography> */}
             <Grid container alignItems="center">
               <Grid item xs>
                 <Typography sx={{ fontSize: 13, marginBottom: "10px" }}>
-                  number of views
+                  Number of views
                 </Typography>
               </Grid>
               <Grid item>
                 <Typography sx={{ fontSize: 13, marginBottom: "10px" }}>
-                  720.000 -
+                  {totalView} -
                 </Typography>
               </Grid>
             </Grid>
-            <Grid container alignItems="center">
-              <Grid item xs>
-                <Typography sx={{ fontSize: 13, marginBottom: "25px" }}>
-                  Watching time (hours)
-                </Typography>
-              </Grid>
-              <Grid item>
-                <Typography sx={{ fontSize: 13, marginBottom: "25px" }}>
-                  720 -
-                </Typography>
-              </Grid>
-            </Grid>
+           
             <Divider sx={{ marginBottom: "10px" }} light />
 
             <Typography variant="body2">
@@ -161,14 +186,14 @@ export default function OutlinedCard() {
                 sx={{ fontSize: 17, fontWeight: "bold", marginBottom: "5px" }}
                 gutterBottom
               >
-                Top videos
+                Top view of videos
               </Typography>
               <Typography
                 sx={{ fontSize: 13, marginBottom: "5px" }}
                 color="text.secondary"
                 gutterBottom
               >
-                Last 48 hours - 75800 views
+                All time - {top1Video} views
               </Typography>
             </Typography>
           </CardContent>
@@ -193,7 +218,7 @@ export default function OutlinedCard() {
               component="div"
               sx={{ marginBottom: "45px" }}
             >
-              <NumberFormatter value={5000000} />
+              <NumberFormatter value={currentBalance} />
             </Typography>
             <Divider sx={{ marginBottom: "10px" }} light />
           </CardContent>

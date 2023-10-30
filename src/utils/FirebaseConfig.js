@@ -35,12 +35,11 @@ if(currentURL.pathname.startsWith('/stream')){
   firepadRef = child(firepadRef,roomId);
 } else {
   firepadRef = push(firepadRef);
-  window.history.replaceState(null, "Meet", "?id=" + firepadRef.key);
+  window.history.replaceState(null, "Meet", `?id=${firepadRef.key}`);
   userRole = true; // Đặt vai trò là admin
   setCookie('timeLiveStream',datetime)
 }
 }
-
 
 class FirebaseConfig{
     DeleteImage = (imgUrl) => {
@@ -81,4 +80,4 @@ console.error("Error deleting Video:", error);
     };
 }
 export { child, refDatabase, push, onValue ,firepadRef};
-export  default new  FirebaseConfig
+export default new FirebaseConfig

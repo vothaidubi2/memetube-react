@@ -1,10 +1,11 @@
 import './App.css';
-import  {firepadRef,
+import {
   child,
   db,
   onValue,
   push,
   refDatabase,
+  firepadRef
 } from "./utils/FirebaseConfig";
 import "./App.css";
 import { useContext, useEffect, useState } from "react";
@@ -46,6 +47,7 @@ import { UserContext } from './Components/Cookie/UserContext';
 import jwt_decode from "jwt-decode";
 import getCookie from './Components/Cookie/getCookie';
 import NotFound from './Components/ResponsiveDrawer/NotFound';
+import ThankYou from './Components/ResponsiveDrawer/ThankYou';
 
 const theme = createTheme({
   palette: {
@@ -57,13 +59,16 @@ function isUserLoggedIn() {
   return !!token; // Kiểm tra xem có token hay không
 }
 const router = createBrowserRouter([
-{  path:'/*',
-  element:<NotFound />},
   {
-
-   
-    
-    element: <Layout/>,
+    path: '/*',
+    element: <NotFound />
+  },
+  {
+    path: '/success-transaction',
+    element: <ThankYou />
+  },
+  {
+    element: <Layout />,
 
     children: [
       {
@@ -78,56 +83,56 @@ const router = createBrowserRouter([
         path: '/watch',
         element: <ResponsiveDrawer Page={VideoDetail} />
       }
-      ,{
+      , {
         path: '/studio/home',
-        element: isUserLoggedIn() ?  <ResponsiveDrawer Showsidebar={UserChannel} Page={Homepage} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      },{
+        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={Homepage} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+      }, {
         path: '/studio/content',
         element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={Content} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      },{
+      }, {
         path: '/studio/data',
-        element: isUserLoggedIn() ?  <ResponsiveDrawer Showsidebar={UserChannel} Page={DataDetails} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={DataDetails} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       },
       {
         path: '/studio/comment',
-        element: isUserLoggedIn() ?  <ResponsiveDrawer Showsidebar={UserChannel} Page={Comment} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={Comment} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
-      
+
       {
         path: '/channel/home',
-        element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={MyChannel} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={Sidebar} Page={MyChannel} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
-      
+
       {
         path: '/signin',
         element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignIn} />
       }
       ,
-      
+
       {
         path: '/signup',
         element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignUp} />
       }
       ,
-      
+
       {
         path: '/stream',
-        element:isUserLoggedIn() ?   <ResponsiveDrawer  Page={Stream} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: isUserLoggedIn() ? <ResponsiveDrawer Page={Stream} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
-      
+
       {
         path: '/teststream',
         element: <ResponsiveDrawer Page={Stream1} />
       }
       ,
-      
+
       {
         path: '/update',
         element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={Update} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      }    
+      }
     ]
   },
 ]);
@@ -135,9 +140,9 @@ const router = createBrowserRouter([
 
 function App(props) {
   let dataUser = useContext(UserContext);
-  let EmailUser=null
-  if(dataUser!=null){
-    EmailUser=dataUser.Email
+  let EmailUser = null
+  if (dataUser != null) {
+    EmailUser = dataUser.Email
   }
   const [showChat, setShowChat] = useState(false);
   const getUserStream = async () => {
@@ -151,7 +156,7 @@ function App(props) {
   const connectedRef = refDatabase(db, ".info/connected");
   const participantRef = child(firepadRef, "participants");
   useEffect(() => {
-    
+
     const getEffect = async () => {
       const stream = await getUserStream();
       stream.getVideoTracks()[0].enabled = false;
@@ -173,7 +178,7 @@ function App(props) {
           props.setUser({
             [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
           });
-          console.log("props:",props);
+          console.log("props:", props);
           onDisconnect(userStatusRef).remove();
         }
       });
@@ -192,7 +197,7 @@ function App(props) {
           "preferences"
         );
         onChildChanged(preferenceUpdateEvent, (preferenceSnap) => {
-          console.log("cai key:",preferenceSnap.key)
+          console.log("cai key:", preferenceSnap.key)
           props.updateParticipant({
             [snap.key]: {
               [preferenceSnap.key]: preferenceSnap.val(),
@@ -219,14 +224,14 @@ function App(props) {
       const decodedToken = jwt_decode(tokenCookie);
       setUserData(decodedToken);
     }
-  }, []); 
+  }, []);
 
   return (
     <UserContext.Provider value={userData}>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <RouterProvider router={router}/>
-    </ThemeProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </UserContext.Provider>
   );
 }
