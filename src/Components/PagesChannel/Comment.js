@@ -26,73 +26,32 @@ import { Link } from "react-router-dom";
 import VideoAPI from "../../utils/VideoAPI";
 import CommentAPI from "../../utils/CommentAPI";
 import DateConvert from "../../utils/DayConvert";
-function createdatauser(
-  idcomment,
-  nameuser,
-  timecomment,
-  contentcomment,
-  videocommet,
-  namevideocomment,
-  avatar
-) {
-  return {
-    idcomment,
-    nameuser,
-    timecomment,
-    contentcomment,
-    videocommet,
-    namevideocomment,
-    avatar,
-  };
-}
+import RatingAPI from "../../utils/RatingAPI";
+import DeleteIcon from '@mui/icons-material/Delete';
 
-const rows = [
-  createdatauser(
-    1,
-    "le xuan binh",
-    "10/10/2023",
-    "hahaha",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-    "video1",
-    "https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-  ),
-  createdatauser(
-    2,
-    "le xuan binh",
-    "10/10/2023",
-    "hihihi",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-    "video2",
-    "https://img.uhdpaper.com/wallpaper/anime-girl-reading-with-cat-147@0@h-thumb.jpg"
-  ),
-  createdatauser(
-    3,
-    "le xuan binh",
-    "10/10/2023",
-    "hihihi",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWd96a9UE3aFBK97Vts75h_57qGKuUXK7MNWjloWH3-uQdwJfI0fKOVZPb-w9W6NKS-Xg&usqp=CAU",
-    "video3",
-    "https://img.uhdpaper.com/wallpaper/cute-anime-girl-blonde-750@0@i-thumb.jpg"
-  ),
-];
 export default function Comment() {
+  const [videoComment, setIdvideoComment] = React.useState();
+  const [listVIdeoComment, setListVideoComment] = useState([])
+  const [listComment, setListComment] = useState([])
+  const [currentVideo, setCurrentVideo] = useState({})
+  const [listReplyCmt, setListReplyCmt] = useState([]);
   const [replyingToIndex, setReplyingToIndex] = useState(
-    Array(rows.length).fill(false)
+    Array(listComment.length).fill(false)
   );
   const [openAlertIndex, setOpenAlertIndex] = useState(
-    Array(rows.length).fill(false)
+    Array(listComment.length).fill(false)
   );
   const [openWatchReplyComment, setopenWatchReplyComment] = useState(
-    Array(rows.length).fill(false)
+    Array(listComment.length).fill(false)
   );
   const [isThumbUpClicked, setThumbUpClicked] = useState(
-    Array(rows.length).fill(false)
+    Array(listComment.length).fill(false)
   );
   const [isThumbDownClicked, setThumbDownClicked] = useState(
-    Array(rows.length).fill(false)
+    Array(listComment.length).fill(false)
   );
   const [isFavoriteClicked, setFavoriteClicked] = useState(
-    Array(rows.length).fill(false)
+    Array(listComment.length).fill(false)
   );
   const handleReplyClick = (index) => {
     const updatedStatus = [...replyingToIndex];
@@ -108,8 +67,9 @@ export default function Comment() {
     updatedStatus[index] = false;
     setOpenAlertIndex(updatedStatus);
   };
-  const watchUserReply = (index) => {
-    const updatedStatus = [...openWatchReplyComment];
+  const watchUserReply = (index, idbasecmt) => {
+    fetchReplyCmt(idbasecmt)
+    const updatedStatus = openWatchReplyComment.map((_, i) => i === index ? openWatchReplyComment[i] : false);
     updatedStatus[index] = !updatedStatus[index];
     setopenWatchReplyComment(updatedStatus);
   };
@@ -138,18 +98,14 @@ export default function Comment() {
     updatedStatus[index] = !updatedStatus[index];
     setFavoriteClicked(updatedStatus);
   };
-  const [videoComment, setIdvideoComment] = React.useState();
-  const [listVIdeoComment, setListVideoComment] = useState([])
-  const [listComment, setListComment] = useState([])
-  const [currentVideo, setCurrentVideo] = useState({})
 
-  const handleChangeSelectComment = async(event) => {
+  const handleChangeSelectComment = async (event) => {
     setIdvideoComment(event.target.value);
     const currentVideo = await VideoAPI.getOneItem(`/getonevideo?id=${event.target.value}`)
     const listComment = await CommentAPI.getAllBaseCmt(`/getallbasecmt?idvideo=${event.target.value}`)
     setCurrentVideo(currentVideo.data)
     setListComment(listComment.data)
-    // console.log("vao",result.data)
+    console.log("vao day", listComment.data)
   };
 
   const dataVideoComment = async () => {
@@ -164,9 +120,34 @@ export default function Comment() {
       console.log(listretult)
     }
   }
+  //reply comment
+  const fetchReplyCmt = async (idbasecmt) => {
+    const data = await RatingAPI.countRating(`/getallreplycmt?idvideo=${currentVideo.idvideo}&idbasecmt=${idbasecmt}`);
+    if (data.status == 200) {
+      setListReplyCmt(data.data)
+      console.log("replycmt", data.data)
+    }
+  };
   useEffect(() => {
     dataVideoComment()
   }, [])
+
+  const handleDeleteCmt = async (current) => {
+    if (current.idbasecmt == null) {
+      await CommentAPI.deleteComment(`/deletecomment?idcomment=${current.idcomment}&idbasecmt=${current.idcomment}`)
+    } else {
+      await CommentAPI.deleteComment(`/deletecomment?idcomment=${current.idcomment}&idbasecmt=${0}`)
+    }
+    const listComment = await CommentAPI.getAllBaseCmt(`/getallbasecmt?idvideo=${current.video.idvideo}`)
+    const currentVideo = await VideoAPI.getOneItem(`/getonevideo?id=${current.video.idvideo}`)
+    setCurrentVideo(currentVideo.data)
+    setListComment(listComment.data)
+    const data = await RatingAPI.countRating(`/getallreplycmt?idvideo=${current.video.idvideo}&idbasecmt=${current.idbasecmt}`);
+    if (data.status == 200) {
+      setListReplyCmt(data.data)
+      console.log("replycmt", data.data)
+    }
+  }
 
   const commentuser = () => {
     return (
@@ -202,9 +183,12 @@ export default function Comment() {
                             - <DateConvert date={row.datecreated} />
                           </Typography>
                         </div>
+                        <div style={{ marginLeft: '15px', cursor: 'pointer' }} onClick={() => handleDeleteCmt(row)}>
+                          <DeleteIcon />
+                        </div>
                       </Box>
                       <Typography>{row.contents} </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", cursor: 'pointer' }}>
                         <Typography
                           color={"text.secondary"}
                           variant="none"
@@ -213,12 +197,12 @@ export default function Comment() {
                           Feedback
                         </Typography>
                         <Typography
-                          sx={{ width: "auto", margin: " 0 20px" }}
+                          sx={{ width: "auto", margin: " 0 20px", cursor: 'pointer' }}
                           color={"text.secondary"}
                           variant="none"
-                          onClick={() => watchUserReply(rowIndex)} // Clicking "1 Reply" shows commentuser
+                          onClick={() => watchUserReply(rowIndex, row.idcomment)} // Clicking "1 Reply" shows commentuser
                         >
-                          1 Feedback
+                          Show Feedback
                         </Typography>
                         <IconButton
                           aria-label="fingerprint"
@@ -278,7 +262,7 @@ export default function Comment() {
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
-            paddingRight:'30px'
+            paddingRight: '30px'
           }}
         >
           {currentVideo && (
@@ -289,7 +273,7 @@ export default function Comment() {
                 alt=""
                 width={"200px"}
               />
-              <Typography sx={{maxWidth:'200px'}}>
+              <Typography sx={{ maxWidth: '200px' }}>
                 {currentVideo.title}
               </Typography>
             </>
@@ -304,30 +288,33 @@ export default function Comment() {
       return (
         <>
           <div className="allinformation">
-            {rows.map((row, rowIndex) => {
+            {listReplyCmt.map((row, rowIndex) => {
               return (
                 <React.Fragment key={rowIndex}>
                   <Box sx={{ display: "flex", margin: "3% 0" }}>
                     <Avatar
                       alt="Remy Sharp"
-                      src={row.avatar}
+                      src={row.users.avatar}
                       sx={{ width: 56, height: 56, marginRight: "1rem" }}
                     />
                     <div className="informationuserandtime">
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <Link to="https://google.com">
                           <Typography color={"text.secondary"}>
-                            {row.nameuser} -
+                            {row.users.email} -
                           </Typography>
                         </Link>
                         <div className="content">
                           <Typography color={"text.secondary"}>
                             {" "}
-                            - {row.timecomment}
+                            - {row.datecreated}
                           </Typography>
                         </div>
+                        <div style={{ marginLeft: '15px', cursor: 'pointer' }} onClick={() => handleDeleteCmt(row)}>
+                          <DeleteIcon />
+                        </div>
                       </Box>
-                      <Typography>{row.contentcomment} </Typography>
+                      <Typography>{row.contents} </Typography>
                     </div>
                   </Box>
                   <Box></Box>
@@ -347,7 +334,7 @@ export default function Comment() {
       return (
         <>
           <div className="allinformation">
-            {rows.map((row, rowIndex) => {
+            {listComment.map((row, rowIndex) => {
               console.log(index + "sss" + rowIndex);
               return (
                 <React.Fragment key={rowIndex}>
@@ -377,11 +364,7 @@ export default function Comment() {
                               <Avatar
                                 alt="Remy Sharp"
                                 src={row.avatar}
-                                sx={{
-                                  width: 40,
-                                  height: 40,
-                                  marginRight: "1rem",
-                                }}
+                                sx={{ width: 56, height: 56, marginRight: "1rem" }}
                               />
                             </Link>
                             <TextField

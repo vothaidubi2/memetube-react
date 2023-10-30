@@ -29,6 +29,10 @@ class VideoAPI {
         return await axios.post(process.env.REACT_APP_BASE_DOMAIN + url, content)
             .then(data => data);
     }
+    updateVideo = async (url,content) => {
+        return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url, content)
+            .then(data => data);
+    }
 
     setCount = async (url) => {
         return await

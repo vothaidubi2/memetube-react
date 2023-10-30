@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -11,7 +11,7 @@ import { styled } from "@mui/material/styles";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
-import { CircularProgress, Link } from "@mui/material";
+import { Alert, CircularProgress, Link, Snackbar } from "@mui/material";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -22,26 +22,30 @@ import ChannelAPI from "../../utils/ChannelAPI";
 import CategoryAPI from "../../utils/CategoryAPI";
 import ImageAPI from "../../utils/ImageAPI";
 import format from 'date-fns/format';
+import { useNavigate } from "react-router-dom";
 
 
 const steps = ["uploadvideo", "Detail", "Display mode"];
 const stepsupdate = ["Detail", "Display mode"];
 
-export default function UploadFile({ active }) {
-  // const createUserDate = () => {
-  //   return {
-  //     file, titleValue, descriptionValue, status, selectedImage
-  //   }
-  // }
+export default function UploadFile({ active, video }) {
   const [titleValue, setTitleValue] = useState('');
   const [descriptionValue, setDescriptionValue] = useState('');
   const titleRef = useRef(null);
   const descriptionRef = useRef(null);
-  const [status, setStatus] = useState(0)
+  const [status, setStatus] = useState(true)
   const [file, setFile] = useState('');
   const [pathVideo, setPathVideo] = useState();
   const [selectedImage, setSelectedImage] = useState();
   const [uploadedImage, setUploadedImg] = useState();
+
+
+  useEffect(() => {
+    if (active != null) {
+      setTitleValue(video.title)
+      setDescriptionValue(video.describes)
+    }
+  }, [])
 
   let stepsvalue = () => {
     if (active === null) {
@@ -189,54 +193,52 @@ export default function UploadFile({ active }) {
                 </Box>
               </Button>
 
-              {selectedImage && (
-                <img
-                  src={URL.createObjectURL(selectedImage)}
-                  alt="Selected Thumbnail"
-                  style={{
-                    marginLeft: "10px",
-                    maxWidth: "100%",
-                    height: "80px",
-                  }}
-                />
-              )}
+              {active != null ? (
+                selectedImage ? (
+                  <img
+                    src={URL.createObjectURL(selectedImage)}
+                    alt="Selected Thumbnail"
+                    style={{
+                      marginLeft: "10px",
+                      maxWidth: "100%",
+                      height: "80px",
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={video.imageurl}
+                    alt="Selected Thumbnail"
+                    style={{
+                      marginLeft: "10px",
+                      maxWidth: "100%",
+                      height: "80px",
+                    }}
+                  />
+                )
+              )
+                : (
+                  selectedImage && (
+                    <img
+                      src={URL.createObjectURL(selectedImage)}
+                      alt="Selected Thumbnail"
+                      style={{
+                        marginLeft: "10px",
+                        maxWidth: "100%",
+                        height: "80px",
+                      }}
+                    />
+                  )
+                )}
             </Box>
           </div>
-          <div className="videomedia" style={{ flex: "20%", marginTop: "0%" }}>
-            <CardMedia
-              component="video"
-              src={file}
 
-            />
-            <CardContent sx={{ border: "1px solid gray" }}>
-              <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
-                Video link
-              </Typography>
-
-              <Link
-                href={file}
-                sx={{ textDecoration: "underline", fontSize: "18px" }}
-              >
-                {file}
-              </Link>
-
-              <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
-                Filename
-              </Typography>
-
-              <Typography color="text.secondary">
-                Lizards are a widespread group of squamate reptiles, with over
-                6,000 species, ranging across all continents except Antarctica
-              </Typography>
-            </CardContent>
-          </div>
         </div>
       </FormControl>
     );
   };
   const FormComponent3 = () => {
     return (
-      <FormControl sx={{ backgroundColor: "rgb(40,40,40)", height: "450px" }}>
+      <FormControl sx={{ backgroundColor: "rgb(40,40,40)", height: "450px", width: "100%" }}>
         <Typography
           sx={{ fontSize: 27, fontWeight: "bold", marginBottom: "10px" }}
           gutterBottom
@@ -244,7 +246,7 @@ export default function UploadFile({ active }) {
           Channel dashboard
         </Typography>
         <div style={{ display: "flex", width: "100%" }}>
-          <div className="content" style={{ flex: "70%", paddingRight: "2%" }}>
+          <div className="content" style={{ paddingRight: "2%", width: "100%" }}>
             <CardContent sx={{ border: "1px solid gray" }}>
               <Typography>Save or publish</Typography>
               <Typography sx={{ color: "text.secondary", fontSize: "12px" }}>
@@ -253,57 +255,30 @@ export default function UploadFile({ active }) {
               <RadioGroup
                 sx={{ padding: "0 5%" }}
                 aria-labelledby="demo-radio-buttons-group-label"
-                // defaultChecked="private"
+                // defaultChecked="true"
                 name="radio-buttons-group"
                 value={status}
                 onChange={handlestatus}
               >
                 <FormControlLabel
-                name="status"
+                  name="status"
                   value="false"
-                  control={<Radio name="status"/>}
+                  control={<Radio name="status" />}
                   label="Private"
                 />
                 <Typography sx={{ padding: "0 4%", color: "text.secondary" }}>
-                  Only you and the people you choose can see your videos
+                  Only can see your videos
                 </Typography>
                 <FormControlLabel
-                name="status"
+                  name="status"
                   value="true"
-                  control={<Radio name="status"/>}
+                  control={<Radio name="status" />}
                   label="Public"
                 />
                 <Typography sx={{ padding: "0 4%", color: "text.secondary" }}>
-                  Only you and the people you choose can see your videos
+                  People can see your videos
                 </Typography>
               </RadioGroup>
-            </CardContent>
-          </div>
-          <div className="videomedia" style={{ flex: "20%", marginTop: "0%" }}>
-            <CardMedia
-              component="video"
-              src={file}
-            />
-            <CardContent sx={{ border: "1px solid gray" }}>
-              <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
-                Video link
-              </Typography>
-
-              <Link
-                href={file}
-                sx={{ textDecoration: "underline", fontSize: "18px" }}
-              >
-                {file}
-              </Link>
-
-              <Typography sx={{ color: "GrayText", fontSize: "21px" }}>
-                Filename
-              </Typography>
-
-              <Typography color="text.secondary">
-                Lizards are a widespread group of squamate reptiles, with over
-                6,000 species, ranging across all continents except Antarctica
-              </Typography>
             </CardContent>
           </div>
         </div>
@@ -349,13 +324,73 @@ export default function UploadFile({ active }) {
   };
 
   const handleComplete = async (event) => {
-    if (activeStep === 0) {
-      const file = event.target.files[0]
-      setPathVideo(event.target.files[0])
-      setFile(URL.createObjectURL(file))
-    } else if (activeStep === 1) {
-      setTitleValue(titleRef.current.value)
-      setDescriptionValue(descriptionRef.current.value)
+    event.preventDefault()
+    if (active == null) {
+      if (activeStep === 0) {
+        if (active == null) {
+          if (!event.target.files) {
+            setState({
+              ...state,
+              open: true,
+              titleError: "Video must exist!",
+            });
+            return
+          }
+          const file = event.target.files[0]
+          setPathVideo(event.target.files[0])
+          setFile(URL.createObjectURL(file))
+        }
+      } else if (activeStep === 1) {
+        setTitleValue(titleRef.current.value)
+        setDescriptionValue(descriptionRef.current.value)
+        if (!titleRef.current.value) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Title must not be blank!",
+          });
+          return
+        }
+        if (!descriptionRef.current.value) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Description must not be blank!",
+          });
+          return
+        }
+        if (!selectedImage) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Image must exist!",
+          });
+          return
+        }
+      }
+    } else {
+      if (activeStep == 0) {
+        console.log('vao day:', titleRef.current.value)
+        console.log('vao day image:', selectedImage)
+        setTitleValue(titleRef.current.value)
+        setDescriptionValue(descriptionRef.current.value)
+        if (!titleRef.current.value) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Title must not be blank!",
+          });
+          return
+        }
+        if (!descriptionRef.current.value) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Description must not be blank!",
+          });
+          return
+        }
+      }
     }
     const newCompleted = completed;
     newCompleted[activeStep] = true;
@@ -367,30 +402,57 @@ export default function UploadFile({ active }) {
   const [loadingButton, setLoadingButton] = useState(false);
   const handleFinish = async () => {
     setLoadingButton(true)
-    let imageData = new FormData();
-    imageData.append('files', selectedImage)
-    const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
-    let formVideo = new FormData()
-    formVideo.append('files', pathVideo)
-    const videoUrl = await ImageAPI.uploadImage("/uploadvideo", formVideo)
-    const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${1}`)
-    const category = await CategoryAPI.getOneItem(`/getcatebyid?id=${1}`)
-    // const formattedDateTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
-    const form = {
-      title: titleValue,
-      imageurl: imageurl,
-      describes: descriptionValue,
-      videourl: videoUrl,
-      datecreated: '',
-      channel: channel,
-      category: category,
-      status: status,
-      viewcount: 0
-    }
-    console.log(form)
-    const data = await VideoAPI.postVideo('/postvideo', form)
-    if (data.status == 201) {
-      setLoadingButton(false)
+    if (active == null) {
+      let imageData = new FormData();
+      imageData.append('files', selectedImage)
+      const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
+      let formVideo = new FormData()
+      formVideo.append('files', pathVideo)
+      const videoUrl = await ImageAPI.uploadImage("/uploadvideo", formVideo)
+      const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${1}`)
+      const category = await CategoryAPI.getOneItem(`/getcatebyid?id=${1}`)
+      // const formattedDateTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+      const form = {
+        title: titleValue,
+        imageurl: imageurl,
+        describes: descriptionValue,
+        videourl: videoUrl,
+        datecreated: '',
+        channel: channel,
+        category: category,
+        status: status,
+        viewcount: 0
+      }
+      console.log(form)
+      const data = await VideoAPI.postVideo('/postvideo', form)
+      if (data.status == 201) {
+        setLoadingButton(false)
+      }
+    } else {
+      let form = {
+        idvideo: video.idvideo,
+        title: titleValue,
+        describes: descriptionValue,
+        videourl: video.videourl,
+        datecreated: video.datecreated,
+        channel: video.channel,
+        category: video.category,
+        status: status,
+        viewcount: video.viewcount
+      }
+      if (selectedImage) {
+        let imageData = new FormData();
+        imageData.append('files', selectedImage)
+        const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
+        form = { ...form, imageurl: imageurl }
+      } else {
+        form = { ...form, imageurl: video.imageurl }
+      }
+      // console.log("form:",form)
+      const data = await VideoAPI.updateVideo('/updatevideo', form)
+      if (data.status == 200) {
+        setLoadingButton(false)
+      }
     }
     const newCompleted = completed;
     newCompleted[activeStep] = true;
@@ -398,12 +460,42 @@ export default function UploadFile({ active }) {
     handleNext();
   }
 
-  // const upload = () => {
-  //   console.log(createUserDate())
-  // };
+  const [state, setState] = React.useState({
+    open: false,
+    vertical: "top",
+    horizontal: "center",
+    titleError: "Something is wrong ",
+  });
+  const { vertical, horizontal, open, titleError } = state;
+
+  const handleClick = (newState) => () => {
+    setState({ ...newState, open: true });
+  };
+
+  const handleClose = () => {
+    setState({ ...state, open: false });
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: 500 }}>
+        <Snackbar
+          anchorOrigin={{ vertical, horizontal }}
+          open={open}
+          onClose={handleClose}
+          message="I love snacks"
+          key={vertical + horizontal}
+          autoHideDuration={3000}
+        >
+          <Alert
+            onClose={handleClose}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            {titleError}
+          </Alert>
+        </Snackbar>
+      </Box>
       <Stepper activeStep={activeStep} sx={{ width: "50%", marginLeft: "25%" }}>
         {stepsvalue().map((label, index) => (
           <Step key={label} completed={completed[index]}>
@@ -416,7 +508,6 @@ export default function UploadFile({ active }) {
       <div>
         {allStepsCompleted() ? (
           <React.Fragment>
-
             <Typography sx={{ mt: 2, mb: 1, textAlign: 'center' }}>
               All steps completed - you&apos;re finished
             </Typography>
@@ -433,15 +524,15 @@ export default function UploadFile({ active }) {
                   if (activeStep === 0) {
                     return <FormComponent1 />;
                   } else if (activeStep === 1) {
-                    return <FormComponent2 />;
+                    return <FormComponent2 />
                   } else {
-                    return <FormComponent3 />;
+                    return <FormComponent3 />
                   }
                 } else {
                   if (activeStep === 0) {
-                    return <FormComponent2 />;
+                    return <FormComponent2 />
                   } else {
-                    return <FormComponent3 />;
+                    return <FormComponent3 />
                   }
                 }
               })()}
