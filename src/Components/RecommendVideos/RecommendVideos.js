@@ -58,12 +58,8 @@ function RecommendVideos() {
         console.log("cate: ",data)
     }
     useEffect(() => {
-
-        return () => {
-            fetchResults();
-            fetchCategory();
-            // clearTimeout(timeoutRef.current); // Cleanup timeout on component unmount
-        };
+        fetchResults();
+        fetchCategory();
     }, []);
 
     return (

@@ -27,9 +27,7 @@ function VideoDetail() {
         }
       }
     };
-    return () => {
       fetchResults();
-    }
   }, [params]);
   const setCount = async () => {
     await VideoAPI.setCount(`/setcountvideo?id=${params.get('id')}`)

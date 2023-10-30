@@ -8,13 +8,15 @@ class UsersAPI {
             },
         })
     }
-
     updateUser = async (url) => {
         return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url)
         
     }
-    receiveUserByToken = async (url,token ) => {
-
+    updateBalance = async (url) => {
+        return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url)
+        .then(data => data.data)
+    }
+    receiveUserByToken = async (url, token) => {
         const config = {
             headers: {
                 'Content-Type': 'application/json',
