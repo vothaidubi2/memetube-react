@@ -8,6 +8,10 @@ class UsersAPI{
             },
         })
     }
+    updateUser = async (url) => {
+        return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url)
+        
+    }
     receiveUserByToken = async (url,token ) => {
         const config = {
             headers: {

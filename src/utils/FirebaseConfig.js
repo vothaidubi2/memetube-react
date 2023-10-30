@@ -81,6 +81,5 @@ class FirebaseConfig{
         });
     };
 }
-export    default firepadRef;
-export { child, refDatabase, push, onValue };
-// export default new FirebaseConfig
+export { child, refDatabase, push, onValue ,firepadRef};
+export  default new  FirebaseConfig
