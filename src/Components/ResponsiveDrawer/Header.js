@@ -23,6 +23,7 @@ import { Avatar } from "@mui/material";
 import { UserContext } from "../Cookie/UserContext";
 import removeCookie from "../Cookie/removeCookie";
 import getCookie from "../Cookie/getCookie";
+import Update from "../Form/Update";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -80,6 +81,7 @@ export default function Header() {
         setAnchorEl(event.currentTarget);
     };
 
+    const [openUpdate, setOpenUpdate] = React.useState(false);
     const [openSignIn, setOpenSignIn] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -88,15 +90,20 @@ export default function Header() {
     const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
     const signin = () => {
         if (openSignIn === true) {
-            return <SignIn onClose={handleCloseSignIn} isOpen={openSignIn} />;
+            return <SignIn onClose={handleCloseSignIn} isOpen={openUpdate} />;
         } else {
             return null;
         }
     };
     const handleOpenSignIn = () => {
         setOpenSignIn(true);
+    }
+    const handleOpenUpdate =()=>{
+        setOpenUpdate(true)
+    }
+    const handleCloseUpdate = () => {
+        setOpenUpdate(false);
     };
-
     const handleCloseSignIn = () => {
         setOpenSignIn(false);
         window.location.reload();
@@ -117,7 +124,6 @@ export default function Header() {
         setAnchorEl(null);
         handleMobileMenuClose();
     };
-
     const handleMobileMenuOpen = (event) => {
         setMobileMoreAnchorEl(event.currentTarget);
     };
@@ -142,7 +148,7 @@ export default function Header() {
             {dataUser != null ? (
                 <>
                     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-                    <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+                    <MenuItem onClick={handleOpenUpdate}>Update Account</MenuItem>
                     <MenuItem onClick={handleMenuClose}>Studio</MenuItem>
                     <MenuItem onClick={handleLogout}>Log out</MenuItem>
                 </>
@@ -328,6 +334,7 @@ export default function Header() {
             {renderMobileMenu}
             {renderMenu}
             {signin()}
+            <Update onClose={handleCloseUpdate} openUpdate={openUpdate} />
         </Box>
     );
 }
