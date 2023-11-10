@@ -7,27 +7,31 @@ import { CardActionArea } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Box } from "@mui/material";
 import './VideoDetail.scss'
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import VideoAPI from "../../utils/VideoAPI";
 import ContentBar from "./ContentBar";
 
 function VideoDetail() {
   let [params] = useSearchParams();
   const [videoDetail, setVideoDetail] = useState({});
+  const [top10Video, setTop10Video] = useState([]);
   const [isAvailable, setIsAvailable] = useState(true);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
         const data = await VideoAPI.getOneItem(`/getonevideo?id=${params.get('id')}`);
+        const suggest = await VideoAPI.getOneItem(`/gettop10video`);
         setVideoDetail(data.data);
+        setTop10Video(suggest.data)
+        console.log(suggest.data)
       } catch (error) {
         if (error.response || error.response.status === 404) {
           setIsAvailable(false);
         }
       }
     };
-      fetchResults();
+    fetchResults();
   }, [params]);
   const setCount = async () => {
     await VideoAPI.setCount(`/setcountvideo?id=${params.get('id')}`)
@@ -62,12 +66,12 @@ function VideoDetail() {
       }}
     >
       <Box sx={{ flexGrow: '6', flexBasis: '650px', width: '65%', display: 'flex', flexDirection: 'column' }}>
-        <Card sx={{ borderRadius: "10px", display: "flex",maxHeight:'508px' }}>
+        <Card sx={{ borderRadius: "10px", display: "flex", maxHeight: '508px' }}>
           <CardActionArea >
             <CardMedia
               component="video"
               height={'100%'}
-              controls 
+              controls
               autoPlay
               allowFullScreen
               frameBorder={'0'}
@@ -128,668 +132,70 @@ function VideoDetail() {
             width: "100%",
           }}
         >
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        fontSize: '16px',
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
+          {top10Video && (top10Video.map((item, key) => {
+            return(
+              <Card sx={{ width: "100%" }} key={key}>
+              <CardActionArea>
+                <Link
+                  style={{
+                    backgroundImage: "none",
+                    display: "flex",
+                    textDecoration: "none",
+                    color: "white",
+                    width: '100%'
+                  }}
+                  to={`/watch?id=${item.idvideo}`}
+                >
+                  <div style={{ width: '40%' }}>
+                    <CardMedia
+                      component="video"
+                      height="100%"
+                      poster={item.imageurl}
+                      src={item.videourl}
+                      frameBorder="0"
+                      title={item.title}
+                      sx={{ width: '100%' }}
+                    />
+                  </div>
+                  <div style={{ width: '60%' }}>
+                    <CardContent
                     >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: "13px", }}>
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        fontSize: "13px",
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
-          <Card sx={{ width: "100%" }}>
-            <CardActionArea>
-              <a
-                style={{
-                  backgroundImage: "none",
-                  display: "flex",
-                  textDecoration: "none",
-                  color: "white",
-                  width: '100%'
-                }}
-                href="https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT"
-              >
-                <div style={{ width: '40%' }}>
-                  <CardMedia
-                    component="video"
-                    height="100%"
-                    poster="https://i.ytimg.com/vi/-U5N3237WCw/maxresdefault.jpg"
-                    src={`https://drive.google.com/uc?id=17slrOe2qbsZEKGPrlNm3_PnP_QEtM3jT`}
-                    frameBorder="0"
-                    title="Mãi mãi là của nhau | Bùi Anh Tuấn"
-                    sx={{ width: '100%' }}
-                  />
-                </div>
-                <div style={{ width: '60%' }}>
-                  <CardContent
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{
-                        display: "block",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Mãi mãi là của nhau | Bùi Anh Tuấn
-                      adddddddadddddddddddddddddddddddddd
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Channel name
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "center",
-                      }}
-                    >
-                      500K views <CircleIcon sx={{ fontSize: "12px" }} /> 1
-                      years ago
-                    </Typography>
-                  </CardContent>
-                </div>
-              </a>
-            </CardActionArea>
-          </Card>
+                      <Typography
+                        gutterBottom
+                        variant="h6"
+                        component="div"
+                        sx={{
+                          fontSize: '16px',
+                          display: "block",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "13px", }}>
+                        {item.channel.channelname}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          fontSize: "13px",
+                          display: "flex",
+                          gap: "10px",
+                          alignItems: "center",
+                        }}
+                      >
+                        {item.viewcount} <CircleIcon sx={{ fontSize: "12px" }} /> {item.datecreated}
+                      </Typography>
+                    </CardContent>
+                  </div>
+                </Link>
+              </CardActionArea>
+            </Card>
+            )
+          }))}
         </Box>
       </Box>
     </div>

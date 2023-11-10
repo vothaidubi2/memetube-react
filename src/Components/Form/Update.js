@@ -214,7 +214,7 @@ export default function Update({ onClose,openUpdate }) {
                     fullWidth
                     name="Old-Password"
                     label="Old-Password"
-                    type="Old-Password"
+                    type="password"
                     id="Old-Password"
                     autoComplete="Old-password"
                   />
@@ -225,7 +225,7 @@ export default function Update({ onClose,openUpdate }) {
                     fullWidth
                     name="New-password"
                     label="New-password"
-                    type="New-password"
+                    type="password"
                     id="New-password"
                     autoComplete="New-password"
                   />
@@ -236,7 +236,7 @@ export default function Update({ onClose,openUpdate }) {
                     fullWidth
                     name="re-Newpassword"
                     label="Re-enter the new Password"
-                    type="re-Newpassword"
+                    type="password"
                     id="re-Newpassword"
                     autoComplete="re-Newpassword"
                   />
