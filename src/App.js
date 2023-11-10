@@ -42,7 +42,8 @@ import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
 import Update from './Components/Form/Update';
 import Stream from './Components/Stream/Stream';
-import Stream1 from './Components/Stream/Stream1';
+import UserManager from './Components/Admin/UserManager';
+import ForgotPass from './Components/Form/ForgotPass';
 import { UserContext } from './Components/Cookie/UserContext';
 import jwt_decode from "jwt-decode";
 import getCookie from './Components/Cookie/getCookie';
@@ -120,26 +121,34 @@ const router = createBrowserRouter([
       {
         path: '/stream',
         element: isUserLoggedIn() ? <ResponsiveDrawer Page={Stream} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      }
-      ,
+      }      ,
 
       {
-        path: '/teststream',
-        element: <ResponsiveDrawer Page={Stream1} />
+        path: '/admin/user',
+        element: isUserLoggedIn() ? <ResponsiveDrawer Page={UserManager} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
 
       {
         path: '/update',
         element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={Update} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      },
+
+      },      {
+        path: '/forgotpass',
+        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={ForgotPass} />
+
+      }
     ]
   },
 ]);
 
 
 function App(props) {
-  
+  let dataUser = useContext(UserContext);
+  let EmailUser = null
+  if (dataUser != null) {
+    EmailUser = dataUser.Email
+  }
   const [showChat, setShowChat] = useState(false);
   const getUserStream = async () => {
     const localStream = await navigator.mediaDevices.getUserMedia({
@@ -151,37 +160,34 @@ function App(props) {
   };
   const connectedRef = refDatabase(db, ".info/connected");
   const participantRef = child(firepadRef, "participants");
-  let dataUser = useContext(UserContext);
   useEffect(() => {
-    let EmailUser = null
-    if (dataUser != null) {
-      EmailUser = dataUser.Email
-      const getEffect = async () => {
-        const stream = await getUserStream();
-        stream.getVideoTracks()[0].enabled = false;
-        props.setMainStream(stream);
-  
-        onValue(refDatabase(db, ".info/connected"), (snap) => {
-          if (snap.val()) {
-            const defaultPreference = {
-              audio: false,
-              video: false,
-              screen: false,
-              master: userRole,
-            };
-            const userStatusRef = push(participantRef, {
-              EmailUser,
-              preferences: defaultPreference,
-            });
-            props.setUser({
-              [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
-            });
-            onDisconnect(userStatusRef).remove();
-          }
-        });
-      };
-      getEffect();
-    }
+
+    const getEffect = async () => {
+      const stream = await getUserStream();
+      stream.getVideoTracks()[0].enabled = false;
+      props.setMainStream(stream);
+
+      onValue(refDatabase(db, ".info/connected"), (snap) => {
+        if (snap.val()) {
+          const defaultPreference = {
+            audio: false,
+            video: false,
+            screen: false,
+            master: userRole,
+          };
+          const userStatusRef = push(participantRef, {
+            EmailUser,
+            preferences: defaultPreference,
+          });
+          props.setUser({
+            [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
+          });
+          console.log("props:", props);
+          onDisconnect(userStatusRef).remove();
+        }
+      });
+    };
+    getEffect();
   }, []);
 
   const isUserSet = !!props.user;

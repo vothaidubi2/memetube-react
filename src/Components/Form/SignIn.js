@@ -150,7 +150,7 @@ if(dataGoogle.email!==''){
             anchorOrigin={{ vertical, horizontal }}
             open={open}
             onClose={handleClose}
-            message="I love snacks"
+            message=""
             key={vertical + horizontal}
             autoHideDuration={3000}
           >

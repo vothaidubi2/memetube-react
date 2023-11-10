@@ -22,10 +22,13 @@ import Snackbar, { SnackbarOrigin } from "@mui/material/Snackbar";
 import { UserContext } from "../Cookie/UserContext";
 import FirebaseConfig from "../../utils/FirebaseConfig";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
 export default function Update({ onClose,openUpdate }) {
+  const navigate = useNavigate();
+  let token;
   let dataUser = React.useContext(UserContext);
   const [selectedImage, setSelectedImage] = React.useState();
   const handleSubmit = async (event) => {
@@ -34,20 +37,26 @@ export default function Update({ onClose,openUpdate }) {
     let newpass = data.get("New-password");
     let oldpass = data.get("Old-Password");
     let renewpass = data.get("re-Newpassword");
-    if (handleFormSubmit(oldpass, newpass, renewpass) === true) {
+    if (handleFormSubmit(oldpass, newpass, renewpass,selectedImage) === true) {
       let imageData = new FormData();
       imageData.append('files', selectedImage)
-      const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
-     
+      let imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
+      const encodedImageURL = encodeURIComponent(imageurl);
         try {
+
           let id=dataUser.Iduser
-          const dataReceive = await UsersAPI.updateUser( `/updateUser?id=${id}&password=${newpass}&oldPassword=${oldpass}&image=${imageurl}`
+          console.log('dm')
+          const dataReceive = await UsersAPI.updateUser( `/updateUser?id=${id}&password=${newpass}&oldPassword=${oldpass}&image=${encodedImageURL}`
           );
+          console.log(dataReceive.status)
            if(dataReceive.status===200){
-            console.log('cu',dataUser.Avatar)
-            // await FirebaseConfig.DeleteImage(dataUser.Avatar);
+            token = dataReceive.data;
+            setCookie("user", JSON.stringify(token));
+            window.location.reload();
            }
-           
+           console.log('moi')
+           let oldImage=dataUser.Avatar;
+            FirebaseConfig.DeleteImage(oldImage);
 
         } catch (error) {
           setState({
@@ -55,28 +64,12 @@ export default function Update({ onClose,openUpdate }) {
             open: true,
             titleError: "Password is incorrect ",
           });
-  
-          // await FirebaseConfig.DeleteImage(imageurl);
+
+          console.log('cu',imageurl)
+             FirebaseConfig.DeleteImage(imageurl);
+
         }
 
-        //  const dataReceiveTOken = await UsersAPI.sendUser("/authenticate", jsonData);
-        //  console.log(data)
-        //  if (dataReceive.status === 200) {
-        //    // Xử lý khi phản hồi thành công (status 200)
-        //   //  token = dataReceiveTOken.data;
-        //    setCookie("user", JSON.stringify(token));
-
-        //  } else {
-        //    setState({
-        //      ...state,
-        //      open: true,
-        //      titleError: "Error",
-        //    });
-        //  }
-        // token = dataReceive.data;
-        // setCookie("user", JSON.stringify(token));
-        // console.log(token)
-        // setOpenSignIn(onClose);
      
     }
   };
@@ -88,7 +81,7 @@ export default function Update({ onClose,openUpdate }) {
     titleError: "Something is wrong ",
   });
   const { vertical, horizontal, open, titleError } = state;
-  const handleFormSubmit = (oldpass, newpass, renewpass) => {
+  const handleFormSubmit = (oldpass, newpass, renewpass,selectedImage) => {
     console.log("new pass", newpass);
     let isValid = true; // Mặc định là hợp lệ
 
@@ -118,6 +111,25 @@ export default function Update({ onClose,openUpdate }) {
       });
       isValid = false;
     }
+    const validImageExtensions = /\.(jpg|jpeg)$/i;
+    if (selectedImage ===undefined) {
+      setState({
+        ...state,
+        open: true,
+        titleError: "File is empty ",
+      });
+      isValid = false;
+    }else{
+      if (!validImageExtensions.test(selectedImage.name)) {
+        setState({
+          ...state,
+          open: true,
+          titleError: "Image is not in the correct format ",
+        });
+        isValid = false;
+      }
+    }
+
 
     // Kiểm tra mật khẩu và mật khẩu nhập lại trùng khớp
     if (renewpass !== newpass) {
@@ -159,13 +171,12 @@ export default function Update({ onClose,openUpdate }) {
           <Snackbar
             anchorOrigin={{ vertical, horizontal }}
             open={open}
-            onClose={handleClose}
+            // onClose={handleClose}
             message="s"
             key={vertical + horizontal}
             autoHideDuration={3000}
           >
             <Alert
-              onClose={handleClose}
               severity="error"
               sx={{ width: "100%" }}
             >
@@ -275,11 +286,11 @@ export default function Update({ onClose,openUpdate }) {
               )}
 
               <Button
-              onClick={onClose}
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
+                
               >
                 Update
               </Button>
