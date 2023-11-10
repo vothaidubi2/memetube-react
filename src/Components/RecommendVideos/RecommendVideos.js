@@ -45,7 +45,7 @@ function RecommendVideos() {
     const fetchResults = async () => {
         const data = await VideoAPI.getallData("/listvideo");
         setVideosList(data);
-        console.log(data)
+        console.log('this is data',data)
     };
     const fetchsByIdcate = async (cate) => {
         const data = await VideoAPI.getByCate(`/videobycate?cate=${cate}`);
@@ -58,8 +58,10 @@ function RecommendVideos() {
         console.log("cate: ",data)
     }
     useEffect(() => {
-        fetchResults();
+        return(()=>{
+            fetchResults();
         fetchCategory();
+        })
     }, []);
 
     return (

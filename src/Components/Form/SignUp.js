@@ -44,33 +44,46 @@ const sendData=async ()=>{
       let emailform= data.get('email')
       let passwordform= data.get('password')
       let repassword=data.get('re-password')
-      console.log(handleFormSubmit(emailform,passwordform,repassword))
-    if(handleFormSubmit(emailform,passwordform,repassword)===true){
-      let imageData = new FormData();
-      imageData.append('files', selectedImage)
-      const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
-      const formdata ={
-        email:emailform,
-        password:passwordform,
-        status:1,
-        google:0,
-        datecreated:"",
-        role:1,
-        avatar:imageurl
-      }
+      if(handleFormSubmit(emailform,passwordform,repassword,selectedImage)===true){
       try {
-        const jsonData = JSON.stringify(formdata);
-        const dataReceive = await UsersAPI.sendUser("/addAccount", jsonData);
-        if (dataReceive.status === 200) {
-          // Xử lý khi phản hồi thành công (status 200)
-          token = dataReceive.data;
-          setCookie("user", JSON.stringify(token));
-          setOpenSignIn(onClose);
-        }
+        const checkUser = await UsersAPI.checkUser(
+          `/getOneUser?username=${emailform}`
+        );
+        setState({
+          ...state,
+          open: true,
+          titleError: "Email already exists",
+        });
       } catch (error) {
-        console.log('errror')
+
+          let imageData = new FormData();
+          imageData.append('files', selectedImage)
+          const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
+          const formdata ={
+            email:emailform,
+            password:passwordform,
+            status:1,
+            google:0,
+            datecreated:"",
+            role:0,
+            avatar:imageurl
+          }
+          try {
+            const jsonData = JSON.stringify(formdata);
+            const dataReceive = await UsersAPI.sendUser("/addAccount", jsonData);
+            if (dataReceive.status === 200) {
+              // Xử lý khi phản hồi thành công (status 200)
+              token = dataReceive.data;
+              setCookie("user", JSON.stringify(token));
+              setOpenSignIn(onClose);
+            }
+          } catch (error) {
+            console.log('errror')
+          }
+        }
+
       }
-    }
+
 
   };
 
@@ -105,6 +118,26 @@ const sendData=async ()=>{
       });
       isValid = false;
     }
+    const validImageExtensions = /\.(jpg|jpeg)$/i;
+    if (selectedImage ===undefined) {
+      setState({
+        ...state,
+        open: true,
+        titleError: "File is empty ",
+      });
+      isValid = false;
+    }else{
+      if (!validImageExtensions.test(selectedImage.name)) {
+        setState({
+          ...state,
+          open: true,
+          titleError: "Image is not in the correct format ",
+        });
+        isValid = false;
+      }
+    }
+
+
 
     // Kiểm tra mật khẩu và mật khẩu nhập lại trùng khớp
     if (password !== repassword) {
@@ -163,7 +196,7 @@ const sendData=async ()=>{
             anchorOrigin={{ vertical, horizontal }}
             open={open}
             onClose={handleClose}
-            message="I love snacks"
+            message=""
             key={vertical + horizontal}
             autoHideDuration={3000}
           >
