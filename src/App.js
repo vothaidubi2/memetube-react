@@ -41,9 +41,9 @@ import MyChannel from './Components/PagesChannel/MyChannel';
 import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
 import Update from './Components/Form/Update';
-import ForgotPass from './Components/Form/ForgotPass';
 import Stream from './Components/Stream/Stream';
-import Stream1 from './Components/Stream/Stream1';
+import UserManager from './Components/Admin/UserManager';
+import ForgotPass from './Components/Form/ForgotPass';
 import { UserContext } from './Components/Cookie/UserContext';
 import jwt_decode from "jwt-decode";
 import getCookie from './Components/Cookie/getCookie';
@@ -121,19 +121,23 @@ const router = createBrowserRouter([
       {
         path: '/stream',
         element: isUserLoggedIn() ? <ResponsiveDrawer Page={Stream} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      }
-      ,
+      }      ,
 
       {
-        path: '/teststream',
-        element: <ResponsiveDrawer Page={Stream1} />
+        path: '/admin/user',
+        element: isUserLoggedIn() ? <ResponsiveDrawer Page={UserManager} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
 
       {
         path: '/update',
         element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={Update} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      },
+
+      },      {
+        path: '/forgotpass',
+        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={ForgotPass} />
+
+      }
     ]
   },
 ]);
@@ -171,7 +175,6 @@ function App(props) {
             screen: false,
             master: userRole,
           };
-          console.log("day la user: ", EmailUser);
           const userStatusRef = push(participantRef, {
             EmailUser,
             preferences: defaultPreference,
