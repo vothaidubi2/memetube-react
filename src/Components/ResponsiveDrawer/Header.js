@@ -124,6 +124,11 @@ export default function Header() {
         setAnchorEl(null);
         handleMobileMenuClose();
     };
+    const studio=()=>{
+        setAnchorEl(null);
+        handleMobileMenuClose();
+        navigate('/studio/home');
+    }
     const handleMobileMenuOpen = (event) => {
         setMobileMoreAnchorEl(event.currentTarget);
     };
@@ -149,7 +154,7 @@ export default function Header() {
                 <>
                     <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
                     <MenuItem onClick={handleOpenUpdate}>Update Account</MenuItem>
-                    <MenuItem onClick={handleMenuClose}>Studio</MenuItem>
+                    <MenuItem onClick={studio}>Studio</MenuItem>
                     <MenuItem onClick={handleLogout}>Log out</MenuItem>
                 </>
             ) : (

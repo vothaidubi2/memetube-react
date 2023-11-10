@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import Box from "@mui/material/Box";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -11,7 +11,7 @@ import { styled } from "@mui/material/styles";
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
-import { Alert, CircularProgress, Link, Snackbar } from "@mui/material";
+import { Alert, CircularProgress, InputLabel, Link, MenuItem, Select, Snackbar } from "@mui/material";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -23,12 +23,14 @@ import CategoryAPI from "../../utils/CategoryAPI";
 import ImageAPI from "../../utils/ImageAPI";
 import format from 'date-fns/format';
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../Cookie/UserContext";
 
 
 const steps = ["uploadvideo", "Detail", "Display mode"];
 const stepsupdate = ["Detail", "Display mode"];
 
 export default function UploadFile({ active, video }) {
+  const userData = useContext(UserContext)
   const [titleValue, setTitleValue] = useState('');
   const [descriptionValue, setDescriptionValue] = useState('');
   const titleRef = useRef(null);
@@ -38,13 +40,26 @@ export default function UploadFile({ active, video }) {
   const [pathVideo, setPathVideo] = useState();
   const [selectedImage, setSelectedImage] = useState();
   const [uploadedImage, setUploadedImg] = useState();
+  const [category, setCategory] = React.useState(null);
+  const [listCategory, setListCategory] = React.useState([]);
 
-
+  const handleChangeCate = (event) => {
+    setTitleValue(titleRef.current.value)
+    setDescriptionValue(descriptionRef.current.value)
+    setCategory(event.target.value);
+  };
+  
+  const fetchDataCategory = async () => {
+    const data = await CategoryAPI.getAll(`/getallcate`)
+    setListCategory(data.data);
+    console.log(data.data)
+  };
   useEffect(() => {
     if (active != null) {
       setTitleValue(video.title)
       setDescriptionValue(video.describes)
     }
+    fetchDataCategory()
   }, [])
 
   let stepsvalue = () => {
@@ -141,83 +156,79 @@ export default function UploadFile({ active, video }) {
               placeholder="Introduce your video to viewers"
               defaultValue={descriptionValue}
             />
-            <Typography sx={{ margin: "2% 0 0 0" }}>Small picture</Typography>
-            <Typography
-              sx={{
-                margin: "0% 0 1% 0",
-                color: "text.secondary",
-                fontSize: 13,
-              }}
-            >
-              Choose or upload an image to represent what's in your video.
-              Attractive thumbnails will highlight your video and attract
-              viewers
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Button
-                component="label"
-                startIcon={<AddPhotoAlternateOutlinedIcon />}
+            <Box sx={{ width: '100%', margin: "2% 0 0 0" }}>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={category}
+                  label="Category"
+                  onChange={handleChangeCate}
+                >
+                  {listCategory?.map((item, key) => {
+                    return (
+                      <MenuItem key={key} value={item}>{item.name}</MenuItem>
+                    )
+                  })}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box>
+              <Typography sx={{ margin: "2% 0 0 0" }}>Small picture</Typography>
+              <Typography
                 sx={{
-                  width: "200px",
-                  height: "80px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  backgroundColor: "rgb(40,40,40)",
-                  border: "1px dashed gray",
-                  color: "gray",
+                  margin: "0% 0 1% 0",
+                  color: "text.secondary",
+                  fontSize: 13,
                 }}
               >
-                <Box
+                Choose or upload an image to represent what's in your video.
+                Attractive thumbnails will highlight your video and attract
+                viewers
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <Button
+                  component="label"
+                  startIcon={<AddPhotoAlternateOutlinedIcon />}
                   sx={{
+                    width: "200px",
+                    height: "80px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
+                    backgroundColor: "rgb(40,40,40)",
+                    border: "1px dashed gray",
+                    color: "gray",
                   }}
                 >
-                  <Typography
-                    sx={{ fontSize: 10, marginTop: "5%", color: "gray" }}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
                   >
-                    Download pear thumbnails
-                  </Typography>
-                  <VisuallyHiddenInput
-                    type="file"
-                    onChange={(e) => handleFileChange(e)}
-                  />
-                </Box>
-              </Button>
+                    <Typography
+                      sx={{ fontSize: 10, marginTop: "5%", color: "gray" }}
+                    >
+                      Download pear thumbnails
+                    </Typography>
+                    <VisuallyHiddenInput
+                      type="file"
+                      onChange={(e) => handleFileChange(e)}
+                    />
+                  </Box>
+                </Button>
 
-              {active != null ? (
-                selectedImage ? (
-                  <img
-                    src={URL.createObjectURL(selectedImage)}
-                    alt="Selected Thumbnail"
-                    style={{
-                      marginLeft: "10px",
-                      maxWidth: "100%",
-                      height: "80px",
-                    }}
-                  />
-                ) : (
-                  <img
-                    src={video.imageurl}
-                    alt="Selected Thumbnail"
-                    style={{
-                      marginLeft: "10px",
-                      maxWidth: "100%",
-                      height: "80px",
-                    }}
-                  />
-                )
-              )
-                : (
-                  selectedImage && (
+                {active != null ? (
+                  selectedImage ? (
                     <img
                       src={URL.createObjectURL(selectedImage)}
                       alt="Selected Thumbnail"
@@ -227,8 +238,32 @@ export default function UploadFile({ active, video }) {
                         height: "80px",
                       }}
                     />
+                  ) : (
+                    <img
+                      src={video.imageurl}
+                      alt="Selected Thumbnail"
+                      style={{
+                        marginLeft: "10px",
+                        maxWidth: "100%",
+                        height: "80px",
+                      }}
+                    />
                   )
-                )}
+                )
+                  : (
+                    selectedImage && (
+                      <img
+                        src={URL.createObjectURL(selectedImage)}
+                        alt="Selected Thumbnail"
+                        style={{
+                          marginLeft: "10px",
+                          maxWidth: "100%",
+                          height: "80px",
+                        }}
+                      />
+                    )
+                  )}
+              </Box>
             </Box>
           </div>
 
@@ -359,6 +394,14 @@ export default function UploadFile({ active, video }) {
           });
           return
         }
+        if (category == null) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Category must not be empty!",
+          });
+          return
+        }
         if (!selectedImage) {
           setState({
             ...state,
@@ -390,6 +433,14 @@ export default function UploadFile({ active, video }) {
           });
           return
         }
+        if (category == null) {
+          setState({
+            ...state,
+            open: true,
+            titleError: "Category must not be empty!",
+          });
+          return
+        }
       }
     }
     const newCompleted = completed;
@@ -409,9 +460,7 @@ export default function UploadFile({ active, video }) {
       let formVideo = new FormData()
       formVideo.append('files', pathVideo)
       const videoUrl = await ImageAPI.uploadImage("/uploadvideo", formVideo)
-      const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${1}`)
-      const category = await CategoryAPI.getOneItem(`/getcatebyid?id=${1}`)
-      // const formattedDateTime = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
+      const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${userData.Iduser}`)
       const form = {
         title: titleValue,
         imageurl: imageurl,

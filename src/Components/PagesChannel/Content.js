@@ -234,9 +234,10 @@ export default function Content() {
   const [totalVideo, setTotalVideo] = useState(0)
   const fetchDataVideo = async () => {
     const data = await VideoAPI.getallByUser(`/videobyiduser?iduser=${userData.Iduser}`)
+    console.log('vao',data)
     setTotalVideo(data.total)
     setRows(data.data)
-    console.log("vao", data.total)
+    // console.log("vao", data.total)
   }
   const handleDeleteVideo = async (item) => {
     for (let i = 0; i < item.length; i++) {
@@ -250,11 +251,10 @@ export default function Content() {
   }
 
   useEffect(() => {
-    if (!open) {
+    if (userData) {
       fetchDataVideo()
     }
-    fetchDataVideo()
-  }, [open])
+  }, [userData])
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -318,7 +318,7 @@ export default function Content() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [totalVideo, order, orderBy, page, rowsPerPage]
+    [rows,totalVideo, order, orderBy, page, rowsPerPage]
   );
 
   const [currentVideo, setCurrentVideo] = React.useState(null);

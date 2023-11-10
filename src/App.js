@@ -41,7 +41,6 @@ import MyChannel from './Components/PagesChannel/MyChannel';
 import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
 import Update from './Components/Form/Update';
-import ForgotPass from './Components/Form/ForgotPass';
 import Stream from './Components/Stream/Stream';
 import Stream1 from './Components/Stream/Stream1';
 import { UserContext } from './Components/Cookie/UserContext';
@@ -140,11 +139,7 @@ const router = createBrowserRouter([
 
 
 function App(props) {
-  let dataUser = useContext(UserContext);
-  let EmailUser = null
-  if (dataUser != null) {
-    EmailUser = dataUser.Email
-  }
+  
   const [showChat, setShowChat] = useState(false);
   const getUserStream = async () => {
     const localStream = await navigator.mediaDevices.getUserMedia({
@@ -156,35 +151,37 @@ function App(props) {
   };
   const connectedRef = refDatabase(db, ".info/connected");
   const participantRef = child(firepadRef, "participants");
+  let dataUser = useContext(UserContext);
   useEffect(() => {
-
-    const getEffect = async () => {
-      const stream = await getUserStream();
-      stream.getVideoTracks()[0].enabled = false;
-      props.setMainStream(stream);
-
-      onValue(refDatabase(db, ".info/connected"), (snap) => {
-        if (snap.val()) {
-          const defaultPreference = {
-            audio: false,
-            video: false,
-            screen: false,
-            master: userRole,
-          };
-          console.log("day la user: ", EmailUser);
-          const userStatusRef = push(participantRef, {
-            EmailUser,
-            preferences: defaultPreference,
-          });
-          props.setUser({
-            [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
-          });
-          console.log("props:", props);
-          onDisconnect(userStatusRef).remove();
-        }
-      });
-    };
-    getEffect();
+    let EmailUser = null
+    if (dataUser != null) {
+      EmailUser = dataUser.Email
+      const getEffect = async () => {
+        const stream = await getUserStream();
+        stream.getVideoTracks()[0].enabled = false;
+        props.setMainStream(stream);
+  
+        onValue(refDatabase(db, ".info/connected"), (snap) => {
+          if (snap.val()) {
+            const defaultPreference = {
+              audio: false,
+              video: false,
+              screen: false,
+              master: userRole,
+            };
+            const userStatusRef = push(participantRef, {
+              EmailUser,
+              preferences: defaultPreference,
+            });
+            props.setUser({
+              [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
+            });
+            onDisconnect(userStatusRef).remove();
+          }
+        });
+      };
+      getEffect();
+    }
   }, []);
 
   const isUserSet = !!props.user;
