@@ -100,13 +100,128 @@ function a11yPropstable(index) {
 
 export default function DataDetails() {
   const [valuedate, setValuedate] = React.useState([null, null]);
+  const [inputDate, setInputDate] = React.useState([null, null]);
   const [open, setOpen] = React.useState(false);
-
   const [value, setValue] = React.useState(0);
+  const [chartLabels, setChartLabels] = React.useState();
+  const [chartValue, setChartValue] = React.useState();
+  const [chartData, setChartData] = React.useState({
+    xAxis: [{ data: [] }],
+    series: [{ data: [] }],
+  });
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const handleChangeDate = (newValue) => {
+    console.log(newValue)
+    if (newValue[0] != null && newValue[1] != null) {
+      const temp = newValue.map((item) => item.format("YYYY-MM-DD"))
+      setInputDate(temp)
+      setValuedate(newValue)
+    }
+  }
+
+  //fetch data
+  async function fetchRevenueData() {
+    try {
+      console.log("start:", inputDate[0])
+      console.log("end:", inputDate[1])
+      const response = await fetch(`${process.env.REACT_APP_BASE_DOMAIN}/gettotalcommentfordaterange?datestart=${inputDate[0]}&dateend=${inputDate[1]}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+
+      const dates = [];
+      const values = [];
+
+      for (const str of data.data) {
+        const [date, value] = str.split(',');
+        dates.push(date);
+        values.push(parseFloat(value));
+      }
+      var arrayOfObjects = [];
+      dates.map((date, index) => ({ date, amount: values[index] })).forEach(temp => arrayOfObjects.push(temp));
+      // arrayOfObjects = dates.map((date, index) => ({ date, amount: values[index] }));
+
+      console.log('data:', arrayOfObjects);
+      return arrayOfObjects;
+
+    } catch (error) {
+      console.error('Error fetching revenue data:', error);
+      return [];
+    }
+  }
+
+  function aggregateWeekly(data) {
+    const aggregatedData = {};
+
+    data.forEach((entry) => {
+      const date = new Date(entry.date);
+      const weekStartDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay());
+      // const weekEndDate = new Date(weekStartDate.getFullYear(), weekStartDate.getMonth(), weekStartDate.getDate() + 6);
+      const weekKey = weekStartDate.toISOString().slice(0, 10);
+
+      if (!aggregatedData[weekKey]) {
+        aggregatedData[weekKey] = { date: weekKey, amount: entry.amount };
+      } else {
+        aggregatedData[weekKey].amount += entry.amount;
+      }
+    });
+
+    return Object.values(aggregatedData);
+  }
+
+  const updateChartWithData = async () => {
+    const startDate = inputDate[0];
+    const endDate = inputDate[1];
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Calculate the difference in milliseconds
+    const diffInMilliseconds = Math.abs(end - start);
+
+    // Convert milliseconds to days
+    const dateDiff = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
+    console.log("datediff: ", dateDiff)
+
+    let chartData;
+
+    if (dateDiff <= 14) {
+      // Show full data
+      chartData = await fetchRevenueData();
+      // chartData = (await fetchRevenueData()).filter((entry) => {
+      //   const entryDate = new Date(entry.date);
+      //   return entryDate >= startDate && entryDate <= endDate;
+      // });
+      console.log("vao day", chartData)
+    } else {
+      // Aggregate into weekly clusters
+      chartData = aggregateWeekly(await fetchRevenueData());
+      console.log("khong vao")
+    }
+
+    setChartLabels(chartData.map((entry) => entry.date));
+    setChartValue(chartData.map((entry) => entry.amount));
+    const newData = {
+      xAxis: [{ data: chartData.map((entry) => entry.date),scaleType: 'point' }],
+      series: [{ data: chartData.map((entry) => entry.amount) }],
+    };
+    setChartData(newData);
+  }
+  const generateRandomData = () => {
+    const newData = {
+      xAxis: [{ data: [0] ,scaleType: 'point'}],
+      series: [{ data: [0] }],
+    };
+    setChartData(newData);
+  };
+
+  React.useEffect(() => {
+    generateRandomData();
+  }, [])
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -124,15 +239,15 @@ export default function DataDetails() {
           </Typography>
 
           <div sx={{ width: "60%" }}>
-            <Box sx={{ border: 1, borderColor: "divider" }}>
+            <Box sx={{ border: 1, borderColor: "divider", marginTop: '30px' }}>
               <Grid item xs>
                 {" "}
-                <Typography
+                {/* <Typography
                   sx={{ fontSize: 25, margin: "10px", textAlign: "center" }}
                   gutterBottom
                 >
                   Your channel has had 9953 views in the past 28 days
-                </Typography>
+                </Typography> */}
                 <Tabs
                   value={value}
                   onChange={handleChange}
@@ -141,7 +256,7 @@ export default function DataDetails() {
                   <Tab
                     label={
                       <div>
-                        Views
+                        Comment
                         <div style={{ fontSize: "12px", color: "gray" }}>-</div>
                       </div>
                     }
@@ -172,12 +287,8 @@ export default function DataDetails() {
                 <CustomTabPanel value={value} index={0}>
                   <LineChart
                     sx={{ width: "60%" }}
-                    xAxis={[{ data: [1, 2, 3, 5, 8, 10] }]}
-                    series={[
-                      {
-                        data: [2, 5.5, 2, 8.5, 1.5, 5],
-                      },
-                    ]}
+                    xAxis={chartData.xAxis}
+                    series={chartData.series}
                     height={300}
                   />
                 </CustomTabPanel>
@@ -210,10 +321,10 @@ export default function DataDetails() {
           </div>
         </Grid>
 
-        <Grid item sx={{ width: "20%", margin: " 0 2%" }}>
+        <Grid item sx={{ width: "30%", margin: " 0 2%" }}>
           <Box
             sx={{
-              padding: "6% 0",
+              padding: "6% 0", display: 'flex', gap: '20px'
             }}
           >
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -222,15 +333,16 @@ export default function DataDetails() {
                   valuedate[0] === null && valuedate[1] === null
                     ? "FROM - TO"
                     : valuedate
-                        .map((date) =>
-                          date ? date.format("MM/DD/YYYY") : "null"
-                        )
-                        .join(" - ")
+                      .map((date) =>
+                        date ? date.format("MM/DD/YYYY") : "null"
+                      )
+                      .join(" - ")
                 }
                 valuedate={valuedate}
-                onChange={(newValue) => setValuedate(newValue)}
+                onChange={(newValue) => handleChangeDate(newValue)}
               />
             </LocalizationProvider>
+            <Button size="large" variant="outlined" onClick={updateChartWithData}>Show</Button>
           </Box>
           <CardContent sx={{ border: 1, borderColor: "divider" }}>
             <Typography

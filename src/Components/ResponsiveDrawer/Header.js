@@ -126,16 +126,21 @@ export default function Header() {
   const handleLogout = () => {
     removeCookie("user");
     setAvatarUser(null);
-
     setDataUser(null);
     navigate("/");
-    return <>{handleMenuClose()}</>;
+    setAnchorEl(null);
+    handleMobileMenuClose();
   };
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
   };
 
   const handleMenuClose = () => {
+    setAnchorEl(null);
+    handleMobileMenuClose();
+  };
+  const handleStudio = () => {
+    navigate("/studio/home");
     setAnchorEl(null);
     handleMobileMenuClose();
   };
@@ -167,7 +172,7 @@ export default function Header() {
           ) : (
             <></>
           )}
-          <MenuItem onClick={handleMenuClose}>Studio</MenuItem>
+          <MenuItem onClick={handleStudio}>Studio</MenuItem>
           <MenuItem onClick={handleLogout}>Log out</MenuItem>
         </>
       ) : (

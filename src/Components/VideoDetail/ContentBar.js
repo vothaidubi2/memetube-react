@@ -124,11 +124,9 @@ export default function ContentBar({ props }) {
                 setCountDislike(rateData.data.dislike)
             }
         };
-        return () => {
-            fetchSub();
-            fetchRate();
-            fetchCountRate();
-        }
+        fetchSub();
+        fetchRate();
+        fetchCountRate();
     }, [isSub, rate])
 
     //change data sub,like/dislike
@@ -164,7 +162,7 @@ export default function ContentBar({ props }) {
                     setRate(inputRate)
                 }
             } catch (error) {
-                if (error.response ) {
+                if (error.response) {
                     setRate(null)
                 }
             }
@@ -175,7 +173,7 @@ export default function ContentBar({ props }) {
                     setRate(inputRate)
                 }
             } catch (error) {
-                if (error.response ) {
+                if (error.response) {
                     setRate(null)
                 }
             }
@@ -226,7 +224,7 @@ export default function ContentBar({ props }) {
         Array(rows.length).fill(false)
     );
     const handleReplyClick = (index) => {
-        
+
         const updatedStatus = [...replyingToIndex];
         updatedStatus[index] = !updatedStatus[index];
         setReplyingToIndex(updatedStatus);
@@ -240,31 +238,31 @@ export default function ContentBar({ props }) {
         updatedStatus[index] = false;
         setOpenAlertIndex(updatedStatus);
     };
-    const watchUserReply = (index,idbasecmt) => {
+    const watchUserReply = (index, idbasecmt) => {
         fetchReplyCmt(idbasecmt)
         const updatedStatus = openWatchReplyComment.map((_, i) => i === index ? openWatchReplyComment[i] : false);
         updatedStatus[index] = !updatedStatus[index];
         setopenWatchReplyComment(updatedStatus);
     };
-  const handleThumbUpClicked = (index) => {
-    console.log(isThumbUpClicked);
-    const updatedStatus = [...isThumbUpClicked];
-    console.log(updatedStatus);
-    updatedStatus[index] = !updatedStatus[index];
-    setThumbUpClicked(updatedStatus);
-    if (isThumbUpClicked[index] === false) {
-      isThumbDownClicked[index] = false;
-    }
-  };
+    const handleThumbUpClicked = (index) => {
+        console.log(isThumbUpClicked);
+        const updatedStatus = [...isThumbUpClicked];
+        console.log(updatedStatus);
+        updatedStatus[index] = !updatedStatus[index];
+        setThumbUpClicked(updatedStatus);
+        if (isThumbUpClicked[index] === false) {
+            isThumbDownClicked[index] = false;
+        }
+    };
 
-  const handleThumbDownClicked = (index) => {
-    const updatedStatus = [...isThumbDownClicked];
-    updatedStatus[index] = !updatedStatus[index];
-    setThumbDownClicked(updatedStatus);
-    if (isThumbDownClicked[index] === false) {
-      isThumbUpClicked[index] = false;
-    }
-  };
+    const handleThumbDownClicked = (index) => {
+        const updatedStatus = [...isThumbDownClicked];
+        updatedStatus[index] = !updatedStatus[index];
+        setThumbDownClicked(updatedStatus);
+        if (isThumbDownClicked[index] === false) {
+            isThumbUpClicked[index] = false;
+        }
+    };
 
     //layout
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -313,7 +311,7 @@ export default function ContentBar({ props }) {
             setInputComment('');
         }
     };
-    const handleEnterReplyCmt = async (event,idbasecmt) => {
+    const handleEnterReplyCmt = async (event, idbasecmt) => {
         if (event.key === 'Enter') {
             await CommentAPI.postComment(`/postreplycomment?idvideo=${props.idvideo}&iduser=${userData.Iduser}&contents=${inputReplyComment}&idbasecmt=${idbasecmt.idcomment}`);
             fetchReplyCmt(idbasecmt.idcomment);
@@ -393,7 +391,7 @@ export default function ContentBar({ props }) {
                                                 <Alert icon={false} sx={{ display: 'flex', flexDirection: 'column' }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: "15px" }}>
                                                         <Avatar sx={{ color: 'action.active', my: 0.5 }} src="https://img.freepik.com/premium-vector/young-smiling-man-avatar-man-with-brown-beard-mustache-hair-wearing-yellow-sweater-sweatshirt-3d-vector-people-character-illustration-cartoon-minimal-style_365941-860.jpg" />
-                                                        <TextField value={inputReplyComment} onKeyPress={(e) => handleEnterReplyCmt(e,row)} onChange={(event) => handleReplyComment(event)} sx={{ width: '100%' }} id="input-with-sx" label="Your comment" variant="standard" />
+                                                        <TextField value={inputReplyComment} onKeyPress={(e) => handleEnterReplyCmt(e, row)} onChange={(event) => handleReplyComment(event)} sx={{ width: '100%' }} id="input-with-sx" label="Your comment" variant="standard" />
                                                     </Box>
                                                 </Alert>
                                             </Collapse>
@@ -635,7 +633,7 @@ export default function ContentBar({ props }) {
                                                                             sx={{ width: "auto", margin: " 0 20px", cursor: 'pointer' }}
                                                                             color={"text.secondary"}
                                                                             variant="none"
-                                                                            onClick={() => watchUserReply(rowIndex,row.idcomment)} // Clicking "1 Reply" shows commentuser
+                                                                            onClick={() => watchUserReply(rowIndex, row.idcomment)} // Clicking "1 Reply" shows commentuser
                                                                         >
                                                                             Show replies
                                                                         </Typography>

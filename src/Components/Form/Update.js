@@ -26,7 +26,7 @@ import { useNavigate } from "react-router-dom";
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
-export default function Update({ onClose,openUpdate }) {
+export default function Update({ onClose, openUpdate }) {
   const navigate = useNavigate();
   let token;
   let dataUser = React.useContext(UserContext);
@@ -37,40 +37,40 @@ export default function Update({ onClose,openUpdate }) {
     let newpass = data.get("New-password");
     let oldpass = data.get("Old-Password");
     let renewpass = data.get("re-Newpassword");
-    if (handleFormSubmit(oldpass, newpass, renewpass,selectedImage) === true) {
+    if (handleFormSubmit(oldpass, newpass, renewpass, selectedImage) === true) {
       let imageData = new FormData();
       imageData.append('files', selectedImage)
       let imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
       const encodedImageURL = encodeURIComponent(imageurl);
-        try {
+      try {
 
-          let id=dataUser.Iduser
-          console.log('dm')
-          const dataReceive = await UsersAPI.updateUser( `/updateUser?id=${id}&password=${newpass}&oldPassword=${oldpass}&image=${encodedImageURL}`
-          );
-          console.log(dataReceive.status)
-           if(dataReceive.status===200){
-            token = dataReceive.data;
-            setCookie("user", JSON.stringify(token));
-            window.location.reload();
-           }
-           console.log('moi')
-           let oldImage=dataUser.Avatar;
-            FirebaseConfig.DeleteImage(oldImage);
-
-        } catch (error) {
-          setState({
-            ...state,
-            open: true,
-            titleError: "Password is incorrect ",
-          });
-
-          console.log('cu',imageurl)
-             FirebaseConfig.DeleteImage(imageurl);
-
+        let id = dataUser.Iduser
+        console.log('dm')
+        const dataReceive = await UsersAPI.updateUser(`/updateUser?id=${id}&password=${newpass}&oldPassword=${oldpass}&image=${encodedImageURL}`
+        );
+        console.log(dataReceive.status)
+        if (dataReceive.status === 200) {
+          token = dataReceive.data;
+          setCookie("user", JSON.stringify(token));
+          window.location.reload();
         }
+        console.log('moi')
+        let oldImage = dataUser.Avatar;
+        FirebaseConfig.DeleteImage(oldImage);
 
-     
+      } catch (error) {
+        setState({
+          ...state,
+          open: true,
+          titleError: "Password is incorrect ",
+        });
+
+        console.log('cu', imageurl)
+        FirebaseConfig.DeleteImage(imageurl);
+
+      }
+
+
     }
   };
 
@@ -81,7 +81,7 @@ export default function Update({ onClose,openUpdate }) {
     titleError: "Something is wrong ",
   });
   const { vertical, horizontal, open, titleError } = state;
-  const handleFormSubmit = (oldpass, newpass, renewpass,selectedImage) => {
+  const handleFormSubmit = (oldpass, newpass, renewpass, selectedImage) => {
     console.log("new pass", newpass);
     let isValid = true; // Mặc định là hợp lệ
 
@@ -112,14 +112,14 @@ export default function Update({ onClose,openUpdate }) {
       isValid = false;
     }
     const validImageExtensions = /\.(jpg|jpeg)$/i;
-    if (selectedImage ===undefined) {
+    if (selectedImage === undefined) {
       setState({
         ...state,
         open: true,
         titleError: "File is empty ",
       });
       isValid = false;
-    }else{
+    } else {
       if (!validImageExtensions.test(selectedImage.name)) {
         setState({
           ...state,
@@ -214,7 +214,7 @@ export default function Update({ onClose,openUpdate }) {
                     fullWidth
                     name="Old-Password"
                     label="Old-Password"
-                    type="Old-Password"
+                    type="password"
                     id="Old-Password"
                     autoComplete="Old-password"
                   />
@@ -225,7 +225,7 @@ export default function Update({ onClose,openUpdate }) {
                     fullWidth
                     name="New-password"
                     label="New-password"
-                    type="New-password"
+                    type="password"
                     id="New-password"
                     autoComplete="New-password"
                   />
@@ -236,7 +236,7 @@ export default function Update({ onClose,openUpdate }) {
                     fullWidth
                     name="re-Newpassword"
                     label="Re-enter the new Password"
-                    type="re-Newpassword"
+                    type="password"
                     id="re-Newpassword"
                     autoComplete="re-Newpassword"
                   />
@@ -284,13 +284,12 @@ export default function Update({ onClose,openUpdate }) {
                   }}
                 />
               )}
-
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
-                
+
               >
                 Update
               </Button>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { visuallyHidden } from "@mui/utils";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -28,8 +28,11 @@ import CommentAPI from "../../utils/CommentAPI";
 import DateConvert from "../../utils/DayConvert";
 import RatingAPI from "../../utils/RatingAPI";
 import DeleteIcon from '@mui/icons-material/Delete';
+import { UserContext } from "../Cookie/UserContext";
+import ChannelAPI from "../../utils/ChannelAPI";
 
 export default function Comment() {
+  const userData = useContext(UserContext)
   const [videoComment, setIdvideoComment] = React.useState();
   const [listVIdeoComment, setListVideoComment] = useState([])
   const [listComment, setListComment] = useState([])
@@ -109,7 +112,8 @@ export default function Comment() {
   };
 
   const dataVideoComment = async () => {
-    const data = await VideoAPI.getOneItem("/listvideobycomment")
+    const channel = await ChannelAPI.getOneItem(`/findchannelbyiduser?iduser=${userData.Iduser}`)
+    const data = await VideoAPI.getOneItem(`/listvideobycommentchannel?idchannel=${channel.idchannel}`)
     if (data?.data.length > 0) {
       let listretult = [];
       for (let i = 0; i < data.data.length; i++) {
@@ -129,8 +133,10 @@ export default function Comment() {
     }
   };
   useEffect(() => {
-    dataVideoComment()
-  }, [])
+    if(userData){
+      dataVideoComment()
+    }
+  }, [userData])
 
   const handleDeleteCmt = async (current) => {
     if (current.idbasecmt == null) {

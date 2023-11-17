@@ -81,8 +81,10 @@ function Chat({ name }) {
   }
 
   useEffect(()=>{
-    fetchChannel()
-  getbalance()
+    if(Customer){
+      fetchChannel()
+    }
+  // getbalance()
   },[currentBalance])
   const donate = () => {
     return (

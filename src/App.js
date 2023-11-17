@@ -49,6 +49,8 @@ import jwt_decode from "jwt-decode";
 import getCookie from './Components/Cookie/getCookie';
 import NotFound from './Components/ResponsiveDrawer/NotFound';
 import ThankYou from './Components/ResponsiveDrawer/ThankYou';
+import VideoManage from './Components/Admin/VideoManage';
+import CommentManage from './Components/Admin/CommentManage';
 import CategoryManager from './Components/Admin/CategoryManager';
 function App(props) {
   const [userData, setUserData] = useState(null);
@@ -59,6 +61,9 @@ function App(props) {
       setUserData(decodedToken);
     }
   }, []);
+
+
+
 
 const theme = createTheme({
   palette: {
@@ -168,6 +173,17 @@ const router = createBrowserRouter([
       {
         path: '/admin/category',
         element: Authorization({page:CategoryManager})
+      }
+      ,
+
+      {
+        path: '/admin/video',
+        element:  <VideoManage />
+      }
+      ,
+      {
+        path: '/admin/comment',
+        element:  <CommentManage /> 
       }
       ,
 

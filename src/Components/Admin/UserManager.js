@@ -326,7 +326,9 @@ export default function UserManager() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
+
     [totalUser, order, orderBy, page, rowsPerPage,rows]
+
   );
   const handleChange = (event,indexUser,row) => {
     const { name, value } = event.target;
