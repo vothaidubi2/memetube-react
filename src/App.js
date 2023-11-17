@@ -31,6 +31,7 @@ import Layout from './Layout';
 import RecommendVideos from './Components/RecommendVideos/RecommendVideos';
 import SearchPage from './Components/Search/SearchPage';
 import Sidebar from './Components/Sidebar/Sidebar';
+import SidebarAdmin from './Components/Admin/SidebarAdmin';
 import VideoDetail from './Components/VideoDetail/VideoDetail';
 import UserChannel from './Components/Navbar/Navbar';
 import Homepage from './Components/PagesChannel/Homepage';
@@ -42,7 +43,7 @@ import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
 import Update from './Components/Form/Update';
 import Stream from './Components/Stream/Stream';
-import UserManager from './Components/Admin/UserManager';
+import UserManager from './Components/Admin/UserManage';
 import ForgotPass from './Components/Form/ForgotPass';
 import { UserContext } from './Components/Cookie/UserContext';
 import jwt_decode from "jwt-decode";
@@ -51,15 +52,55 @@ import NotFound from './Components/ResponsiveDrawer/NotFound';
 import ThankYou from './Components/ResponsiveDrawer/ThankYou';
 import VideoManage from './Components/Admin/VideoManage';
 import CommentManage from './Components/Admin/CommentManage';
+import CategoryManager from './Components/Admin/CategoryManage';
+function App(props) {
+  const [userData, setUserData] = useState(null);
+  useEffect(() => {
+    const tokenCookie = getCookie('user');
+    if (tokenCookie) {
+      const decodedToken = jwt_decode(tokenCookie);
+      setUserData(decodedToken);
+    }
+  }, []);
+
+
+
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
   },
 });
-function isUserLoggedIn() {
+
+function Authorization(options) {
+  const { page = null, sidebars = null } = options;
+ 
+console.log('userdataa',userData)
+  const currentURL = new URL(window.location.href);
   const token = getCookie('user');
-  return !!token; // Kiểm tra xem có token hay không
+if(currentURL.pathname.startsWith('/studio') ){
+if( userData==null){
+  return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+}else{
+  return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
+}
+
+}else if(currentURL.pathname.startsWith('/stream')){
+if(  userData==null){
+  return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+}else{
+  return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
+}
+
+}else if(currentURL.pathname.startsWith('/admin')){
+  if(userData==null){
+    return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+  }else if(userData.Role===false){
+    return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+  }else{
+    return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
+  }
+}
 }
 const router = createBrowserRouter([
   {
@@ -88,23 +129,23 @@ const router = createBrowserRouter([
       }
       , {
         path: '/studio/home',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={Homepage} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: Authorization({sidebars:UserChannel,page:Homepage}) 
       }, {
         path: '/studio/content',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={Content} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: Authorization({sidebars:UserChannel,page:Content})
       }, {
         path: '/studio/data',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={DataDetails} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: Authorization({sidebars:UserChannel,page:DataDetails})
       },
       {
         path: '/studio/comment',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={UserChannel} Page={Comment} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: Authorization({sidebars:UserChannel,page:Comment}) 
       }
       ,
 
       {
         path: '/channel/home',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Showsidebar={Sidebar} Page={MyChannel} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element: Authorization(Sidebar,MyChannel )
       }
       ,
 
@@ -122,32 +163,39 @@ const router = createBrowserRouter([
 
       {
         path: '/stream',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Page={Stream} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      }      ,
-
+        element: Authorization({ page: Stream})
+      }      
+,
       {
         path: '/admin/user',
-        element: isUserLoggedIn() ? <ResponsiveDrawer Page={UserManager} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      }
-      ,
+        element: Authorization({sidebars:SidebarAdmin,page:UserManager} )
+      }    ,
 
       {
+        path: '/admin/category',
+        element: Authorization({sidebars:SidebarAdmin,page:CategoryManager})
+      }
+      ,
+      {
         path: '/admin/video',
-        element: isUserLoggedIn() ? <VideoManage /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+
+        element:Authorization({sidebars:SidebarAdmin,page:VideoManage})
       }
       ,
       {
         path: '/admin/comment',
-        element: isUserLoggedIn() ? <CommentManage /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        element:   Authorization({sidebars:SidebarAdmin,page:CommentManage})
       }
       ,
 
       {
         path: '/update',
-        element: isUserLoggedIn() ?<ResponsiveDrawer Showsidebar={Sidebar} Page={Update} />: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-
-      },      {
+        element: Authorization({sidebars:Sidebar,page:Update}) 
+      }
+      , 
+           {
         path: '/forgotpass',
+
         element: <ResponsiveDrawer Showsidebar={Sidebar} Page={ForgotPass} />
 
       }
@@ -156,7 +204,7 @@ const router = createBrowserRouter([
 ]);
 
 
-function App(props) {
+
   let dataUser = useContext(UserContext);
   let EmailUser = null
   if (dataUser != null) {
@@ -234,14 +282,7 @@ function App(props) {
       });
     }
   }, [isStreamSet, isUserSet]);
-  const [userData, setUserData] = useState(null);
-  useEffect(() => {
-    const tokenCookie = getCookie('user');
-    if (tokenCookie) {
-      const decodedToken = jwt_decode(tokenCookie);
-      setUserData(decodedToken);
-    }
-  }, []);
+
 
   return (
     <UserContext.Provider value={userData}>

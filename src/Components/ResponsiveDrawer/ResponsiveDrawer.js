@@ -33,7 +33,7 @@ function ResponsiveDrawer({ Showsidebar, Page, props }) {
         },
       }}>
         <CssBaseline />
-        {(!location.pathname.startsWith('/userchannel') &&!location.pathname.startsWith('/stream') &&!location.pathname.startsWith('/teststream')&&!location.pathname.startsWith('/admin/user')
+        {(!location.pathname.startsWith('/userchannel') &&!location.pathname.startsWith('/stream') &&!location.pathname.startsWith('/teststream')
          && !location.pathname.startsWith('/watch')) ? (
           <Showsidebar props={props} />
         ) : null}

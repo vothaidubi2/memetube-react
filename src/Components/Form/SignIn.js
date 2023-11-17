@@ -24,17 +24,17 @@ export default function SignIn({ onClose }) {
   const [data, setData] = React.useState({
     email: "",
     password: "",
-    isGoogle:"false"
+    isGoogle: "false",
   });
-  const [dataGoogle,setDataGoogle]=React.useState({
-    email:"",
-    password:"",
-    status:1,
-    google:1,
-    datecreated:"",
-    role:1,
-    avatar:""
-  })
+  const [dataGoogle, setDataGoogle] = React.useState({
+    email: "",
+    password: "",
+    status: 1,
+    google: 1,
+    datecreated: "",
+    role: 1,
+    avatar: "",
+  });
   let token = "";
   const [openSignIn, setOpenSignIn] = React.useState(true);
   const [openSignUp, setOpenSignUp] = React.useState(false);
@@ -76,7 +76,7 @@ export default function SignIn({ onClose }) {
     try {
       const jsonData = JSON.stringify(data);
       const dataReceive = await UsersAPI.sendUser("/authenticate", jsonData);
-      console.log(data)
+      console.log(data);
       if (dataReceive.status === 200) {
         // Xử lý khi phản hồi thành công (status 200)
         token = dataReceive.data;
@@ -99,26 +99,25 @@ export default function SignIn({ onClose }) {
     }
   };
 
-  const handleSignIn =  (event) => {
+  const handleSignIn = (event) => {
     event.preventDefault();
-    signinToToken()
-
+    signinToToken();
   };
-    const generateRandomPassword = () => {
+  const generateRandomPassword = () => {
     // Hàm này tạo mật khẩu ngẫu nhiên, bạn có thể thay đổi cách tạo mật khẩu theo ý muốn
     const randomPassword = Math.random().toString(36).slice(-8); // Tạo mật khẩu 8 ký tự ngẫu nhiên
     return randomPassword;
-  }
-  const login = async()=>{
- try {
+  };
+  const login = async () => {
+    try {
       const jsonData = JSON.stringify(dataGoogle);
-      console.log('data',data)
+      console.log("data", data);
       const dataReceive = await UsersAPI.sendUser("/addAccount", jsonData);
       if (dataReceive.status === 200) {
         // Xử lý khi phản hồi thành công (status 200)
         token = dataReceive.data;
         setCookie("user", JSON.stringify(token));
-        console.log(token)
+        console.log(token);
         setOpenSignIn(onClose);
       } else {
         setState({
@@ -134,12 +133,11 @@ export default function SignIn({ onClose }) {
         titleError: "Email or password is not correct",
       });
     }
-  }
-   React.useEffect(() => {
-if(dataGoogle.email!==''){
-  login();
-}
-
+  };
+  React.useEffect(() => {
+    if (dataGoogle.email !== "") {
+      login();
+    }
   }, [dataGoogle]);
 
   return (
@@ -245,17 +243,15 @@ if(dataGoogle.email!==''){
                 <GoogleLogin
                   onSuccess={(credentialResponse) => {
                     var data = jwt_decode(credentialResponse.credential);
-    setDataGoogle({
-      ...dataGoogle,
-      email:data.email,
-      password:generateRandomPassword(),
-      avatar:data.picture
-    })
-
+                    setDataGoogle({
+                      ...dataGoogle,
+                      email: data.email,
+                      password: generateRandomPassword(),
+                      avatar: data.picture,
+                    });
                   }}
                   onError={() => {
-
-                    console.log('error')
+                    console.log("error");
                   }}
                 />
               </GoogleOAuthProvider>

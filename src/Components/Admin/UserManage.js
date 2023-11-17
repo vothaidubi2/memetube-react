@@ -23,19 +23,22 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Grid from "@mui/material/Grid";
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Snackbar,
+  TextField,
 } from "@mui/material";
 import VideoAPI from "../../utils/VideoAPI";
-import Moment from 'react-moment';
+import Moment from "react-moment";
 import { UserContext } from "../Cookie/UserContext";
 import FirebaseConfig from "../../utils/FirebaseConfig";
 import UsersAPI from "../../utils/UsersAPI";
 import { Check } from "@mui/icons-material";
-
+import { LoadingButton } from "@mui/lab";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -83,22 +86,25 @@ const headCells = [
     disablePadding: false,
     label: "Date created",
   },
-  
+
   {
     id: "status",
     numeric: false,
     disablePadding: false,
     label: "Status",
-  }
-  ,
-  
+  },
   {
     id: "role",
     numeric: false,
     disablePadding: false,
     label: "Admin",
-  }
-
+  },
+  {
+    id: "balance",
+    numeric: false,
+    disablePadding: false,
+    label: "Total Balance",
+  },
 ];
 
 function EnhancedTableHead(props) {
@@ -117,7 +123,6 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-    
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
@@ -153,12 +158,10 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-
-
-export default function UserManager() {
+export default function UserManage() {
   function EnhancedTableToolbar(props) {
     const { numSelected } = props;
-  
+
     return (
       <Toolbar
         sx={{
@@ -194,28 +197,40 @@ export default function UserManager() {
             </Typography>
           </>
         )}
-  
-        {numSelected > 0 ? (
-          <Tooltip title="Delete">
-            <IconButton onClick={() => handleDeleteVideo(props.listVideo)}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Tooltip title="Filter list">
-            <IconButton>
-              <FilterListIcon />
-            </IconButton>
-          </Tooltip>
-        )}
       </Toolbar>
     );
   }
-  
+
   EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
   };
-  const userData = useContext(UserContext)
+
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchEmail, setSearchEmail] = useState("");
+  // ...
+  
+  const handleSearchChange = (event) => {
+    const searchValue = event.target.value.toLowerCase();
+  
+    // Nếu giá trị tìm kiếm là rỗng, hiển thị toàn bộ dữ liệu
+    if (searchValue === "") {
+      setSearchResults([]);
+    } else {
+      // Lọc dữ liệu dựa trên giá trị tìm kiếm
+      const filteredResults = rows.filter((row) =>
+        row.email.toLowerCase().includes(searchValue)
+      );
+      setSearchResults(filteredResults);
+    }
+  
+    setSearchEmail(event.target.value);
+  };
+  
+  // ...
+  
+
+  const [balance,setBalance]=useState('')
+  const userData = useContext(UserContext);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("title");
   const [selected, setSelected] = React.useState([]);
@@ -225,33 +240,40 @@ export default function UserManager() {
 
   const [open, setOpen] = React.useState(false);
   //fetchdata
-  const [rows, setRows] = useState([])
-  const [totalUser, setTotalUser] = useState(0)
-  const fetchDataVideo = async () => {
-    const data = await UsersAPI.getall(`/getAllUser`)
-    setTotalUser(data.countUser)
-    setRows(data.data)
-    console.log("vao", data.data)
-  }
-  const [checkedStatus, setCheckedStatus] = React.useState(    rows.map(row=>row.status));
-  const handleDeleteVideo = async (item) => {
-
-    // for (let i = 0; i < item.length; i++) {
-    //   const data = await VideoAPI.deleteItem(`/deletevideo?id=${item[i].idvideo}`)
-    //   console.log("xoa", data)
-    //   FirebaseConfig.DeleteVideo(item[i].imageurl)
-    //   FirebaseConfig.DeleteImage(item[i].videourl)
-    // }
-    // setRows(rows.filter(row => row.idvideo !=item[0].idvideo))
-    // fetchDataVideo()
-  }
-
+  const [rows, setRows] = useState([]);
+  const [totalUser, setTotalUser] = useState(0);
   useEffect(() => {
     if (!open) {
-      fetchDataVideo()
+      // Nếu có kết quả tìm kiếm, hiển thị kết quả, ngược lại hiển thị toàn bộ dữ liệu
+      setRows(searchResults.length > 0 ? searchResults : []);
     }
-    fetchDataVideo()
-  }, [open])
+  }, [open, searchResults]);
+  const fetchDataUser = async () => {
+    const data = await UsersAPI.getall(`/getAllUser`);
+    setTotalUser(data.countUser);
+    setRows(data.data);
+    console.log(searchResults.length)
+    if (searchResults.length === 0) {
+      setRows(data.data);
+    }
+  };
+
+  const [state, setState] = useState({
+    openinformaiton: false,
+    vertical: "top",
+    horizontal: "center",
+    titleError: "Something is wrong ",
+    typeError:"error"
+  });
+  const [dataCategory, setDataCategory] = useState("");
+
+  const { vertical, horizontal, openinformaiton, titleError,typeError } = state;
+  useEffect(() => {
+    if (!open) {
+      fetchDataUser();
+    }
+    fetchDataUser();
+  }, [open]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -268,9 +290,32 @@ export default function UserManager() {
     }
     setSelected([]);
   };
+  const handleClickLoading = (indexUser, row) => async (event) => {
+    if(row.balance<0){
+      setState({
+        ...state,
+        openinformaiton: true,
+        titleError: "Money >0",
+        typeError:"error"
+      });
+    }else{
+      const dataReceive = await UsersAPI.updateBalance(
+        `/updatemoney?iduser=${row.iduser}&amount=${row.balance}`
+      );
+      setState({
+        ...state,
+        openinformaiton: true,
+        titleError: "Update success",
+        typeError:"success"
+      });
+    }
+
+
+  
+
+  };
 
   const handleClick = (event, name) => {
-
     const selectedIndex = selected.indexOf(name);
     let newSelected = [];
 
@@ -286,10 +331,10 @@ export default function UserManager() {
         selected.slice(selectedIndex + 1)
       );
     }
-    console.log("name:", newSelected[0])
+
     setSelected(newSelected);
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -315,47 +360,85 @@ export default function UserManager() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [rows,totalUser, order, orderBy, page, rowsPerPage]
-  );
-  const handleClickStatusUser=  (indexUser,row)=> async(event)=>{
 
-    let updatedStatus = [...rows];
+    [totalUser, order, orderBy, page, rowsPerPage,rows]
+
+  );
+  const handleChange = (event,indexUser,row) => {
+    const { name, value } = event.target;
+    let updatedbalance = [...visibleRows];
+    updatedbalance[indexUser].balance = value
+    setRows(updatedbalance);
+  };
+  const handleClose = () => {
+    setState({ ...state, openinformaiton: false });
+  };
+  const handleClickStatusUser = (indexUser, row) => async (event) => {
+    let updatedStatus = [...visibleRows];
     updatedStatus[indexUser].status = !updatedStatus[indexUser].status;
     setRows(updatedStatus);
-    const dataReceive = await UsersAPI.updateStatus( `/updateUserStatus?id=${row.iduser}&status=${rows[indexUser].status}`)
-      }
-      const handleClickRoleUser=  (indexUser,row)=> async(event)=>{
-    
-        let updatedRole = [...rows];
-        updatedRole[indexUser].role = !updatedRole[indexUser].role;
-        setRows(updatedRole);
-        const dataReceive = await UsersAPI.updateRole( `/updateUserRole?id=${row.iduser}&role=${rows[indexUser].role}`)
-          }
-    
+    const dataReceive = await UsersAPI.updateStatus(
+      `/updateUserStatus?id=${row.iduser}&status=${row.status}`
+    );
+  };
+  const handleClickRoleUser = (indexUser, row) => async (event) => {
+    let updatedRole = [...visibleRows];
+    updatedRole[indexUser].role = !updatedRole[indexUser].role;
+    setRows(updatedRole);
+    const dataReceive = await UsersAPI.updateRole(
+      `/updateUserRole?id=${row.iduser}&role=${row.role}`
+    );
+  
+
+  };
+
   return (
     <Box sx={{ width: "100%" }}>
       <Grid item xs>
-        {" "}
+      <Snackbar
+              sx={{ marginTop: "5%" }}
+              anchorOrigin={{ vertical, horizontal }}
+              open={openinformaiton}
+              onClose={handleClose}
+              message=""
+              key={vertical + horizontal}
+              autoHideDuration={3000}
+            >
+              <Alert
+                onClose={handleClose}
+               severity={typeError}
+                sx={{ width: "100%" }}
+              >
+                {titleError}
+              </Alert>
+            </Snackbar>
+
         <Typography
           sx={{
             fontSize: 27,
             fontWeight: "bold",
             marginBottom: "10px",
             margin: "10px 25px 0 25px",
-            cursor:'pointer'
+            cursor: "pointer",
           }}
           gutterBottom
         >
           Admin dashboard
         </Typography>
+        {/* <TextField
+            label="Search by Email"
+            variant="outlined"
+            value={searchEmail}
+            onChange={handleSearchChange}
+          /> */}
       </Grid>
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
-        <EnhancedTableToolbar numSelected={selected.length} listVideo={selected} handleDeleteVideo={()=>handleDeleteVideo()} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          listVideo={selected}
+        />
         <TableContainer>
-          <Table
-            aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
-          >
+          <Table aria-labelledby="tableTitle" size={dense ? "small" : "medium"}>
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
@@ -377,23 +460,56 @@ export default function UserManager() {
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
+                    <TableCell>{row.iduser}</TableCell>
 
-                      <TableCell
-                      >
-                {row.iduser}
-
+                    <TableCell sx={{ width: "350px" }} align="left">
+                      {row.email}
                     </TableCell>
 
-                    <TableCell sx={{width:"350px"}} align="left">{row.email}</TableCell>
-
-                    <TableCell  align="left"><Moment format="yyyy-MM-DD">{row.datecreated}</Moment></TableCell>
-                                        <TableCell align="left">
-                    
-                      <FormControlLabel control={<Switch   onChange={handleClickStatusUser(index,row)}   checked={row.status} />} label="Ban" />
+                    <TableCell align="left">
+                      <Moment format="yyyy-MM-DD">{row.datecreated}</Moment>
                     </TableCell>
                     <TableCell align="left">
-                    <FormControlLabel control={<Switch   onChange={handleClickRoleUser(index,row)} checked={row.role}   />} label="Admin"  />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={handleClickStatusUser(index, row)}
+                            checked={row.status}
+                          />
+                        }
+                      />
                     </TableCell>
+                    <TableCell align="left">
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            onChange={handleClickRoleUser(index, row)}
+                            checked={row.role}
+                          />
+                        }
+                      />
+                    </TableCell>
+                    <TableCell sx={{ width: "350px" }} align="left">
+                    <Box display="flex" alignItems="center" m={1} p={1}>
+                    <TextField
+                     style={{ marginRight: '8px' }}
+                required
+                id="balance"
+                defaultValue= {row.balance}
+                name="balance"
+                onChange={(event) => handleChange(event, index,row)}
+                autoFocus
+                type="number"
+              />
+                  <Button variant="outlined" 
+                   size="small"
+            onClick={handleClickLoading(index,row)}
+          >
+            <span>Update Balance</span>
+          </Button>
+          </Box>
+                    </TableCell>
+
                   </TableRow>
                 );
               })}
@@ -425,5 +541,4 @@ export default function UserManager() {
       />
     </Box>
   );
-
 }
