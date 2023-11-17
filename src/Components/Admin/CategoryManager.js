@@ -13,32 +13,14 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Grid from "@mui/material/Grid";
-import {
-  Alert,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Snackbar,
-  TextField,
-} from "@mui/material";
-import VideoAPI from "../../utils/VideoAPI";
-import Moment from "react-moment";
-import { UserContext } from "../Cookie/UserContext";
-import FirebaseConfig from "../../utils/FirebaseConfig";
-import UsersAPI from "../../utils/UsersAPI";
-import { Check } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
+import EditIcon from "@mui/icons-material/Edit";
+import { Alert, Button, TextField } from "@mui/material";
+import Snackbar from "@mui/material/Snackbar";
+import CategoryAPI from "../../utils/CategoryAPI";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -52,9 +34,26 @@ function descendingComparator(a, b, orderBy) {
 
 function getComparator(order, orderBy) {
   return order === "desc"
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
+    ? (a, b) => {
+        if (typeof a[orderBy] === 'string') {
+          // String comparison for 'name' field
+          return b[orderBy].localeCompare(a[orderBy]);
+        } else {
+          // Numeric comparison for other fields
+          return b[orderBy] - a[orderBy];
+        }
+      }
+    : (a, b) => {
+        if (typeof a[orderBy] === 'string') {
+          // String comparison for 'name' field
+          return a[orderBy].localeCompare(b[orderBy]);
+        } else {
+          // Numeric comparison for other fields
+          return a[orderBy] - b[orderBy];
+        }
+      };
 }
+
 function stableSort(array, comparator) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -69,24 +68,17 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: "iduser",
+    id: "idcategory",
     // numeric: true,
     // disablePadding: false,
     label: "Id ",
   },
   {
-    id: "email",
+    id: "name",
     numeric: false,
     disablePadding: false,
-    label: "Email",
+    label: "Name",
   },
-  {
-    id: "datecreated",
-    numeric: false,
-    disablePadding: false,
-    label: "Date created",
-  },
-
   {
     id: "status",
     numeric: false,
@@ -94,17 +86,11 @@ const headCells = [
     label: "Status",
   },
   {
-    id: "role",
+    id: "",
     numeric: false,
     disablePadding: false,
-    label: "Admin",
-  },
-  {
-    id: "balance",
-    numeric: false,
-    disablePadding: false,
-    label: "Total Balance",
-  },
+    label: "",
+  }
 ];
 
 function EnhancedTableHead(props) {
@@ -158,74 +144,19 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-export default function UserManager() {
-  function EnhancedTableToolbar(props) {
-    const { numSelected } = props;
-
-    return (
-      <Toolbar
-        sx={{
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-          ...(numSelected > 0 && {
-            bgcolor: (theme) =>
-              alpha(
-                theme.palette.primary.main,
-                theme.palette.action.activatedOpacity
-              ),
-          }),
-        }}
-      >
-        {numSelected > 0 ? (
-          <Typography
-            sx={{ flex: "1 1 100%" }}
-            color="inherit"
-            variant="subtitle1"
-            component="div"
-          >
-            {numSelected} selected
-          </Typography>
-        ) : (
-          <>
-            <Typography
-              sx={{ flex: "1 1 100%" }}
-              variant="h6"
-              id="tableTitle"
-              component="div"
-            >
-              Nutrition
-            </Typography>
-          </>
-        )}
-      </Toolbar>
-    );
-  }
-
-  EnhancedTableToolbar.propTypes = {
-    numSelected: PropTypes.number.isRequired,
+export default function CategoryManager() {
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setDataCategory((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
-
-
-  const [balance,setBalance]=useState('')
-  const userData = useContext(UserContext);
-  const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("title");
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-  const [open, setOpen] = React.useState(false);
-  //fetchdata
-  const [rows, setRows] = useState([]);
-  const [totalUser, setTotalUser] = useState(0);
-  const fetchDataUser = async () => {
-    const data = await UsersAPI.getall(`/getAllUser`);
-    setTotalUser(data.countUser);
-    setRows(data.data);
+  const handleClose = () => {
+    setState({ ...state, open: false });
   };
   const [state, setState] = useState({
-    openinformaiton: false,
+    open: false,
     vertical: "top",
     horizontal: "center",
     titleError: "Something is wrong ",
@@ -233,12 +164,123 @@ export default function UserManager() {
   });
   const [dataCategory, setDataCategory] = useState("");
 
-  const { vertical, horizontal, openinformaiton, titleError,typeError } = state;
+  const { vertical, horizontal, open, titleError,typeError } = state;
+
+
+  useEffect(() => {}, [dataCategory]);
+  function EnhancedTableToolbar(props) {
+    const { numSelected } = props;
+
+    return (
+      <>
+        <Box component="form" noValidate sx={{ mt: 3 }}>
+          <Box sx={{ width: 500 }}>
+            <Snackbar
+              sx={{ marginTop: "5%" }}
+              anchorOrigin={{ vertical, horizontal }}
+              open={open}
+              onClose={handleClose}
+              message=""
+              key={vertical + horizontal}
+              autoHideDuration={3000}
+            >
+              <Alert
+                onClose={handleClose}
+               severity={typeError}
+                sx={{ width: "100%" }}
+              >
+                {titleError}
+              </Alert>
+            </Snackbar>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={2}>
+              <TextField
+                disabled
+                id="outlined-disabled"
+                label="Id Category"
+                defaultValue={dataCategory.idcategory}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <TextField
+                required
+                fullWidth
+                id="name"
+                defaultValue={dataCategory.name}
+                name="name"
+                onChange={handleChange}
+                autoFocus
+                value={dataCategory.email}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={2}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                onClick={(event) => handleSubmit("update")(event)}
+                sx={{ mt: 1, mb: 1 }}
+              >
+                Update
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                onClick={(event) => handleSubmit("reset")(event)}
+                sx={{ mt: 1, mb: 1 }}
+              >
+                reset
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                onClick={(event) => handleSubmit("add")(event)}
+                sx={{ mt: 1, mb: 1 }}
+              >
+                Add
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
+
+     
+      </>
+    );
+  }
+
+  EnhancedTableToolbar.propTypes = {
+    numSelected: PropTypes.number.isRequired,
+  };
+  const [order, setOrder] = React.useState("asc");
+  const [orderBy, setOrderBy] = React.useState("idcategory");
+  const [selected, setSelected] = React.useState([]);
+  const [page, setPage] = React.useState(0);
+  const [dense, setDense] = React.useState(false);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  const [rows, setRows] = useState([]);
+  const [totalCategory, setTotalCategory] = useState(0);
+  const fetchDataCategory = async () => {
+    const data = await CategoryAPI.getAll(`/getallcate`);
+    setTotalCategory(data.data.length);
+    setRows(data.data);
+    console.log("vao", data.data);
+  };
+
   useEffect(() => {
     if (!open) {
-      fetchDataUser();
+      fetchDataCategory();
     }
-    fetchDataUser();
+    fetchDataCategory();
   }, [open]);
 
   const handleRequestSort = (event, property) => {
@@ -247,59 +289,7 @@ export default function UserManager() {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelected = rows.map((n) => n.idvideo);
-      // setSelected(newSelected);
-      setSelected(rows);
-      return;
-    }
-    setSelected([]);
-  };
-  const handleClickLoading = (indexUser, row) => async (event) => {
-    if(row.balance<0){
-      setState({
-        ...state,
-        openinformaiton: true,
-        titleError: "Money >0",
-        typeError:"error"
-      });
-    }else{
-      const dataReceive = await UsersAPI.updateBalance(
-        `/updatemoney?iduser=${row.iduser}&amount=${row.balance}`
-      );
-      setState({
-        ...state,
-        openinformaiton: true,
-        titleError: "Update success",
-        typeError:"success"
-      });
-    }
 
-
-  
-
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
-      );
-    }
-
-    setSelected(newSelected);
-  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -318,7 +308,7 @@ export default function UserManager() {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - totalUser) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - totalCategory) : 0;
 
   const visibleRows = React.useMemo(
     () =>
@@ -326,56 +316,79 @@ export default function UserManager() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [totalUser, order, orderBy, page, rowsPerPage,rows]
+    [totalCategory, order, orderBy, page, rowsPerPage,rows]
   );
-  const handleChange = (event,indexUser,row) => {
-    const { name, value } = event.target;
-    let updatedbalance = [...visibleRows];
-    updatedbalance[indexUser].balance = value
-    setRows(updatedbalance);
+
+  const handleClickEdit = (row) => {
+    setDataCategory(row);
   };
-  const handleClose = () => {
-    setState({ ...state, openinformaiton: false });
-  };
-  const handleClickStatusUser = (indexUser, row) => async (event) => {
+
+  
+
+  const handleClickStatusCategory = (indexUser, row) => async (event) => {
     let updatedStatus = [...visibleRows];
     updatedStatus[indexUser].status = !updatedStatus[indexUser].status;
     setRows(updatedStatus);
-    const dataReceive = await UsersAPI.updateStatus(
-      `/updateUserStatus?id=${row.iduser}&status=${row.status}`
+    const dataReceive = await CategoryAPI.updateStatus(
+      `/updateCategoryStatus?id=${row.idcategory}&status=${row.status}`
     );
   };
-  const handleClickRoleUser = (indexUser, row) => async (event) => {
-    let updatedRole = [...visibleRows];
-    updatedRole[indexUser].role = !updatedRole[indexUser].role;
-    setRows(updatedRole);
-    const dataReceive = await UsersAPI.updateRole(
-      `/updateUserRole?id=${row.iduser}&role=${row.role}`
-    );
+  const handleSubmit = (actionType) => async (event) => {
+    event.preventDefault();
+    if (actionType === "update") {
+      if (
+        dataCategory.idcategory === null ||
+        dataCategory.idcategory === undefined
+      ) {
+        setState({
+          ...state,
+          open: true,
+          titleError: "No data Category",
+          typeError:"error"
+        });
+      } else {
+        // setDataCategory(dataCategory,name:)
+        let jsondata=JSON.stringify(dataCategory)
+        const data = await CategoryAPI.updateCategory(`/updateCategory`,jsondata);
+
+        const updatedCategory = visibleRows.map((row) =>
+        row.idcategory   === dataCategory.idcategory ? { ...row, name:dataCategory.name  } : row
+      );
+      setRows(updatedCategory);
+      setState({
+        ...state,
+        open: true,
+        titleError: "Update success",
+        typeError:"success"
+      });
+      }
+    } else if (actionType === "reset") {
+      setDataCategory("");
+    } else if (actionType === "add") {
+      console.log(dataCategory);
+      if (dataCategory.idcategory === undefined) {
+        const data = await CategoryAPI.addCategory(`/addCategory?category=${dataCategory.name}`);
+        setRows(rows.concat(data));
+        setState({
+          ...state,
+          open: true,
+          titleError: "Add success",
+          typeError:"success"
+        });
+      } else {
+        setState({
+          ...state,
+          open: true,
+          titleError: "Click reset to add a new Category",
+          typeError:"error"
+        });
+      }
+    }
+  };
   
-
-  };
-
   return (
     <Box sx={{ width: "100%" }}>
       <Grid item xs>
-      <Snackbar
-              sx={{ marginTop: "5%" }}
-              anchorOrigin={{ vertical, horizontal }}
-              open={openinformaiton}
-              onClose={handleClose}
-              message=""
-              key={vertical + horizontal}
-              autoHideDuration={3000}
-            >
-              <Alert
-                onClose={handleClose}
-               severity={typeError}
-                sx={{ width: "100%" }}
-              >
-                {titleError}
-              </Alert>
-            </Snackbar>
         <Typography
           sx={{
             fontSize: 27,
@@ -389,6 +402,7 @@ export default function UserManager() {
           Admin dashboard
         </Typography>
       </Grid>
+
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
         <EnhancedTableToolbar
           numSelected={selected.length}
@@ -400,71 +414,48 @@ export default function UserManager() {
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={totalUser}
+              rowCount={totalCategory}
             />
             <TableBody>
               {visibleRows?.map((row, index) => {
                 const isItemSelected = isSelected(row);
                 const labelId = `enhanced-table-checkbox-${index}`;
-
                 return (
                   <TableRow
                     hover
                     tabIndex={-1}
-                    key={row.iduser}
+                    key={row.idcategory}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
-                    <TableCell>{row.iduser}</TableCell>
-
-                    <TableCell sx={{ width: "350px" }} align="left">
-                      {row.email}
+                    <TableCell sx={{ width: "30%" }}>
+                      {row.idcategory}
+                    </TableCell>
+                    <TableCell sx={{ width: "35%" }} align="left">
+                      {row.name}
                     </TableCell>
 
-                    <TableCell align="left">
-                      <Moment format="yyyy-MM-DD">{row.datecreated}</Moment>
-                    </TableCell>
-                    <TableCell align="left">
+                    <TableCell sx={{ width: "45%" }} align="left">
                       <FormControlLabel
                         control={
                           <Switch
-                            onChange={handleClickStatusUser(index, row)}
+                            onChange={handleClickStatusCategory(index, row)}
                             checked={row.status}
                           />
                         }
-                        label="Ban"
+                        label="Deleted"
                       />
                     </TableCell>
-                    <TableCell align="left">
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            onChange={handleClickRoleUser(index, row)}
-                            checked={row.role}
-                          />
-                        }
-                        label="Admin"
-                      />
+                    <TableCell sx={{ width: "35%" }} align="left">
+                      <Button
+                        variant="contained"
+                        onClick={() => handleClickEdit(row)}
+                        endIcon={<EditIcon />}
+                      >
+                        Edit
+                      </Button>
                     </TableCell>
-                    <TableCell sx={{ width: "350px" }} align="left">
-                    <TextField
-                required
-                id="balance"
-                defaultValue= {row.balance}
-                name="balance"
-                onChange={(event) => handleChange(event, index,row)}
-                autoFocus
-                type="number"
-              />
-                  <Button variant="outlined" 
-            onClick={handleClickLoading(index,row)}
-          >
-            <span>Fetch data</span>
-          </Button>
-                    </TableCell>
-
                   </TableRow>
                 );
               })}
@@ -474,7 +465,7 @@ export default function UserManager() {
                     height: (dense ? 33 : 53) * emptyRows,
                   }}
                 >
-                  <TableCell colSpan={5} />
+                  <TableCell colSpan={4} />
                 </TableRow>
               )}
             </TableBody>
@@ -483,7 +474,7 @@ export default function UserManager() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={totalUser}
+          count={totalCategory}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
