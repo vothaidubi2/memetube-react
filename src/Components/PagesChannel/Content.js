@@ -232,6 +232,7 @@ export default function Content() {
   //fetchdata
   const [rows, setRows] = useState([])
   const [totalVideo, setTotalVideo] = useState(0)
+  const [currentVideo, setCurrentVideo] = React.useState(null);
   const fetchDataVideo = async () => {
     const data = await VideoAPI.getallByUser(`/videobyiduser?iduser=${userData.Iduser}`)
     console.log('vao',data)
@@ -248,13 +249,14 @@ export default function Content() {
     }
     setRows(rows.filter(row => row.idvideo !=item[0].idvideo))
     fetchDataVideo()
+    setSelected([]);
   }
 
   useEffect(() => {
     if (userData) {
       fetchDataVideo()
     }
-  }, [userData])
+  }, [userData,open])
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -318,10 +320,9 @@ export default function Content() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [rows,totalVideo, order, orderBy, page, rowsPerPage]
+    [rows,totalVideo, order, orderBy, page, rowsPerPage,currentVideo]
   );
 
-  const [currentVideo, setCurrentVideo] = React.useState(null);
 
   const handleClickOpen = (video) => {
     setCurrentVideo(video)

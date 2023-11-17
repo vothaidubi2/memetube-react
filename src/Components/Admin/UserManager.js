@@ -315,7 +315,7 @@ export default function UserManager() {
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [totalUser, order, orderBy, page, rowsPerPage]
+    [rows,totalUser, order, orderBy, page, rowsPerPage]
   );
   const handleClickStatusUser=  (indexUser,row)=> async(event)=>{
 

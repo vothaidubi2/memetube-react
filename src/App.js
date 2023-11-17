@@ -49,6 +49,8 @@ import jwt_decode from "jwt-decode";
 import getCookie from './Components/Cookie/getCookie';
 import NotFound from './Components/ResponsiveDrawer/NotFound';
 import ThankYou from './Components/ResponsiveDrawer/ThankYou';
+import VideoManage from './Components/Admin/VideoManage';
+import CommentManage from './Components/Admin/CommentManage';
 
 const theme = createTheme({
   palette: {
@@ -126,6 +128,17 @@ const router = createBrowserRouter([
       {
         path: '/admin/user',
         element: isUserLoggedIn() ? <ResponsiveDrawer Page={UserManager} /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+      }
+      ,
+
+      {
+        path: '/admin/video',
+        element: isUserLoggedIn() ? <VideoManage /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+      }
+      ,
+      {
+        path: '/admin/comment',
+        element: isUserLoggedIn() ? <CommentManage /> : <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       }
       ,
 
