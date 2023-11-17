@@ -31,6 +31,7 @@ import Layout from './Layout';
 import RecommendVideos from './Components/RecommendVideos/RecommendVideos';
 import SearchPage from './Components/Search/SearchPage';
 import Sidebar from './Components/Sidebar/Sidebar';
+import SidebarAdmin from './Components/Admin/SidebarAdmin';
 import VideoDetail from './Components/VideoDetail/VideoDetail';
 import UserChannel from './Components/Navbar/Navbar';
 import Homepage from './Components/PagesChannel/Homepage';
@@ -42,7 +43,7 @@ import SignIn from './Components/Form/SignIn';
 import SignUp from './Components/Form/SignUp';
 import Update from './Components/Form/Update';
 import Stream from './Components/Stream/Stream';
-import UserManager from './Components/Admin/UserManager';
+import UserManager from './Components/Admin/UserManage';
 import ForgotPass from './Components/Form/ForgotPass';
 import { UserContext } from './Components/Cookie/UserContext';
 import jwt_decode from "jwt-decode";
@@ -51,7 +52,7 @@ import NotFound from './Components/ResponsiveDrawer/NotFound';
 import ThankYou from './Components/ResponsiveDrawer/ThankYou';
 import VideoManage from './Components/Admin/VideoManage';
 import CommentManage from './Components/Admin/CommentManage';
-import CategoryManager from './Components/Admin/CategoryManager';
+import CategoryManager from './Components/Admin/CategoryManage';
 function App(props) {
   const [userData, setUserData] = useState(null);
   useEffect(() => {
@@ -167,23 +168,23 @@ const router = createBrowserRouter([
 ,
       {
         path: '/admin/user',
-        element: Authorization({page:UserManager} )
+        element: Authorization({sidebars:SidebarAdmin,page:UserManager} )
       }    ,
 
       {
         path: '/admin/category',
-        element: Authorization({page:CategoryManager})
+        element: Authorization({sidebars:SidebarAdmin,page:CategoryManager})
       }
       ,
-
       {
         path: '/admin/video',
-        element:  <VideoManage />
+
+        element:Authorization({sidebars:SidebarAdmin,page:VideoManage})
       }
       ,
       {
         path: '/admin/comment',
-        element:  <CommentManage /> 
+        element:   Authorization({sidebars:SidebarAdmin,page:CommentManage})
       }
       ,
 

@@ -158,7 +158,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-export default function UserManager() {
+export default function UserManage() {
   function EnhancedTableToolbar(props) {
     const { numSelected } = props;
 
@@ -205,6 +205,29 @@ export default function UserManager() {
     numSelected: PropTypes.number.isRequired,
   };
 
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchEmail, setSearchEmail] = useState("");
+  // ...
+  
+  const handleSearchChange = (event) => {
+    const searchValue = event.target.value.toLowerCase();
+  
+    // Nếu giá trị tìm kiếm là rỗng, hiển thị toàn bộ dữ liệu
+    if (searchValue === "") {
+      setSearchResults([]);
+    } else {
+      // Lọc dữ liệu dựa trên giá trị tìm kiếm
+      const filteredResults = rows.filter((row) =>
+        row.email.toLowerCase().includes(searchValue)
+      );
+      setSearchResults(filteredResults);
+    }
+  
+    setSearchEmail(event.target.value);
+  };
+  
+  // ...
+  
 
   const [balance,setBalance]=useState('')
   const userData = useContext(UserContext);
@@ -219,11 +242,22 @@ export default function UserManager() {
   //fetchdata
   const [rows, setRows] = useState([]);
   const [totalUser, setTotalUser] = useState(0);
+  useEffect(() => {
+    if (!open) {
+      // Nếu có kết quả tìm kiếm, hiển thị kết quả, ngược lại hiển thị toàn bộ dữ liệu
+      setRows(searchResults.length > 0 ? searchResults : []);
+    }
+  }, [open, searchResults]);
   const fetchDataUser = async () => {
     const data = await UsersAPI.getall(`/getAllUser`);
     setTotalUser(data.countUser);
     setRows(data.data);
+    console.log(searchResults.length)
+    if (searchResults.length === 0) {
+      setRows(data.data);
+    }
   };
+
   const [state, setState] = useState({
     openinformaiton: false,
     vertical: "top",
@@ -378,6 +412,7 @@ export default function UserManager() {
                 {titleError}
               </Alert>
             </Snackbar>
+
         <Typography
           sx={{
             fontSize: 27,
@@ -390,6 +425,12 @@ export default function UserManager() {
         >
           Admin dashboard
         </Typography>
+        {/* <TextField
+            label="Search by Email"
+            variant="outlined"
+            value={searchEmail}
+            onChange={handleSearchChange}
+          /> */}
       </Grid>
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
         <EnhancedTableToolbar
@@ -436,7 +477,6 @@ export default function UserManager() {
                             checked={row.status}
                           />
                         }
-                        label="Ban"
                       />
                     </TableCell>
                     <TableCell align="left">
@@ -447,11 +487,12 @@ export default function UserManager() {
                             checked={row.role}
                           />
                         }
-                        label="Admin"
                       />
                     </TableCell>
                     <TableCell sx={{ width: "350px" }} align="left">
+                    <Box display="flex" alignItems="center" m={1} p={1}>
                     <TextField
+                     style={{ marginRight: '8px' }}
                 required
                 id="balance"
                 defaultValue= {row.balance}
@@ -461,10 +502,12 @@ export default function UserManager() {
                 type="number"
               />
                   <Button variant="outlined" 
+                   size="small"
             onClick={handleClickLoading(index,row)}
           >
-            <span>Fetch data</span>
+            <span>Update Balance</span>
           </Button>
+          </Box>
                     </TableCell>
 
                   </TableRow>
