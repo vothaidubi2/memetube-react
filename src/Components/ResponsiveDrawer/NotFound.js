@@ -1,10 +1,11 @@
 import React from 'react';
 import { Container, Typography, Button, Grid } from '@mui/material';
 import { Link } from 'react-router-dom';
+import { Margin } from '@mui/icons-material';
 
 const NotFound = () => {
   return (
-    <Container>
+    <Container sx={{marginTop:"80px"}}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Typography variant="h1" align="center">

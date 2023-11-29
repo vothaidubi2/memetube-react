@@ -75,28 +75,27 @@ const theme = createTheme({
 function Authorization(options) {
   const { page = null, sidebars = null } = options;
  
-console.log('userdataa',userData)
   const currentURL = new URL(window.location.href);
   const token = getCookie('user');
 if(currentURL.pathname.startsWith('/studio') ){
 if( userData==null){
-  return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+  return  <NotFound />
 }else{
   return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
 }
 
 }else if(currentURL.pathname.startsWith('/stream')){
 if(  userData==null){
-  return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+  return  <NotFound />
 }else{
   return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
 }
 
 }else if(currentURL.pathname.startsWith('/admin')){
   if(userData==null){
-    return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+    return  <NotFound />
   }else if(userData.Role===false){
-    return <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+    return  <NotFound />
   }else{
     return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
   }
@@ -243,7 +242,6 @@ const router = createBrowserRouter([
           props.setUser({
             [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
           });
-          console.log("props:", props);
           onDisconnect(userStatusRef).remove();
         }
       });
@@ -262,7 +260,6 @@ const router = createBrowserRouter([
           "preferences"
         );
         onChildChanged(preferenceUpdateEvent, (preferenceSnap) => {
-          console.log("cai key:", preferenceSnap.key)
           props.updateParticipant({
             [snap.key]: {
               [preferenceSnap.key]: preferenceSnap.val(),
