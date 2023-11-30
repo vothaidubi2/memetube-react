@@ -112,8 +112,14 @@ export default function Header() {
   const handleOpenUpdate = () => {
     setOpenUpdate(true);
   };
+
   const handleCloseUpdate = () => {
     setOpenUpdate(false);
+  };
+  const handleOpenAdmin = () => {
+    setAnchorEl(null);
+    handleMobileMenuClose();
+    navigate('/admin/user')
   };
   const handleCloseSignIn = () => {
     setOpenSignIn(false);
@@ -127,9 +133,9 @@ export default function Header() {
     removeCookie("user");
     setAvatarUser(null);
     setDataUser(null);
-    navigate("/");
     setAnchorEl(null);
     handleMobileMenuClose();
+    navigate("/");
   };
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
@@ -140,9 +146,9 @@ export default function Header() {
     handleMobileMenuClose();
   };
   const handleStudio = () => {
-    navigate("/studio/home");
     setAnchorEl(null);
     handleMobileMenuClose();
+    navigate("/studio/home");
   };
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
@@ -169,6 +175,11 @@ export default function Header() {
         <>
           {!tempdataUser.Google ? (
             <MenuItem onClick={handleOpenUpdate}>Update Account</MenuItem>
+          ) : (
+            <></>
+          )}
+          {tempdataUser.Role ? (
+            <MenuItem onClick={handleOpenAdmin}>Admin dashboard</MenuItem>
           ) : (
             <></>
           )}

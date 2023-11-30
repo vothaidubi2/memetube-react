@@ -50,11 +50,12 @@ function Sidebar(props) {
             path: "/admin/video",
             name: "Video Manage",
             icon: VideoSettingsIcon
-        }, {
-            path: "/admin/comment",
-            name: "Comment Manage",
-            icon: MarkChatReadIcon
-        }
+        },
+        //  {
+        //     path: "/admin/comment",
+        //     name: "Comment Manage",
+        //     icon: MarkChatReadIcon
+        // }
 
     ]
     const drawer = (

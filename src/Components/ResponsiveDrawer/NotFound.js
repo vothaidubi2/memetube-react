@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const NotFound = () => {
   return (
     <Container>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{marginTop:'80px'}}>
         <Grid item xs={12}>
           <Typography variant="h1" align="center">
             404
