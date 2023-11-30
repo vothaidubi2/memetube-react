@@ -21,10 +21,10 @@ function VideoDetail() {
     const fetchResults = async () => {
       try {
         const data = await VideoAPI.getOneItem(`/getonevideo?id=${params.get('id')}`);
-        // const suggest = await VideoAPI.getOneItem(`/gettop10video`);
+        const suggest = await VideoAPI.getOneItem(`/gettop10video`);
         setVideoDetail(data.data);
-        // setTop10Video(suggest.data)
-        // console.log(suggest.data)
+        setTop10Video(suggest.data)
+        console.log(suggest.data)
       } catch (error) {
         if (error.response || error.response.status === 404) {
           setIsAvailable(false);
