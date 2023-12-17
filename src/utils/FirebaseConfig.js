@@ -5,14 +5,14 @@ import { getStorage, ref,deleteObject } from "firebase/storage";
 import setCookie from "../Components/Cookie/setCookie";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAOqwhqnDBpRHUJQWtE79fBcUvn0zEsUF0", // Add API Key
-  databaseURL:"https://memetube-fb4a6-default-rtdb.asia-southeast1.firebasedatabase.app/" ,
-  authDomain: "memetube-fb4a6.firebaseapp.com",
-  projectId: "memetube-fb4a6",
-  storageBucket: "memetube-fb4a6.appspot.com",
-  messagingSenderId: "927981229531",
-  appId: "1:927981229531:web:54fe5041c3d10f9b1ec3fe",
-  measurementId: "G-9W90Y8VZ7J"// Add databaseURL
+    apiKey: "AIzaSyCVPWnDvCqE2WD7L6FowgYYMwGahEIC2hk",
+    authDomain: "memetube-2.firebaseapp.com",
+    databaseURL: "https://memetube-2-default-rtdb.firebaseio.com",
+    projectId: "memetube-2",
+    storageBucket: "memetube-2.appspot.com",
+    messagingSenderId: "1091776246958",
+    appId: "1:1091776246958:web:b37766e43a8b7c970a293f",
+    measurementId: "G-VLZEL8PQST"
   };
   var currentdate = new Date();
   var datetime = "Stream at: " + currentdate.getDate() + "/"

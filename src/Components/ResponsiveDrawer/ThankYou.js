@@ -30,8 +30,8 @@ const ThankYou = () => {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
-                    <Button component={Link} to="/" variant="contained" color="primary">
-                        Go to Home
+                    <Button component={Link} to="/studio/home" variant="contained" color="primary">
+                        Go back
                     </Button>
                 </Grid>
             </Grid>

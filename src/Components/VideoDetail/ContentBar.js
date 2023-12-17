@@ -31,8 +31,11 @@ import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import CommentAPI from '../../utils/CommentAPI';
 import { UserContext } from '../Cookie/UserContext';
+import EmojiFlagsIcon from '@mui/icons-material/EmojiFlags';
+import PropTypes from 'prop-types';
+import DialogInformation from '../VideoDetail/DialogInformation'
 
-
+import { blue } from '@mui/material/colors';
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -48,6 +51,8 @@ const Search = styled('div')(({ theme }) => ({
         width: 'auto',
     },
 }));
+
+const ContentReport = ['Violent or graphic content', 'Content that is abusive or incites hatred', 'Wrong information', 'Content promoting terrorism', 'Fraudulent/infringing or misleading content'];
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
     padding: theme.spacing(0, 2),
@@ -82,12 +87,29 @@ const buttonStyles = styled(IconButton)(({ theme }) => ({
 }));
 
 export default function ContentBar({ props }) {
+    //report
+    const [openDialogReport, setOpenDialogReport] = React.useState(false);
+    const [selectedValueDialogReport, setSelectedValueDialogReport] = React.useState(ContentReport[1]);
+    console.log(selectedValueDialogReport)
+    const handleClickOpenDialogReport = (idvideo, idcomment) => {
+        setSelectedIdComment(idcomment)
+        setSelectedIdVideo(idvideo)
+        setOpenDialogReport(true);
+    };
+
+    const handleCloseDialogReport = (value) => {
+        setOpenDialogReport(false);
+        setSelectedValueDialogReport(value);
+    };
+
     const userData = useContext(UserContext)
     //fetchdata
     const [isSub, setIsSub] = useState(false);
     const [rate, setRate] = useState(null);
     const [countLike, setCountLike] = useState(null);
     const [countDislike, setCountDislike] = useState(null);
+    const [selectedIdVideo, setSelectedIdVideo] = useState(null);
+    const [selectedIdComment, setSelectedIdComment] = useState(null);
     //data comment
     const [rows, setRows] = useState([]);
     const [listReplyCmt, setListReplyCmt] = useState([]);
@@ -361,7 +383,15 @@ export default function ContentBar({ props }) {
                                                         - <DateConvert date={row.datecreated} />
                                                     </Typography>
                                                 </div>
-                                            </Box>
+                                                <IconButton
+                                                    aria-label="fingerprint"
+                                                    onClick={() => handleClickOpenDialogReport(null, userData.Iduser)}
+                                                    style={{
+                                                        color: "gray",
+                                                    }}
+                                                >
+                                                    <EmojiFlagsIcon />
+                                                </IconButton>                                       </Box>
                                             <Typography>{row.contents} </Typography>
                                         </div>
                                     </Box>
@@ -446,6 +476,25 @@ export default function ContentBar({ props }) {
                     <Button sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<RedoIcon />}>Share</Button>
                 </buttonStyles>
             </MenuItem>
+            <MenuItem>
+                <buttonStyles
+                    size="large"
+                    color="inherit"
+                >
+                    <Button onClick={handleClickOpenDialogReport} sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<EmojiFlagsIcon />}>report violations</Button>
+                </buttonStyles>
+            </MenuItem>
+            <div>
+
+                {userData && <DialogInformation
+                    data={ContentReport}
+                    idvideo={selectedIdVideo}
+                    idcomment={selectedIdComment}
+                    selectedValue={selectedValueDialogReport}
+                    openDialogReport={openDialogReport}
+                    onCloseDialogReport={handleCloseDialogReport}
+                />}
+            </div>
         </Menu>
     );
     return (
@@ -467,7 +516,7 @@ export default function ContentBar({ props }) {
                                 <Typography noWrap
                                     component="div">
                                     <h4>{props?.channel?.channelname}</h4>
-                                    <h6 style={{ fontWeight: '100', color: '#aaa' }}>6 Subscriber</h6>
+                                    {/* <h6 style={{ fontWeight: '100', color: '#aaa' }}>6 Subscriber</h6> */}
                                 </Typography>
                             </Link>
                         </Typography>
@@ -508,6 +557,29 @@ export default function ContentBar({ props }) {
                         >
                             <Button sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<RedoIcon />}>Share</Button>
                         </buttonStyles>
+                        <buttonStyles
+                            size="large"
+                            color="inherit"
+                        >
+                            <Button onClick={() => handleClickOpenDialogReport(props.idvideo, null)} sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<EmojiFlagsIcon />}>report</Button>
+                        </buttonStyles>
+                        <div>
+                            {/* <Typography variant="subtitle1" component="div">
+        Selected: {selectedValueDialogReport}
+      </Typography>
+      <br />
+      <Button variant="outlined" onClick={handleClickOpenDialogReport}>
+        Open simple dialog
+      </Button> */}
+                            {userData && <DialogInformation
+                                data={ContentReport}
+                                idvideo={selectedIdVideo}
+                                idcomment={selectedIdComment}
+                                selectedValue={selectedValueDialogReport}
+                                openDialogReport={openDialogReport}
+                                onCloseDialogReport={handleCloseDialogReport}
+                            />}
+                        </div>
                     </Box>
                     <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
@@ -619,6 +691,15 @@ export default function ContentBar({ props }) {
                                                                             <Typography color={"text.secondary"}>
                                                                                 - <DateConvert date={row.datecreated} />                                                                            </Typography>
                                                                         </div>
+                                                                        <IconButton
+                                                                            aria-label="fingerprint"
+                                                                            onClick={() => handleClickOpenDialogReport(null, userData.Iduser)}
+                                                                            style={{
+                                                                                color: "gray",
+                                                                            }}
+                                                                        >
+                                                                            <EmojiFlagsIcon />
+                                                                        </IconButton>
                                                                     </Box>
                                                                     <Typography>{row.contents} </Typography>
                                                                     <Box sx={{ display: "flex", alignItems: "center" }}>

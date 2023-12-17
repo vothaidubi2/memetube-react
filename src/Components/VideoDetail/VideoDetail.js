@@ -134,66 +134,67 @@ function VideoDetail() {
         >
           {top10Video && (top10Video.map((item, key) => {
             return(
-              <Card sx={{ width: "100%" }} key={key}>
-              <CardActionArea>
-                <Link
-                  style={{
-                    backgroundImage: "none",
-                    display: "flex",
-                    textDecoration: "none",
-                    color: "white",
-                    width: '100%'
-                  }}
-                  to={`/watch?id=${item.idvideo}`}
-                >
-                  <div style={{ width: '40%' }}>
-                    <CardMedia
-                      component="video"
-                      height="100%"
-                      poster={item.imageurl}
-                      src={item.videourl}
-                      frameBorder="0"
-                      title={item.title}
-                      sx={{ width: '100%' }}
-                    />
-                  </div>
-                  <div style={{ width: '60%' }}>
-                    <CardContent
-                    >
-                      <Typography
-                        gutterBottom
-                        variant="h6"
-                        component="div"
-                        sx={{
-                          fontSize: '16px',
-                          display: "block",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {item.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: "13px", }}>
-                        {item.channel.channelname}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          fontSize: "13px",
-                          display: "flex",
-                          gap: "10px",
-                          alignItems: "center",
-                        }}
-                      >
-                        {item.viewcount} <CircleIcon sx={{ fontSize: "12px" }} /> {item.datecreated}
-                      </Typography>
-                    </CardContent>
-                  </div>
-                </Link>
-              </CardActionArea>
-            </Card>
+              <></>
+            //   <Card sx={{ width: "100%" }} key={key}>
+            //   <CardActionArea>
+            //     <Link
+            //       style={{
+            //         backgroundImage: "none",
+            //         display: "flex",
+            //         textDecoration: "none",
+            //         color: "white",
+            //         width: '100%'
+            //       }}
+            //       to={`/watch?id=${item.idvideo}`}
+            //     >
+            //       <div style={{ width: '40%' }}>
+            //         <CardMedia
+            //           component="video"
+            //           height="100%"
+            //           poster={item.imageurl}
+            //           src={item.videourl}
+            //           frameBorder="0"
+            //           title={item.title}
+            //           sx={{ width: '100%' }}
+            //         />
+            //       </div>
+            //       <div style={{ width: '60%' }}>
+            //         <CardContent
+            //         >
+            //           <Typography
+            //             gutterBottom
+            //             variant="h6"
+            //             component="div"
+            //             sx={{
+            //               fontSize: '16px',
+            //               display: "block",
+            //               whiteSpace: "nowrap",
+            //               overflow: "hidden",
+            //               textOverflow: "ellipsis",
+            //             }}
+            //           >
+            //             {item.title}
+            //           </Typography>
+            //           <Typography variant="body2" color="text.secondary" sx={{ fontSize: "13px", }}>
+            //             {item.channel.channelname}
+            //           </Typography>
+            //           <Typography
+            //             variant="body2"
+            //             color="text.secondary"
+            //             sx={{
+            //               fontSize: "13px",
+            //               display: "flex",
+            //               gap: "10px",
+            //               alignItems: "center",
+            //             }}
+            //           >
+            //             {item.viewcount} <CircleIcon sx={{ fontSize: "12px" }} /> {item.datecreated}
+            //           </Typography>
+            //         </CardContent>
+            //       </div>
+            //     </Link>
+            //   </CardActionArea>
+            // </Card>
             )
           }))}
         </Box>
