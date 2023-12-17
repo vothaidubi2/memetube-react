@@ -79,7 +79,7 @@ function App(props) {
     const { page = null, sidebars = null } = options;
    
     const currentURL = new URL(window.location.href);
-    const token = getCookie('user');
+const token = getCookie('user');
   if(currentURL.pathname.startsWith('/stream')){
   if( userData==null){
     return  <NotFound />
@@ -183,7 +183,7 @@ return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
         },
         {
           path: '/subscription',
-          element: <Authorization sidebars= {Sidebar} page= {Subscription} />
+element: <Authorization sidebars= {Sidebar} page= {Subscription} />
         },
         {
           path: '/likevideo',
@@ -296,7 +296,7 @@ element: <Authorization sidebars={Sidebar} page={Update} />
           "preferences"
         );
         onChildChanged(preferenceUpdateEvent, (preferenceSnap) => {
-          console.log("cai key:", preferenceSnap.key)
+console.log("cai key:", preferenceSnap.key)
           props.updateParticipant({
             [snap.key]: {
               [preferenceSnap.key]: preferenceSnap.val(),

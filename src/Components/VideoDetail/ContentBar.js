@@ -31,9 +31,11 @@ import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import CommentAPI from '../../utils/CommentAPI';
 import { UserContext } from '../Cookie/UserContext';
-import NotificationAPI from '../../utils/NotificationAPI';
+import EmojiFlagsIcon from '@mui/icons-material/EmojiFlags';
+import PropTypes from 'prop-types';
+import DialogInformation from '../VideoDetail/DialogInformation'
 
-
+import { blue } from '@mui/material/colors';
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -49,6 +51,8 @@ const Search = styled('div')(({ theme }) => ({
         width: 'auto',
     },
 }));
+
+const ContentReport = ['Violent or graphic content', 'Content that is abusive or incites hatred', 'Wrong information', 'Content promoting terrorism', 'Fraudulent/infringing or misleading content'];
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
     padding: theme.spacing(0, 2),
@@ -83,12 +87,29 @@ const buttonStyles = styled(IconButton)(({ theme }) => ({
 }));
 
 export default function ContentBar({ props }) {
+    //report
+    const [openDialogReport, setOpenDialogReport] = React.useState(false);
+    const [selectedValueDialogReport, setSelectedValueDialogReport] = React.useState(ContentReport[1]);
+    console.log(selectedValueDialogReport)
+    const handleClickOpenDialogReport = (idvideo, idcomment) => {
+        setSelectedIdComment(idcomment)
+        setSelectedIdVideo(idvideo)
+        setOpenDialogReport(true);
+    };
+
+    const handleCloseDialogReport = (value) => {
+        setOpenDialogReport(false);
+        setSelectedValueDialogReport(value);
+    };
+
     const userData = useContext(UserContext)
     //fetchdata
     const [isSub, setIsSub] = useState(false);
     const [rate, setRate] = useState(null);
     const [countLike, setCountLike] = useState(null);
     const [countDislike, setCountDislike] = useState(null);
+    const [selectedIdVideo, setSelectedIdVideo] = useState(null);
+    const [selectedIdComment, setSelectedIdComment] = useState(null);
     //data comment
     const [rows, setRows] = useState([]);
     const [listReplyCmt, setListReplyCmt] = useState([]);
@@ -129,23 +150,13 @@ export default function ContentBar({ props }) {
         fetchRate();
         fetchCountRate();
     }, [isSub, rate])
-   
-const [statusComment, setStatusComment]=useState('video')
-const [idreplyComment, setIdReplyComment]=useState('')
+
     //change data sub,like/dislike
     const addSub = async () => {
         try {
             const data = await SubscribeAPI.addSub(`/addsub?iduser=${userData.Iduser}&idchannel=${props.channel.idchannel}`);
             if (data.status == 201) {
                 setIsSub(true)
-                setStatusComment('sub')
-                setDataNotification({
-                    ...dataNotification,
-                    title: `New customer subscriber`,
-                    contents: `${userData.Email} has become a subscriber`,
-                    redirecturl: "http://localhost:3000/studio/home",
-                  });
-
             }
         } catch (error) {
             if (error.response) {
@@ -157,7 +168,6 @@ const [idreplyComment, setIdReplyComment]=useState('')
     const deleteSub = async () => {
         try {
             const data = await SubscribeAPI.deleteSub(`/deletesub?iduser=${userData.Iduser}&idchannel=${props.channel.idchannel}`);
-
             if (data.status == 200) {
                 setIsSub(false)
             }
@@ -165,48 +175,6 @@ const [idreplyComment, setIdReplyComment]=useState('')
 
         }
     }
-    
-    const [dataNotification,setDataNotification] =  useState({
-        Idnotification: "",
-        Iduser: "",
-        title: ``,
-        contents: ``,
-        datecreate: "",
-        checked: false,
-        redirecturl: '',
-        status: true,
-    });
-  
-
-
-        const addNotificationOnetoOne = async (dataNotifications) => {
-          const jsonData = JSON.stringify(dataNotifications);
-          const iduser  = props.channel.users.iduser;
-            if(statusComment==="replycomment"){
-                try {
-                    const data = await NotificationAPI.addnotificationOnetoOne(
-                      `/addNotificationRatingorSub?Idsend=${userData.Iduser}&idreceive=${idreplyComment}&idvideo=${props.idvideo}&idchannel=${props.channel.idchannel}&issub=${statusComment}`,
-                      jsonData
-                    );
-                    console.log("success:", jsonData);
-                  } catch (error) {
-                    console.log("Error reply", error);
-                  }
-            }else{
-                try {
-                    const data = await NotificationAPI.addnotificationOnetoOne(
-                      `/addNotificationRatingorSub?Idsend=${userData.Iduser}&idreceive=${iduser}&idvideo=${props.idvideo}&idchannel=${props.channel.idchannel}&issub=${statusComment}`,
-                      jsonData
-                    );
-                    console.log("success:", jsonData);
-                  } catch (error) {
-                    console.log("Error", error);
-                  }
-            }
-
-        };
-    
-
 
     const modifyRate = async (inputRate) => {
         if (rate != null) {
@@ -223,13 +191,6 @@ const [idreplyComment, setIdReplyComment]=useState('')
         } else {
             try {
                 const data = await RatingAPI.addRate(`/addrate?iduser=${userData.Iduser}&idvideo=${props.idvideo}&rate=${inputRate}`);
-                setDataNotification({
-                    ...dataNotification,
-                    title: `New customer like video ${props.title}`,
-                    contents: `${userData.Email} like video`,
-                    redirecturl: "http://localhost:3000/studio/home",
-                  });
-                  setStatusComment('video');
                 if (data.status == 201) {
                     setRate(inputRate)
                 }
@@ -240,14 +201,6 @@ const [idreplyComment, setIdReplyComment]=useState('')
             }
         }
     }
-useEffect((
-) => {
-    if(dataNotification.title!==""){
-        addNotificationOnetoOne(dataNotification);
-    }
-
-  }, [dataNotification]);
-
 
     const deleteRate = async () => {
         try {
@@ -378,30 +331,13 @@ useEffect((
             await CommentAPI.postComment(`/postcomment?idvideo=${props.idvideo}&iduser=${userData.Iduser}&contents=${inputComment}`);
             fetchBaseCmt();
             setInputComment('');
-            setStatusComment('comment');
-            setDataNotification({
-                ...dataNotification,
-                title: `${userData.Email} post comment this  video ${props.title}`,
-                contents: `${inputComment}`,
-                redirecturl:    `http://localhost:3000/watch?id=${props.idvideo}`,
-              });
-             
         }
     };
     const handleEnterReplyCmt = async (event, idbasecmt) => {
         if (event.key === 'Enter') {
             await CommentAPI.postComment(`/postreplycomment?idvideo=${props.idvideo}&iduser=${userData.Iduser}&contents=${inputReplyComment}&idbasecmt=${idbasecmt.idcomment}`);
             fetchReplyCmt(idbasecmt.idcomment);
-            
             setInputReplyComment('');
-            setIdReplyComment(idbasecmt.users.iduser)
-            setStatusComment('replycomment');
-            setDataNotification({
-                ...dataNotification,
-                title: `${userData.Email} reply comment this  video ${idbasecmt.contents}`,
-                contents: `${inputReplyComment}`,
-                redirecturl:    `http://localhost:3000/watch?id=${props.idvideo}`,
-              });
         }
     };
     const handleComment = (event) => {
@@ -447,7 +383,15 @@ useEffect((
                                                         - <DateConvert date={row.datecreated} />
                                                     </Typography>
                                                 </div>
-                                            </Box>
+                                                <IconButton
+                                                    aria-label="fingerprint"
+                                                    onClick={() => handleClickOpenDialogReport(null, userData.Iduser)}
+                                                    style={{
+                                                        color: "gray",
+                                                    }}
+                                                >
+                                                    <EmojiFlagsIcon />
+                                                </IconButton>                                       </Box>
                                             <Typography>{row.contents} </Typography>
                                         </div>
                                     </Box>
@@ -532,6 +476,25 @@ useEffect((
                     <Button sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<RedoIcon />}>Share</Button>
                 </buttonStyles>
             </MenuItem>
+            <MenuItem>
+                <buttonStyles
+                    size="large"
+                    color="inherit"
+                >
+                    <Button onClick={handleClickOpenDialogReport} sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<EmojiFlagsIcon />}>report violations</Button>
+                </buttonStyles>
+            </MenuItem>
+            <div>
+
+                {userData && <DialogInformation
+                    data={ContentReport}
+                    idvideo={selectedIdVideo}
+                    idcomment={selectedIdComment}
+                    selectedValue={selectedValueDialogReport}
+                    openDialogReport={openDialogReport}
+                    onCloseDialogReport={handleCloseDialogReport}
+                />}
+            </div>
         </Menu>
     );
     return (
@@ -553,7 +516,7 @@ useEffect((
                                 <Typography noWrap
                                     component="div">
                                     <h4>{props?.channel?.channelname}</h4>
-                                    <h6 style={{ fontWeight: '100', color: '#aaa' }}>6 Subscriber</h6>
+                                    {/* <h6 style={{ fontWeight: '100', color: '#aaa' }}>6 Subscriber</h6> */}
                                 </Typography>
                             </Link>
                         </Typography>
@@ -594,6 +557,29 @@ useEffect((
                         >
                             <Button sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<RedoIcon />}>Share</Button>
                         </buttonStyles>
+                        <buttonStyles
+                            size="large"
+                            color="inherit"
+                        >
+                            <Button onClick={() => handleClickOpenDialogReport(props.idvideo, null)} sx={{ color: 'white', border: '1px solid #aaa', borderRadius: "15px" }} variant="secondary" startIcon={<EmojiFlagsIcon />}>report</Button>
+                        </buttonStyles>
+                        <div>
+                            {/* <Typography variant="subtitle1" component="div">
+        Selected: {selectedValueDialogReport}
+      </Typography>
+      <br />
+      <Button variant="outlined" onClick={handleClickOpenDialogReport}>
+        Open simple dialog
+      </Button> */}
+                            {userData && <DialogInformation
+                                data={ContentReport}
+                                idvideo={selectedIdVideo}
+                                idcomment={selectedIdComment}
+                                selectedValue={selectedValueDialogReport}
+                                openDialogReport={openDialogReport}
+                                onCloseDialogReport={handleCloseDialogReport}
+                            />}
+                        </div>
                     </Box>
                     <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
@@ -705,6 +691,15 @@ useEffect((
                                                                             <Typography color={"text.secondary"}>
                                                                                 - <DateConvert date={row.datecreated} />                                                                            </Typography>
                                                                         </div>
+                                                                        <IconButton
+                                                                            aria-label="fingerprint"
+                                                                            onClick={() => handleClickOpenDialogReport(null, userData.Iduser)}
+                                                                            style={{
+                                                                                color: "gray",
+                                                                            }}
+                                                                        >
+                                                                            <EmojiFlagsIcon />
+                                                                        </IconButton>
                                                                     </Box>
                                                                     <Typography>{row.contents} </Typography>
                                                                     <Box sx={{ display: "flex", alignItems: "center" }}>
