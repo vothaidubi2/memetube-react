@@ -632,7 +632,8 @@ useEffect((
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <Typography component='h6' sx={{ display: 'flex', gap: '5px' }}>
-                                    <NumberFormatter value={195131242} /> Comments
+                                    {/* <NumberFormatter value={195131242} />  */}
+                                    Comments
                                 </Typography>
                                 <Box>
                                     <Button

@@ -467,7 +467,7 @@ const exportFile = () => {
                                                     className="smallimage"
                                                     src={row.imageurl}
                                                     alt=""
-                                                    width={"50%"}
+                                                    width={"250px"}
                                                 />
 
                                                 <Dialog
