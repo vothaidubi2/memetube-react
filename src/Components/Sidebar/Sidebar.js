@@ -39,7 +39,7 @@ function Sidebar(props) {
     const menuItem2 = [
 
          {
-            path: `/studio/mychannel`,
+            path: `/mychannel`,
             name: "Your Videos",
             icon: OndemandVideoIcon  
         }, {

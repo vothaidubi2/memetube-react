@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 import { Margin } from '@mui/icons-material';
 
 const NotFound = () => {
-    <Container>
-      <Grid container spacing={3} sx={{marginTop:'80px'}}>
+  return (
+    <Container sx={{marginTop:"80px"}}>
+      <Grid container spacing={3}>
         <Grid item xs={12}>
           <Typography variant="h1" align="center">
             404
@@ -21,6 +22,7 @@ const NotFound = () => {
         </Grid>
       </Grid>
     </Container>
+  );
 };
 
 export default NotFound;

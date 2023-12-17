@@ -55,24 +55,16 @@ function Subscription() {
 
     //fetch api
     const [videosList, setVideosList] = useState([]);
-    const [videosListByCate, setVideosListByCate] = useState([]);
-    const [listCate, setListcate] = useState([]);
+
 
     const fetchResults = async () => {
         const data = await SubscriptionAPI.getAllVideo(`/getSubscription?iduser=${userData.Iduser}`);
         setVideosList(data.data);
-        setVideosListByCate([])
         console.log('data sub',data)
     };
-    const fetchsByIdcate = async (cate) => {
-        const data = await VideoAPI.getByCate(`/videobycate?cate=${cate}`);
-        setVideosListByCate(data);
-        setVideosList([])
-        console.log(data)
-    };
+
     const fetchCategory = async () => {
         const data = await CategoryAPI.getAll("/getallcate")
-        setListcate(data.data);
         console.log("cate: ",data)
     }
     useEffect(() => {
@@ -91,52 +83,12 @@ function Subscription() {
                     <Box sx={{ marginTop: 2 }}>
                         <Stack direction="row" spacing={1} sx={{ display: 'flex', flexWrap: 'wrap', marginBottom: '20px' }}>
                             <Chip onClick={fetchResults} component="button" label="All" sx={{ cursor: 'pointer',padding:'0 5px' }} />
-                            {listCate &&( listCate.map((item,key)=>{
-                                return(
-                                    <Chip onClick={()=>fetchsByIdcate(item.idcategory)} component="button" key={key} label={item.name} sx={{ cursor: 'pointer',padding:'0 5px' }} />
-                                )
-                            }))}
                         </Stack>
                     </Box>
                     <Box
                         component="div"
                         sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '20px', justifyContent: 'space-between' }}
                     >
-                         {(videosListByCate.map((item, key) => {
-                            return (
-                                <Card sx={{ borderRadius: '10px', minWidth: '150px', width: '380px', maxWidth: '450px' }} key={key}>
-                                    <CardActionArea>
-                                        {/* <Link to={`/watch?id=${item.idvideo}`} style={{ textDecoration: 'none', color: 'white' }} > */}
-                                            <CardMedia
-                                                 onClick={handleVideo(item.idvideo)} 
-                                                component="video"
-                                                src={item.videourl}
-                                                title={item.title}
-                                                width={'100%'}
-                                                sx={{ objectFit: 'cover', maxHeight: '200px' }}
-                                                ref={videoRef}
-                                                frameBorder={'0'}
-                                                poster={item.imageurl}
-                                            // onMouseEnter={handleMouseEnter}
-                                            // onMouseLeave={handleMouseLeave}
-                                            // controls={controlsVisible}
-                                            />
-                                            <CardContent >
-                                                <Typography gutterBottom variant="h6" component="div" sx={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                    {item.title}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {item.channel.channelname}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                                    {(item.viewcount >= 1000 ? <NumberFormatter value={item.viewcount} /> : item.viewcount)} Views<CircleIcon sx={{ fontSize: '12px' }} /> <DateConvert date={item.datecreated} />
-                                                </Typography>
-                                            </CardContent>
-                                        {/* </Link> */}
-                                    </CardActionArea>
-                                </Card>
-                            )
-                        }))}
                         {videosList===null ? <></>:<>          {(videosList.map((item, key) => {
                             return (
                                 <Card sx={{ borderRadius: '10px', minWidth: '150px', width: '380px', maxWidth: '450px' }} key={key}>

@@ -163,6 +163,7 @@ export default function Header() {
     navigate("/");
     setAnchorEl(null);
     handleMobileMenuClose();
+    window.location.reload();
   };
   const handleMobileMenuClose = () => {
     setMobileMoreAnchorEl(null);
