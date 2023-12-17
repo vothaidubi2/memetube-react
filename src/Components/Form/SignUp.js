@@ -118,7 +118,7 @@ const sendData=async ()=>{
       });
       isValid = false;
     }
-    const validImageExtensions = /\.(jpg|jpeg)$/i;
+    const validImageExtensions = /\.(jpg|jpeg|png)$/i;
     if (selectedImage ===undefined) {
       setState({
         ...state,

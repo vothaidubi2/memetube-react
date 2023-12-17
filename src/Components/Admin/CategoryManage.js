@@ -21,7 +21,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import { Alert, Button, TextField } from "@mui/material";
 import Snackbar from "@mui/material/Snackbar";
 import CategoryAPI from "../../utils/CategoryAPI";
-
+import {utils,writeFile} from "xlsx";
+import ImportExportIcon from '@mui/icons-material/ImportExport';
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -212,7 +213,7 @@ export default function CategoryManager() {
                 name="name"
                 onChange={handleChange}
                 autoFocus
-                value={dataCategory.email}
+                value={dataCategory.name  }
               />
             </Grid>
 
@@ -323,11 +324,28 @@ export default function CategoryManager() {
     setDataCategory(row);
   };
 
-  
+  const [shouldExport, setShouldExport] = useState(false);
 
-  const handleClickStatusCategory = (indexUser, row) => async (event) => {
+  const handleExportClick = () => {
+    setShouldExport(true);
+  };
+
+  const exportFile = () => {
+    var wb = utils.book_new(),
+      ws = utils.json_to_sheet(rows);
+    utils.book_append_sheet(wb, ws, "Video");
+
+    writeFile(ws, "Video.xlsx");
+  };
+  useEffect(() => {
+    if (shouldExport) {
+      exportFile();
+      setShouldExport(false);
+    }
+  }, [shouldExport]);
+  const handleClickStatusCategory = (index, row) => async (event) => {
     let updatedStatus = [...visibleRows];
-    updatedStatus[indexUser].status = !updatedStatus[indexUser].status;
+    updatedStatus[index].status = !updatedStatus[index].status;
     setRows(updatedStatus);
     const dataReceive = await CategoryAPI.updateStatus(
       `/updateCategoryStatus?id=${row.idcategory}&status=${row.status}`
@@ -343,10 +361,20 @@ export default function CategoryManager() {
         setState({
           ...state,
           open: true,
-          titleError: "No data Category",
+          titleError:     "No data Category",
           typeError:"error"
         });
-      } else {
+      } else if(   dataCategory.name===''){
+        setState({
+          ...state,
+          open: true,
+          titleError:     "No data Category",
+          typeError:"error"
+        });
+      }
+      
+      
+      else  {
         // setDataCategory(dataCategory,name:)
         let jsondata=JSON.stringify(dataCategory)
         const data = await CategoryAPI.updateCategory(`/updateCategory`,jsondata);
@@ -404,10 +432,20 @@ export default function CategoryManager() {
       </Grid>
 
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
+      <Button
+               
+               variant="outlined"
+               size="small"
+               onClick={handleExportClick} // Khi nhấn nút, set cờ shouldExport thành true
+             >
+               <ImportExportIcon/>
+               <span>Export excel</span>
+             </Button>
         <EnhancedTableToolbar
           numSelected={selected.length}
           listVideo={selected}
         />
+        
         <TableContainer>
           <Table aria-labelledby="tableTitle" size={dense ? "small" : "medium"}>
             <EnhancedTableHead
@@ -418,6 +456,7 @@ export default function CategoryManager() {
               rowCount={totalCategory}
             />
             <TableBody>
+              
               {visibleRows?.map((row, index) => {
                 const isItemSelected = isSelected(row);
                 const labelId = `enhanced-table-checkbox-${index}`;
@@ -444,7 +483,6 @@ export default function CategoryManager() {
                             checked={row.status}
                           />
                         }
-                        label="Deleted"
                       />
                     </TableCell>
                     <TableCell sx={{ width: "35%" }} align="left">

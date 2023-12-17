@@ -53,7 +53,10 @@ import ThankYou from './Components/ResponsiveDrawer/ThankYou';
 import VideoManage from './Components/Admin/VideoManage';
 import CommentManage from './Components/Admin/CommentManage';
 import CategoryManager from './Components/Admin/CategoryManage';
-import ReportManage from './Components/Admin/ReportManage';
+import ChannelManage from './Components/Admin/ChannelManage';
+import TrendingVideo from './Components/RecommendVideos/TrendingVideo';
+import Subscription from './Components/RecommendVideos/Subscription';
+import Likevideo from './Components/RecommendVideos/Likevideo';
 function App(props) {
   const [userData, setUserData] = useState(null);
   useEffect(() => {
@@ -67,146 +70,172 @@ function App(props) {
 
 
 
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
-
-function Authorization(options) {
-  const { page = null, sidebars = null } = options;
- 
-  const currentURL = new URL(window.location.href);
-  const token = getCookie('user');
-if(currentURL.pathname.startsWith('/studio') ){
-if( userData==null){
-  return  <NotFound />
-}else{
-  return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
-}
-
-}else if(currentURL.pathname.startsWith('/stream')){
-if(  userData==null){
-  return  <NotFound />
-}else{
-  return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
-}
-
-}else if(currentURL.pathname.startsWith('/admin')){
-  if(userData==null){
-    return  <NotFound />
-  }else if(userData.Role===false){
+  const theme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  });
+  function AuthorizationStream(options) {
+    const { page = null, sidebars = null } = options;
+   
+    const currentURL = new URL(window.location.href);
+const token = getCookie('user');
+  if(currentURL.pathname.startsWith('/stream')){
+  if( userData==null){
     return  <NotFound />
   }else{
     return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
   }
-}
-}
-const router = createBrowserRouter([
-  {
-    path: '/*',
-    element: <NotFound />
-  },
-  {
-    path: '/success-transaction',
-    element: <ThankYou />
-  },
-  {
-    element: <Layout />,
+  
+  
+  }
+  }
+  function Authorization(options) {
+    const { page = null, sidebars = null } = options;
 
-    children: [
-      {
-        path: '/',
-        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
-      },
-      {
-        path: '/search',
-        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SearchPage} />
-      },
-      {
-        path: '/watch',
-        element: <ResponsiveDrawer Page={VideoDetail} />
+    console.log('co vao day')
+    const currentURL = new URL(window.location.href);
+    const token = getCookie('user');
+    if(currentURL.pathname.startsWith('/studio') || currentURL.pathname.startsWith('/stream')||currentURL.pathname.startsWith('/subscription')||currentURL.pathname.startsWith('/likevideo')||currentURL.pathname.startsWith('/mychannel')) {
+      if (userData == null) {
+        return <NotFound />
+      } else {
+return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
       }
-      , {
-        path: '/studio/home',
-        element: Authorization({sidebars:UserChannel,page:Homepage}) 
-      }, {
-        path: '/studio/content',
-        element: Authorization({sidebars:UserChannel,page:Content})
-      }, {
-        path: '/studio/data',
-        element: Authorization({sidebars:UserChannel,page:DataDetails})
-      },
-      {
-        path: '/studio/comment',
-        element: Authorization({sidebars:UserChannel,page:Comment}) 
-      }
-      ,
 
-      {
-        path: '/channel/home',
-        element: Authorization(Sidebar,MyChannel )
-      }
-      ,
+    } 
 
-      {
-        path: '/signin',
-        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignIn} />
+    else if (currentURL.pathname.startsWith('/admin')) {
+      if (userData == null) {
+        return <NotFound />
+      } else if (userData.Role === false) {
+        return <NotFound />
+      } else {
+        return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
       }
-      ,
+    }
+  }
+  const router = createBrowserRouter([
+    {
+      path: '*',
+      element: <NotFound />
+    },
+    {
+      path: '/success-transaction',
+      element: <ThankYou />
+    },
+    {
+      element: <Layout />,
 
-      {
-        path: '/signup',
-        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignUp} />
-      }
-      ,
+      children: [
+        {
+          path: '/',
+          element: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
+        },
+        {
+          path: '/search',
+          element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SearchPage} />
+        },
+        {
+          path: '/watch',
+          element: <ResponsiveDrawer Page={VideoDetail} />
+        }
+        , {
+          path: '/studio/home',
+          element: <Authorization sidebars= {UserChannel} page= {Homepage} />
+        }, {
+          path: '/studio/content',
+          element: <Authorization sidebars= {UserChannel} page= {Content} />
+        }, {
+          path: '/studio/data',
+          element: <Authorization sidebars= {UserChannel} page= {DataDetails} />
+        },
+        {
+          path: '/studio/comment',
+          element: <Authorization sidebars= {UserChannel} page= {Comment} />
+        },
+        {
+          path: '/mychannel',
+          element: <Authorization sidebars= {Sidebar} page= {MyChannel} />
+        }
+        ,
 
-      {
-        path: '/stream',
-        element: Authorization({ page: Stream})
-      }      
-,
-      {
-        path: '/admin/user',
-        element: Authorization({sidebars:SidebarAdmin,page:UserManager} )
-      }    ,
+        {
+          path: '/channel/home',
+          element: <Authorization sidebars= {Sidebar} page= {MyChannel} />
+        }
+        ,
 
-      {
-        path: '/admin/category',
-        element: Authorization({sidebars:SidebarAdmin,page:CategoryManager})
-      }
-      ,
-      {
-        path: '/admin/video',
+        {
+          path: '/signin',
+          element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignIn} />
+        }
+        ,
 
-        element:Authorization({sidebars:SidebarAdmin,page:VideoManage})
-      }
-      ,
-      {
-        path: '/admin/comment',
-        element:   Authorization({sidebars:SidebarAdmin,page:CommentManage})
-      }
-      ,
-      {
-        path: '/admin/report',
-        element:   Authorization({sidebars:SidebarAdmin,page:ReportManage})
-      }
-      ,
+        {
+          path: '/signup',
+          element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SignUp} />
+        }
+        ,
+        {
+          path: '/trending',
+          element: <ResponsiveDrawer Showsidebar={Sidebar} Page={TrendingVideo} />
+        },
+        {
+          path: '/subscription',
+element: <Authorization sidebars= {Sidebar} page= {Subscription} />
+        },
+        {
+          path: '/likevideo',
+          element: <Authorization sidebars= {Sidebar} page= {Likevideo} />
+        },
 
-      {
-        path: '/update',
-        element: Authorization({sidebars:Sidebar,page:Update}) 
-      }
-      , 
-           {
-        path: '/forgotpass',
+        {
+          path: '/stream',
+          element: AuthorizationStream({ page: Stream})
+        }
+        ,
+        {
+          path: '/admin/user',
+          element: <Authorization sidebars= {SidebarAdmin} page= {UserManager} />
+        },
 
-        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={ForgotPass} />
+        {
+          path: '/admin/category',
+          element: <Authorization sidebars= {SidebarAdmin} page= {CategoryManager} />
+        }
+        ,
+        {
+          path: '/admin/video',
 
-      }
-    ]
-  },
-]);
+          element: <Authorization sidebars= {SidebarAdmin} page= {VideoManage} />
+        }
+        ,
+        {
+          path: '/admin/comment',
+          element: <Authorization sidebars= {SidebarAdmin} page= {CommentManage} />
+        }    ,
+        {
+          path: '/admin/channel',
+          element: <Authorization sidebars= {SidebarAdmin} page= {ChannelManage} />
+        }
+
+        ,
+
+        {
+          path: '/update',
+element: <Authorization sidebars={Sidebar} page={Update} />
+        }
+        ,
+        {
+          path: '/forgotpass',
+
+          element: <ResponsiveDrawer Showsidebar={Sidebar} Page={ForgotPass} />
+
+        }
+      ]
+    },
+  ]);
 
 
 
@@ -248,6 +277,7 @@ const router = createBrowserRouter([
           props.setUser({
             [userStatusRef.key]: { name: EmailUser, ...defaultPreference },
           });
+          console.log("props:", props);
           onDisconnect(userStatusRef).remove();
         }
       });
@@ -266,6 +296,7 @@ const router = createBrowserRouter([
           "preferences"
         );
         onChildChanged(preferenceUpdateEvent, (preferenceSnap) => {
+console.log("cai key:", preferenceSnap.key)
           props.updateParticipant({
             [snap.key]: {
               [preferenceSnap.key]: preferenceSnap.val(),
@@ -306,7 +337,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setMainStream: (stream) => dispatch(setMainStream(stream)),
     addParticipant: (user) => dispatch(addParticipant(user)),
-    setUser: (user) => dispatch(setUser(user)),
+setUser: (user) => dispatch(setUser(user)),
     removeParticipant: (userId) => dispatch(removeParticipant(userId)),
     updateParticipant: (user) => dispatch(updateParticipant(user)),
   };

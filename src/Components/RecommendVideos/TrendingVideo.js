@@ -14,7 +14,7 @@ import DateConvert from "../../utils/DayConvert";
 import CategoryAPI from "../../utils/CategoryAPI";
 import TrendingAPI from "../../utils/TrendingAPI";
 
-function RecommendVideos() {
+function TrendingVideo() {
     //number formatter
     const NumberFormatter = ({ value }) => {
         const formattedValue = numeral(value).format('0.0a');
@@ -38,25 +38,32 @@ function RecommendVideos() {
         clearTimeout(timeoutRef.current); // Clear any existing timeout
         videoRef.current.pause()
     };
-    const handleVideo = (idvideo) =>async () => {
+    const handleVideo = (idvideo) => async() => {
+        // This is the function that will be executed on click
+        // const data=NotificationAPI.updateCheck(`/updateChecked?idNotification=${notificationId}`)
         const data = await TrendingAPI.PostVideo(`/postVideoTrending?idVideo=${idvideo}`);
         console.log('handle video',data.data)
         window.location.href=`watch?id=${idvideo}`
-
+        
+        // Add your logic here
+        // For example, you might want to call an update function or perform some actions
       };
 
     //fetch api
     const [videosList, setVideosList] = useState([]);
+    const [videosListByCate, setVideosListByCate] = useState([]);
     const [listCate, setListcate] = useState([]);
 
     const fetchResults = async () => {
-        const data = await VideoAPI.getallData("/listvideo");
+        const data = await TrendingAPI.getAllVideoTrend("/trending");
         setVideosList(data);
+        setVideosListByCate([])
         console.log(data)
     };
     const fetchsByIdcate = async (cate) => {
         const data = await VideoAPI.getByCate(`/videobycate?cate=${cate}`);
-        setVideosList(data);
+        setVideosListByCate(data);
+        setVideosList([])
         console.log(data)
     };
     const fetchCategory = async () => {
@@ -91,7 +98,7 @@ function RecommendVideos() {
                         component="div"
                         sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '20px', justifyContent: 'space-between' }}
                     >
-                        {(videosList.map((item, key) => {
+                         {(videosListByCate.map((item, key) => {
                             return (
                                 <Card sx={{ borderRadius: '10px', minWidth: '150px', width: '380px', maxWidth: '450px' }} key={key}>
                                     <CardActionArea>
@@ -126,10 +133,42 @@ function RecommendVideos() {
                                 </Card>
                             )
                         }))}
+                        {(videosList.map((item, key) => {
+                            return (
+                                <Card sx={{ borderRadius: '10px', minWidth: '150px', width: '380px', maxWidth: '450px' }} key={key}>
+                                    <CardActionArea>
+                                        {/* <Link to={`/watch?id=${item.idvideo}`} style={{ textDecoration: 'none', color: 'white' }} > */}
+                                            <CardMedia
+                                                 onClick={handleVideo(item.video.idvideo)} 
+                                                component="video"
+                                                src={item.video.videourl}
+                                                title={item.title}
+                                                width={'100%'}
+                                                sx={{ objectFit: 'cover', maxHeight: '200px' }}
+                                                ref={videoRef}
+                                                frameBorder={'0'}
+                                                poster={item.video.imageurl}
+                                            />
+                                            <CardContent >
+                                                <Typography gutterBottom variant="h6" component="div" sx={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {item.video.title}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                {item.video.channel.channelname}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                    {(item.video.viewcount >= 1000 ? <NumberFormatter value={item.viewcount} /> : item.viewcount)} Views<CircleIcon sx={{ fontSize: '12px' }} /> <DateConvert date={item.datecreated} />
+                                                </Typography>
+                                            </CardContent>
+                                        {/* </Link> */}
+                                    </CardActionArea>
+                                </Card>
+                            )
+                        }))}
                     </Box>
                 </Box> 
         </div >
     )
 }
 
-export default RecommendVideos;
+export default TrendingVideo;

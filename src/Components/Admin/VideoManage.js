@@ -35,7 +35,8 @@ import Moment from 'react-moment';
 import FirebaseConfig from "../../utils/FirebaseConfig";
 import UploadFile from "../PagesChannel/UploadFile";
 import { Form, useNavigate } from "react-router-dom";
-
+import {utils,writeFile} from "xlsx";
+import ImportExportIcon from '@mui/icons-material/ImportExport';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -63,6 +64,7 @@ function stableSort(array, comparator) {
     });
     return stabilizedThis.map((el) => el[0]);
 }
+
 
 const headCells = [
     {
@@ -168,6 +170,25 @@ EnhancedTableHead.propTypes = {
 
 
 export default function VideoManage() {
+
+    const [shouldExport, setShouldExport] = useState(false);
+const handleExportClick = () => {
+  setShouldExport(true);
+};
+const exportFile = () => {
+  var wb = utils.book_new(),
+    ws = utils.json_to_sheet(exportData);
+  utils.book_append_sheet(wb, ws, "Video");
+
+  writeFile(wb, "Video.xlsx");
+}
+
+  useEffect(() => {
+    if (shouldExport) {
+      exportFile();
+      setShouldExport(false);
+    }
+  }, [shouldExport]);
     function EnhancedTableToolbar(props) {
         const { numSelected } = props;
 
@@ -248,6 +269,18 @@ export default function VideoManage() {
         setRows(data.data)
         // console.log("vao", data.total)
     }
+    const exportData = rows.map((video) => ({
+        idvideo: video.idvideo,
+        title: video.title,
+        categoryname: video.category ? video.category.name : '',
+        channelname: video.channel ? video.channel.channelname : '',
+        datecreated: video.datecreated,
+        describes: video.describes,
+        imageurl: video.imageurl,
+        videourl: video.videourl,
+        viewcount: video.viewcount,
+        status:video.status,
+      }));
     const handleDeleteVideo = async (item) => {
         for (let i = 0; i < item.length; i++) {
             const data = await VideoAPI.deleteItem(`/deletevideo?id=${item[i].idvideo}`)
@@ -368,6 +401,15 @@ export default function VideoManage() {
                 </Typography>
             </Grid>
             <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
+            <Button
+               
+               variant="outlined"
+               size="small"
+               onClick={handleExportClick} // Khi nhấn nút, set cờ shouldExport thành true
+             >
+               <ImportExportIcon/>
+               <span>Export excel</span>
+             </Button>
                 <EnhancedTableToolbar numSelected={selected.length} listVideo={selected} handleDeleteVideo={() => handleDeleteVideo()} />
                 <TableContainer>
                     <Table

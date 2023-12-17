@@ -4,6 +4,9 @@ class RatingAPI{
     countRating = async (url) => {
         return await axios.get(process.env.REACT_APP_BASE_DOMAIN + url)
     }
+    getLikedvideo = async (url) => {
+        return await axios.get(process.env.REACT_APP_BASE_DOMAIN + url)
+    }
     getOneItem = async (url) => {
         return await axios.get(process.env.REACT_APP_BASE_DOMAIN + url)
     }

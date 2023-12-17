@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {  useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -13,35 +13,21 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import { visuallyHidden } from "@mui/utils";
 import Grid from "@mui/material/Grid";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Snackbar,
   TextField,
 } from "@mui/material";
-import VideoAPI from "../../utils/VideoAPI";
 import Moment from "react-moment";
-import { UserContext } from "../Cookie/UserContext";
-import FirebaseConfig from "../../utils/FirebaseConfig";
-import UsersAPI from "../../utils/UsersAPI";
-import { Check } from "@mui/icons-material";
-import { LoadingButton } from "@mui/lab";
-import WalletAPI from "../../utils/WalletAPI";
 import {utils,writeFile} from "xlsx";
 import ImportExportIcon from '@mui/icons-material/ImportExport';
+import ChannelAPI from "../../utils/ChannelAPI";
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -71,51 +57,50 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: "iduser",
+    id: "idchannel",
     // numeric: true,
     // disablePadding: false,
-    label: "Id ",
+    label: "Id Channel ",
   },
   {
-    id: "email",
+    id: "channelname",
     numeric: false,
     disablePadding: false,
-    label: "Email",
+    label: "Name channel",
   },
+  {
+    id: "iduser",
+    numeric: false,
+    disablePadding: false,
+    label: "Id user",
+  },
+
   {
     id: "datecreated",
     numeric: false,
     disablePadding: false,
-    label: "Date created",
-  },
-
+    label: "Date Created",
+  }
+  ,
   {
     id: "status",
     numeric: false,
     disablePadding: false,
     label: "Status",
-  },
+  }
+  ,
   {
-    id: "role",
+    id: "",
     numeric: false,
     disablePadding: false,
-    label: "Admin",
-  },
-  {
-    id: "balance",
-    numeric: false,
-    disablePadding: false,
-    label: "Total Balance",
-  },
+    label: "",
+  }
 ];
 
 function EnhancedTableHead(props) {
   const {
-    onSelectAllClick,
     order,
     orderBy,
-    numSelected,
-    rowCount,
     onRequestSort,
   } = props;
   const createSortHandler = (property) => (event) => {
@@ -207,18 +192,12 @@ export default function UserManage() {
   EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
   };
-
-  const [searchResults, setSearchResults] = useState([]);
-  const [searchEmail, setSearchEmail] = useState("");
-  // ...
-  
-  // ...
   const [shouldExport, setShouldExport] = useState(false);
   const exportFile = () => {
     var wb = utils.book_new(),
-      ws = utils.json_to_sheet(rows);
-    utils.book_append_sheet(wb, ws, "user");
-    writeFile(wb, "User.xlsx");
+      ws = utils.json_to_sheet(exportData);
+    utils.book_append_sheet(wb, ws, "Channel");
+    writeFile(wb, "Channel.xlsx");
   };
   const handleExportClick = () => {
     setShouldExport(true);
@@ -229,9 +208,6 @@ export default function UserManage() {
       setShouldExport(false);
     }
   }, [shouldExport]);
-
-  const [balance,setBalance]=useState('')
-  const userData = useContext(UserContext);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("title");
   const [selected, setSelected] = React.useState([]);
@@ -242,19 +218,19 @@ export default function UserManage() {
   const [open, setOpen] = React.useState(false);
   //fetchdata
   const [rows, setRows] = useState([]);
-  const [totalUser, setTotalUser] = useState(0);
-  useEffect(() => {
-    if (!open) {
-      // Nếu có kết quả tìm kiếm, hiển thị kết quả, ngược lại hiển thị toàn bộ dữ liệu
-      setRows(searchResults.length > 0 ? searchResults : []);
-    }
-  }, [open, searchResults]);
-  const fetchDataUser = async () => {
-    const data = await UsersAPI.getall(`/getAllUser`);
-    setTotalUser(data.data.length);
-    setRows(data.data);
+  const [totalChannel, setTotalChannel] = useState(0);
+  const fetchDataChannel = async () => {
+    const data = await ChannelAPI.getAllItem(`/fillallchannel`);
+    setTotalChannel(data.length);
+    setRows(data);
   };
-
+  const exportData = rows.map((channel) => ({
+    Idchannel: channel.idchannel,
+    'Channel name ': channel.channelname,
+    'Id user ': channel.users.iduser,
+    'Datecreated  ': channel.datecreated,
+    'Status  ': channel.status,
+  }));
   const [state, setState] = useState({
     openinformaiton: false,
     vertical: "top",
@@ -266,9 +242,9 @@ export default function UserManage() {
   const { vertical, horizontal, openinformaiton, titleError,typeError } = state;
   useEffect(() => {
     if (!open) {
-      fetchDataUser();
+      fetchDataChannel();
     }
-    fetchDataUser();
+    fetchDataChannel();
   }, [open]);
 
   const handleRequestSort = (event, property) => {
@@ -276,41 +252,6 @@ export default function UserManage() {
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelected = rows.map((n) => n.idvideo);
-      // setSelected(newSelected);
-      setSelected(rows);
-      return;
-    }
-    setSelected([]);
-  };
-  const handleClickLoading = (indexUser, row) => async (event) => {
-    if(row.balance<0){
-      setState({
-        ...state,
-        openinformaiton: true,
-        titleError: "Money >0",
-        typeError:"error"
-      });
-    }else{
-      const dataReceive = await WalletAPI.updateBalance(
-        `/updatemoney?iduser=${row.iduser}&amount=${row.balance}`
-      );
-      setState({
-        ...state,
-        openinformaiton: true,
-        titleError: "Update success",
-        typeError:"success"
-      });
-    }
-
-
-  
-
-  };
-
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -329,7 +270,7 @@ export default function UserManage() {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - totalUser) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - totalChannel) : 0;
 
   const visibleRows = React.useMemo(
     () =>
@@ -338,39 +279,83 @@ export default function UserManage() {
         page * rowsPerPage + rowsPerPage
       ),
 
-    [totalUser, order, orderBy, page, rowsPerPage,rows]
+    [totalChannel, order, orderBy, page, rowsPerPage,rows]
 
   );
-  const handleChange = (event,indexUser,row) => {
-    const { name, value } = event.target;
-    let updatedbalance = [...visibleRows];
-    updatedbalance[indexUser].balance = value
-    setRows(updatedbalance);
-  };
   const handleClose = () => {
     setState({ ...state, openinformaiton: false });
   };
-  const handleClickStatusUser = (indexUser, row) => async (event) => {
+  const handleClickStatusChannel = (index, row) => async (event) => {
     let updatedStatus = [...visibleRows];
-    updatedStatus[indexUser].status = !updatedStatus[indexUser].status;
+    updatedStatus[index].status = !updatedStatus[index].status;
     setRows(updatedStatus);
-    const dataReceive = await UsersAPI.updateStatus(
-      `/updateUserStatus?id=${row.iduser}&status=${row.status}`
+    const dataReceive = await ChannelAPI.updateStatus(
+      `/updateChannelStatus?id=${row.idchannel}&status=${row.status}`
     );
   };
-  const handleClickRoleUser = (indexUser, row) => async (event) => {
-    let updatedRole = [...visibleRows];
-    updatedRole[indexUser].role = !updatedRole[indexUser].role;
-    setRows(updatedRole);
-    const dataReceive = await UsersAPI.updateRole(
-      `/updateUserRole?id=${row.iduser}&role=${row.role}`
-    );
+  // eidt name channel
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setDataChannel((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+  const [dataChannel, setDataChannel] = useState("");
+  console.log(visibleRows)
+  const handleClickEdit = (row) => {
+    setDataChannel(row);
+  };
+  const handleSubmit = (actionType) => async (event) => {
+    event.preventDefault();
+    if (actionType === "update") {
+      if (
+        dataChannel.idchannel === null ||
+        dataChannel.idchannel === undefined
+      ) {
+        setState({
+          ...state,
+          openinformaiton: true,
+          titleError: "No data Channel",
+          typeError:"error"
+        });
+      } else {
+        if( dataChannel.channelname === ''){
+          setState({
+            ...state,
+            openinformaiton: true,
+            titleError: "No data Channel",
+            typeError:"error"
+          });
+        }else{
+          let jsondata=JSON.stringify(dataChannel)
+          const data = await ChannelAPI.updateChannel(`/updateChannel`,jsondata);
+  
+          const updatedChannel = visibleRows.map((row) =>
+          row.idchannel   === dataChannel.idchannel ? { ...row, channelname:dataChannel.channelname  } : row
+        );
+        setRows(updatedChannel);
+        setState({
+          ...state,
+          openinformaiton: true,
+          titleError: "Update success",
+          typeError:"success"
+        });
+        }
 
+      }
+    } else if (actionType === "reset") {
+      const emptyDataChannel = Object.fromEntries(
+        Object.keys(dataChannel).map((key) => [key, ""])
+      );
+      setDataChannel(emptyDataChannel);
+      console.log(state)
+    }
   };
+
 
   return (
     <Box sx={{ width: "100%" }}>
-  
       <Grid item xs>
       <Snackbar
               sx={{ marginTop: "5%" }}
@@ -402,15 +387,57 @@ export default function UserManage() {
         >
           Admin dashboard
         </Typography>
-
-        {/* <TextField
-            label="Search by Email"
-            variant="outlined"
-            value={searchEmail}
-            onChange={handleSearchChange}
-          /> */}
       </Grid>
+   
       <Paper sx={{ width: "100%", padding: "10px 25px 0 25px" }}>
+
+      <Grid container spacing={3}>
+            <Grid item xs={12} sm={2}>
+              <TextField
+                disabled
+                id="outlined-disabled"
+                defaultValue={dataChannel.idchannel}
+                value={dataChannel.idchannel}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <TextField
+                required
+                fullWidth
+                id="channelname"
+                defaultValue={dataChannel.channelname}
+                name="channelname"
+                onChange={handleChange}
+                autoFocus
+                value={dataChannel.channelname}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={2}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                onClick={(event) => handleSubmit("update")(event)}
+                sx={{ mt: 1, mb: 1 }}
+              >
+                Update
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                onClick={(event) => handleSubmit("reset")(event)}
+                sx={{ mt: 1, mb: 1 }}
+              >
+                reset
+              </Button>
+            </Grid>
+          </Grid>
+
         <EnhancedTableToolbar
           numSelected={selected.length}
           listVideo={selected}
@@ -421,9 +448,8 @@ export default function UserManage() {
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={totalUser}
+              rowCount={totalChannel}
             />
             <TableBody>
               {visibleRows?.map((row, index) => {
@@ -434,14 +460,18 @@ export default function UserManage() {
                   <TableRow
                     hover
                     tabIndex={-1}
-                    key={row.iduser}
+                    key={row.idchannel}
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
-                    <TableCell>{row.iduser}</TableCell>
+                    <TableCell>{row.idchannel}</TableCell>
 
                     <TableCell sx={{ width: "350px" }} align="left">
-                      {row.email}
+                      {row.channelname}
+                    </TableCell>
+                    
+                    <TableCell sx={{ width: "350px" }} align="left">
+                      {row.users.iduser}
                     </TableCell>
 
                     <TableCell align="left">
@@ -451,43 +481,22 @@ export default function UserManage() {
                       <FormControlLabel
                         control={
                           <Switch
-                            onChange={handleClickStatusUser(index, row)}
+                            onChange={handleClickStatusChannel(index, row)}
                             checked={row.status}
                           />
                         }
                       />
                     </TableCell>
+                  
                     <TableCell align="left">
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            onChange={handleClickRoleUser(index, row)}
-                            checked={row.role}
-                          />
-                        }
-                      />
+                      <Button
+                        variant="contained"
+                        onClick={() => handleClickEdit(row)}
+                        endIcon={<EditIcon />}
+                      >
+                        Edit
+                      </Button>
                     </TableCell>
-                    <TableCell sx={{ width: "350px" }} align="left">
-                    <Box display="flex" alignItems="center" m={1} p={1}>
-                    <TextField
-                     style={{ marginRight: '8px' }}
-                required
-                id="balance"
-                defaultValue= {row.balance}
-                name="balance"
-                onChange={(event) => handleChange(event, index,row)}
-                autoFocus
-                type="number"
-              />
-                  <Button variant="outlined" 
-                   size="small"
-            onClick={handleClickLoading(index,row)}
-          >
-            <span>Update Balance</span>
-          </Button>
-          </Box>
-                    </TableCell>
-
                   </TableRow>
                 );
               })}
@@ -506,7 +515,7 @@ export default function UserManage() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={totalUser}
+          count={totalChannel}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

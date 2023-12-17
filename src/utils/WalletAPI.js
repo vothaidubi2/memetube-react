@@ -8,5 +8,9 @@ class WalletAPI {
         return await axios.get(process.env.REACT_APP_BASE_DOMAIN + url)
         .then(data => data.data);
     }
+    updateBalance = async (url) => {
+        return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url)
+        .then(data => data.data)
+    }
 }
 export default new WalletAPI

@@ -38,10 +38,7 @@ class UsersAPI {
         return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url)
         
     }
-    updateBalance = async (url) => {
-        return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url)
-        .then(data => data.data)
-    }
+
     setBalance = async (url) => {
         return await axios.put(process.env.REACT_APP_BASE_DOMAIN + url)
         .then(data => data.data)

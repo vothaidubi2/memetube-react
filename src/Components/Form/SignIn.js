@@ -32,7 +32,7 @@ export default function SignIn({ onClose }) {
     status: 1,
     google: 1,
     datecreated: "",
-    role: 1,
+    role: 0,
     avatar: "",
   });
   let token = "";

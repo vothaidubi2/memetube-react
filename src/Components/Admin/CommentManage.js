@@ -29,7 +29,6 @@ import DateConvert from "../../utils/DayConvert";
 import RatingAPI from "../../utils/RatingAPI";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { UserContext } from "../Cookie/UserContext";
-import ChannelAPI from "../../utils/ChannelAPI";
 
 export default function CommentManage() {
     const userData = useContext(UserContext)

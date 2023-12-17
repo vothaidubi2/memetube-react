@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import './RecommendVideos.scss';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -13,9 +13,13 @@ import numeral from "numeral";
 import DateConvert from "../../utils/DayConvert";
 import CategoryAPI from "../../utils/CategoryAPI";
 import TrendingAPI from "../../utils/TrendingAPI";
+import { UserContext } from "../Cookie/UserContext";
+import SubscribeAPI from "../../utils/SubscribeAPI";
+import SubscriptionAPI from "../../utils/SubscriptionAPI";
 
-function RecommendVideos() {
+function Subscription() {
     //number formatter
+    const userData = useContext(UserContext)
     const NumberFormatter = ({ value }) => {
         const formattedValue = numeral(value).format('0.0a');
         return <>{formattedValue}</>;
@@ -38,30 +42,29 @@ function RecommendVideos() {
         clearTimeout(timeoutRef.current); // Clear any existing timeout
         videoRef.current.pause()
     };
-    const handleVideo = (idvideo) =>async () => {
+    const handleVideo = (idvideo) => async() => {
+        // This is the function that will be executed on click
+        // const data=NotificationAPI.updateCheck(`/updateChecked?idNotification=${notificationId}`)
         const data = await TrendingAPI.PostVideo(`/postVideoTrending?idVideo=${idvideo}`);
         console.log('handle video',data.data)
         window.location.href=`watch?id=${idvideo}`
-
+        
+        // Add your logic here
+        // For example, you might want to call an update function or perform some actions
       };
 
     //fetch api
     const [videosList, setVideosList] = useState([]);
-    const [listCate, setListcate] = useState([]);
+
 
     const fetchResults = async () => {
-        const data = await VideoAPI.getallData("/listvideo");
-        setVideosList(data);
-        console.log(data)
+        const data = await SubscriptionAPI.getAllVideo(`/getSubscription?iduser=${userData.Iduser}`);
+        setVideosList(data.data);
+        console.log('data sub',data)
     };
-    const fetchsByIdcate = async (cate) => {
-        const data = await VideoAPI.getByCate(`/videobycate?cate=${cate}`);
-        setVideosList(data);
-        console.log(data)
-    };
+
     const fetchCategory = async () => {
         const data = await CategoryAPI.getAll("/getallcate")
-        setListcate(data.data);
         console.log("cate: ",data)
     }
     useEffect(() => {
@@ -80,18 +83,13 @@ function RecommendVideos() {
                     <Box sx={{ marginTop: 2 }}>
                         <Stack direction="row" spacing={1} sx={{ display: 'flex', flexWrap: 'wrap', marginBottom: '20px' }}>
                             <Chip onClick={fetchResults} component="button" label="All" sx={{ cursor: 'pointer',padding:'0 5px' }} />
-                            {listCate &&( listCate.map((item,key)=>{
-                                return(
-                                    <Chip onClick={()=>fetchsByIdcate(item.idcategory)} component="button" key={key} label={item.name} sx={{ cursor: 'pointer',padding:'0 5px' }} />
-                                )
-                            }))}
                         </Stack>
                     </Box>
                     <Box
                         component="div"
                         sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '20px', justifyContent: 'space-between' }}
                     >
-                        {(videosList.map((item, key) => {
+                        {videosList===null ? <></>:<>          {(videosList.map((item, key) => {
                             return (
                                 <Card sx={{ borderRadius: '10px', minWidth: '150px', width: '380px', maxWidth: '450px' }} key={key}>
                                     <CardActionArea>
@@ -106,16 +104,13 @@ function RecommendVideos() {
                                                 ref={videoRef}
                                                 frameBorder={'0'}
                                                 poster={item.imageurl}
-                                            // onMouseEnter={handleMouseEnter}
-                                            // onMouseLeave={handleMouseLeave}
-                                            // controls={controlsVisible}
                                             />
                                             <CardContent >
                                                 <Typography gutterBottom variant="h6" component="div" sx={{ display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                     {item.title}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {item.channel.channelname}
+                                                {item.channel.channelname}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                                     {(item.viewcount >= 1000 ? <NumberFormatter value={item.viewcount} /> : item.viewcount)} Views<CircleIcon sx={{ fontSize: '12px' }} /> <DateConvert date={item.datecreated} />
@@ -125,11 +120,12 @@ function RecommendVideos() {
                                     </CardActionArea>
                                 </Card>
                             )
-                        }))}
+                        }))}</>}
+              
                     </Box>
                 </Box> 
         </div >
     )
 }
 
-export default RecommendVideos;
+export default Subscription;
