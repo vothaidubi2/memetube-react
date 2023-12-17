@@ -15,6 +15,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CategoryIcon from '@mui/icons-material/Category';
 import VideoSettingsIcon from '@mui/icons-material/VideoSettings';
 import MarkChatReadIcon from '@mui/icons-material/MarkChatRead';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 const drawerWidth = 240;
 
 
@@ -43,6 +44,13 @@ function Sidebar(props) {
             name: "User Manage",
             icon: AccountCircleIcon
         }, {
+            path: `/admin/channel`,
+            name: "Channel Manage",
+            icon: PlayCircleIcon
+        }
+        ,
+        
+        {
             path: `/admin/category`,
             name: "Category Manage",
             icon: CategoryIcon
@@ -50,10 +58,6 @@ function Sidebar(props) {
             path: "/admin/video",
             name: "Video Manage",
             icon: VideoSettingsIcon
-        }, {
-            path: "/admin/comment",
-            name: "Comment Manage",
-            icon: MarkChatReadIcon
         }
 
     ]

@@ -17,14 +17,28 @@ import VideoCallIcon from "@mui/icons-material/VideoCall";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import { Form, Link, useNavigate } from "react-router-dom";
+import { Form, Navigate, useNavigate } from "react-router-dom";
 import SignIn from "../Form/SignIn";
-import { Avatar } from "@mui/material";
+import Link from '@mui/material/Link';
+import {
+  Avatar,
+  Button,
+  Card,
+  CardHeader,
+  Popover,
+  Snackbar,
+  SnackbarContent,
+  Stack,
+} from "@mui/material";
 import { UserContext } from "../Cookie/UserContext";
 import removeCookie from "../Cookie/removeCookie";
 import getCookie from "../Cookie/getCookie";
 import Update from "../Form/Update";
 import ForgotPass from "../Form/ForgotPass";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import PopupState from "material-ui-popup-state";
+import { red } from "@mui/material/colors";
+import NotificationAPI from "../../utils/NotificationAPI";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -69,10 +83,29 @@ export default function Header() {
   let tempdataUser = useContext(UserContext);
   const [AvatarUser, setAvatarUser] = useState(null);
   const [dataUser, setDataUser] = useState(null);
-  useEffect(() => {
+  const [dataNotification,setDataNotification]=useState(null)
+  const [notificantsize, setNotificantsize] = useState(0);
+  const fetchDataNotification = async () => {
+    try {
+      const data = await NotificationAPI.getNotification(
+        `/getNotificationByIduser?IdUser=${tempdataUser.Iduser}`
+
+      );
+      console.log(data)
+      const filteredData = data.filter(item => item.checked === false);
+      setNotificantsize(filteredData.length);
+      setDataNotification(data);
+    } catch (error) {
+      // Xử lý lỗi nếu cần
+    }
+  };
+  
+  useEffect(()  => {
     if (tempdataUser !== null && boolean === false) {
       setDataUser(tempdataUser);
       setAvatarUser(tempdataUser.Avatar);
+      fetchDataNotification();
+
       boolean = true;
     }
   }, [tempdataUser]);
@@ -147,42 +180,79 @@ export default function Header() {
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
+  const [anchorElNotification, setAnchorElNotification] = React.useState(null);
+
+  const handleClickNotification = (event) => {
+    setAnchorElNotification(event.currentTarget);
+  };
+
+  const handleCloseNotification = () => {
+    setAnchorElNotification(null);
+  };
+  const handleOpenAdmin = () => {
+    setAnchorEl(null);
+    handleMobileMenuClose();
+    navigate('/admin/user')
+  };
+
+
+
+    
+
+  const openNotification = Boolean(anchorElNotification);
+  const id = openNotification ? "simple-popover" : undefined;
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (
     <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      {dataUser != null ? (
-        <>
-          {!tempdataUser.Google ? (
-            <MenuItem onClick={handleOpenUpdate}>Update Account</MenuItem>
-          ) : (
-            <></>
-          )}
-          <MenuItem onClick={handleStudio}>Studio</MenuItem>
-          <MenuItem onClick={handleLogout}>Log out</MenuItem>
-        </>
-      ) : (
-        <>
-          <MenuItem onClick={handleOpenSignIn}>Signin/signup</MenuItem>
-          <MenuItem onClick={handleOpenForgotPass}>Forgot Password</MenuItem>
-        </>
-      )}
-    </Menu>
+    anchorEl={anchorEl}
+    anchorOrigin={{
+      vertical: "top",
+      horizontal: "right",
+    }}
+    id={menuId}
+    keepMounted
+    transformOrigin={{
+      vertical: "top",
+      horizontal: "right",
+    }}
+    open={isMenuOpen}
+    onClose={handleMenuClose}
+  >
+    
+    {dataUser != null ? (
+      <>
+        {!tempdataUser.Google ? (
+          <MenuItem onClick={handleOpenUpdate}>Update Account</MenuItem>
+        ) : (
+          <></>
+        )}
+        {tempdataUser.Role ? (
+          <MenuItem onClick={handleOpenAdmin}>Admin dashboard</MenuItem>
+        ) : (
+          <></>
+        )}
+        <MenuItem onClick={handleStudio}>Studio</MenuItem>
+        <MenuItem onClick={handleLogout}>Log out</MenuItem>
+      </>
+    ) : (
+      <>
+        <MenuItem onClick={handleOpenSignIn}>Signin/signup</MenuItem>
+        <MenuItem onClick={handleOpenForgotPass}>Forgot Password</MenuItem>
+      </>
+    )}
+  </Menu>
+
   );
+  const updateCheckedNotificationHandler = (redirectUrl, notificationId) => () => {
+    // This is the function that will be executed on click
+    
+    const data=NotificationAPI.updateCheck(`/updateChecked?idNotification=${notificationId}`)
+    window.location.href=`${redirectUrl}`
+
+    // Add your logic here
+    // For example, you might want to call an update function or perform some actions
+  };
 
   const mobileMenuId = "primary-search-account-menu-mobile";
   const renderMobileMenu = (
@@ -223,6 +293,36 @@ export default function Header() {
       </MenuItem>
     </Menu>
   );
+  function convertTime(inputTime) {
+    // Chuyển đổi thời gian từ chuỗi thành đối tượng Date
+    const inputDate = new Date(inputTime);
+
+    // Tính thời gian hiện tại
+    const currentTime = new Date();
+
+    // Tính khoảng cách thời gian giữa hiện tại và thời gian đầu vào
+    const timeDifference = currentTime - inputDate;
+
+    const days = Math.floor(timeDifference / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((timeDifference % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const minutes = Math.floor((timeDifference % (60 * 60 * 1000)) / (60 * 1000));
+    const seconds = Math.floor((timeDifference % (60 * 1000)) / 1000);
+    let result = "";
+    if (days > 0) {
+        result += days + " day" + (days > 1 ? "s " : " ");
+    } else if (hours > 0) {
+        result += hours + " hour" + (hours > 1 ? "s " : " ");
+    } else if (minutes > 0) {
+        result += minutes + " minute" + (minutes > 1 ? "s " : " ");
+    } else {
+        result += seconds + " second" + (seconds > 1 ? "s " : " ");
+    }
+    
+    result += "ago";
+    
+
+    return result;
+}
 
   //search input
   const [inputSearch, setInputSearch] = React.useState("");
@@ -315,15 +415,49 @@ export default function Header() {
                   <VideoCallIcon />
                 </a>
               </IconButton>
-              {/* <IconButton
-                                size="large"
-                                aria-label="show 17 new notifications"
-                                color="inherit"
-                            >
-                                <Badge badgeContent={17} color="error">
-                                    <NotificationsIcon />
-                                </Badge>
-                            </IconButton> */}
+
+                <IconButton   onClick={handleClickNotification}>
+                <Badge badgeContent={ notificantsize} color="error">
+  <NotificationsIcon color="action" />
+</Badge>
+                </IconButton>
+                <Popover
+                  id={id}
+                  open={openNotification}
+                  anchorEl={anchorElNotification}
+                  onClose={handleCloseNotification}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                >
+   {dataNotification === null ? (
+  <></>
+) : dataNotification.length === 0 ? (
+  <div>
+     <Card sx={{ width: 400, height: "80vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+  There are no announcements here!!!
+</Card>
+
+  </div>
+) : (
+  dataNotification.map((no) => (
+    <Card sx={{ width: 400}} onClick={updateCheckedNotificationHandler(no.redirecturl, no.idnotification)}>
+      <CardHeader
+        avatar={
+          <Avatar sx={{ bgcolor: red[500], opacity: 1 }} aria-label="recipe" src={no.user.avatar}>
+          </Avatar>
+        }
+        sx={{ opacity: no.checked ? 0.5 : 1 }}
+        title={no.title}
+        subheader={`${no.contents} -- ${convertTime(no.datecreate)}`}
+      />
+    </Card>
+  ))
+)}
+
+                </Popover>
+             
               <IconButton
                 size="large"
                 edge="end"

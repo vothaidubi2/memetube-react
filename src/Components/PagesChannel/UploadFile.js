@@ -24,6 +24,7 @@ import ImageAPI from "../../utils/ImageAPI";
 import format from 'date-fns/format';
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../Cookie/UserContext";
+import NotificationAPI from "../../utils/NotificationAPI";
 
 
 const steps = ["uploadvideo", "Detail", "Display mode"];
@@ -42,6 +43,12 @@ export default function UploadFile({ active, video }) {
   const [uploadedImage, setUploadedImg] = useState();
   const [category, setCategory] = React.useState(null);
   const [listCategory, setListCategory] = React.useState([]);
+  let user = useContext(UserContext);
+  const [notificationSent, setNotificationSent] = useState(false);
+
+  const currentURL = new URL(window.location.href);
+
+
 
   const handleChangeCate = (event) => {
     setTitleValue(titleRef.current.value)
@@ -456,6 +463,8 @@ export default function UploadFile({ active, video }) {
     if (active == null) {
       let imageData = new FormData();
       imageData.append('files', selectedImage)
+
+      ///fetch lại video
       const imageurl = await ImageAPI.uploadImage("/uploadimage", imageData)
       let formVideo = new FormData()
       formVideo.append('files', pathVideo)
@@ -476,6 +485,33 @@ export default function UploadFile({ active, video }) {
       const data = await VideoAPI.postVideo('/postvideo', form)
       if (data.status == 201) {
         setLoadingButton(false)
+        if(status===true){
+          if (!notificationSent) {
+            const addNotification = async () => {
+              let dataNotification={
+                Idnotification: "",
+                Iduser: "",
+                title: `User ${user.Email} posted a new video`,
+                contents: `${titleValue}`,
+                datecreate: "",
+                checked: false,
+                redirecturl: `http://localhost:3000/watch?id=${data.data.idvideo}`,
+                status: true,
+              };
+              const jsonData = JSON.stringify(dataNotification);
+              try {
+                const data = await NotificationAPI.addnotificationOnetoMany(
+                  `/addNotificationOnetoMany?Idsend=${user.Iduser}`,
+                  jsonData
+                );
+                setNotificationSent(true);
+              } catch (error) {
+              }
+            };
+      
+            addNotification();
+          }
+        }
       }
     } else {
       let form = {

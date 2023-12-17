@@ -53,6 +53,10 @@ import ThankYou from './Components/ResponsiveDrawer/ThankYou';
 import VideoManage from './Components/Admin/VideoManage';
 import CommentManage from './Components/Admin/CommentManage';
 import CategoryManager from './Components/Admin/CategoryManage';
+import TrendingVideo from './Components/RecommendVideos/TrendingVideo';
+import Subscription from './Components/RecommendVideos/Subscription';
+import Likevideo from './Components/RecommendVideos/Likevideo';
+import ChannelManager from './Components/Admin/ChannelManage';
 function App(props) {
   const [userData, setUserData] = useState(null);
   useEffect(() => {
@@ -77,19 +81,13 @@ function Authorization(options) {
  
   const currentURL = new URL(window.location.href);
   const token = getCookie('user');
-if(currentURL.pathname.startsWith('/studio') ){
+if(currentURL.pathname.startsWith('/studio') || currentURL.pathname.startsWith('/stream')||currentURL.pathname.startsWith('/subscription')||currentURL.pathname.startsWith('/likevideo')){
 if( userData==null){
   return  <NotFound />
 }else{
   return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
 }
 
-}else if(currentURL.pathname.startsWith('/stream')){
-if(  userData==null){
-  return  <NotFound />
-}else{
-  return <ResponsiveDrawer Showsidebar={sidebars} Page={page} />
-}
 
 }else if(currentURL.pathname.startsWith('/admin')){
   if(userData==null){
@@ -119,6 +117,18 @@ const router = createBrowserRouter([
         element: <ResponsiveDrawer Showsidebar={Sidebar} Page={RecommendVideos} />
       },
       {
+        path: '/trending',
+        element: <ResponsiveDrawer Showsidebar={Sidebar} Page={TrendingVideo} />
+      },
+      {
+        path: '/subscription',
+        element: Authorization({sidebars:Sidebar,page:Subscription})
+      },
+      {
+        path: '/likevideo',
+        element: Authorization({sidebars:Sidebar,page:Likevideo})
+      },
+      {
         path: '/search',
         element: <ResponsiveDrawer Showsidebar={Sidebar} Page={SearchPage} />
       },
@@ -139,6 +149,9 @@ const router = createBrowserRouter([
       {
         path: '/studio/comment',
         element: Authorization({sidebars:UserChannel,page:Comment}) 
+      }, {
+        path: '/studio/mychannel',
+        element: Authorization({sidebars:Sidebar,page:MyChannel})
       }
       ,
 
@@ -179,6 +192,11 @@ const router = createBrowserRouter([
         path: '/admin/video',
 
         element:Authorization({sidebars:SidebarAdmin,page:VideoManage})
+      }      ,
+      {
+        path: '/admin/channel',
+
+        element:Authorization({sidebars:SidebarAdmin,page:ChannelManager})
       }
       ,
       {

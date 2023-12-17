@@ -9,12 +9,46 @@ import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import HistoryIcon from '@mui/icons-material/History';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import { useLocation } from "react-router-dom";
+import HomeIconOutlined from '@mui/icons-material/HomeOutlined';
+import WhatshotIconOutlined from '@mui/icons-material/WhatshotOutlined';
+import SubscriptionsIconOutlined from '@mui/icons-material/SubscriptionsOutlined';
+import HistoryIconOutlined from '@mui/icons-material/HistoryOutlined';
+import OndemandVideoIconOutlined from '@mui/icons-material/OndemandVideoOutlined';
+import ThumbUpIconOutlined from '@mui/icons-material/ThumbUpOutlined';
+import { Link, useLocation } from "react-router-dom";
 
 const drawerWidth = 240;
 
 function Sidebar(props) {
+    const menuItem = [
+        {
+            path: "/",
+            name: "Home",
+            icon: HomeIcon,
+        }, {
+            path: `/trending`,
+            name: "Trending",
+            icon: WhatshotIcon 
+        }, {
+            path: "/subscription",
+            name: "Subscription",
+            icon: SubscriptionsIcon 
+        }
 
+    ]
+    const menuItem2 = [
+
+         {
+            path: `/studio/mychannel`,
+            name: "Your Videos",
+            icon: OndemandVideoIcon  
+        }, {
+            path: "/likevideo",
+            name: "Liked Videos",
+            icon: ThumbUpIcon  
+        }
+
+    ]
     const { window } = props;
     const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -37,31 +71,51 @@ function Sidebar(props) {
 
     const drawer = (
         <div>
-        <List>
-            {['Home', 'Trending', 'Subscription'].map((text, index) => (
-                <ListItem key={text} disablePadding>
-                    <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
-                        <ListItemIcon>
-                            {index == 0 ? <HomeIcon /> : index == 1 ? <WhatshotIcon /> : <SubscriptionsIcon />}
-                        </ListItemIcon>
-                        <ListItemText primary={text} />
-                    </ListItemButton>
-                </ListItem>
-            ))}
-        </List>
+       <List  >
+                    {menuItem.map((item, index) => (
+                        <Link to={item.path} style={{ textDecoration: 'none', color: 'white'}}>
+                            <ListItem disablePadding>
+
+                                <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
+                                    <ListItemIcon >
+                                        <item.icon  Outlined/>
+                                    </ListItemIcon>
+                                    <ListItemText primary={item.name} />
+
+                                </ListItemButton>
+
+                            </ListItem>
+
+                        </Link>
+
+                    ))
+
+                    }
+
+                </List>
         <Divider />
-        <List>
-            {['History', 'Your Videos', 'Liked Videos'].map((text, index) => (
-                <ListItem key={text} disablePadding>
-                    <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
-                        <ListItemIcon>
-                            {index == 0 ? <HistoryIcon /> : index == 1 ? <OndemandVideoIcon /> : <ThumbUpIcon />}
-                        </ListItemIcon>
-                        <ListItemText primary={text} />
-                    </ListItemButton>
-                </ListItem>
-            ))}
-        </List>
+        <List  >
+                    {menuItem2.map((item, index) => (
+                        <Link to={item.path} style={{ textDecoration: 'none', color: 'white'}}>
+                            <ListItem disablePadding>
+
+                                <ListItemButton sx={{ borderRadius: '15px', margin: "0 10px" }}>
+                                    <ListItemIcon >
+                                        <item.icon />
+                                    </ListItemIcon>
+                                    <ListItemText primary={item.name} />
+
+                                </ListItemButton>
+
+                            </ListItem>
+
+                        </Link>
+
+                    ))
+
+                    }
+
+                </List>
     </div>
     );
 

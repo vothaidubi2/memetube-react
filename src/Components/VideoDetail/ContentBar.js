@@ -31,6 +31,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import CloseIcon from "@mui/icons-material/Close";
 import CommentAPI from '../../utils/CommentAPI';
 import { UserContext } from '../Cookie/UserContext';
+import NotificationAPI from '../../utils/NotificationAPI';
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -128,13 +129,23 @@ export default function ContentBar({ props }) {
         fetchRate();
         fetchCountRate();
     }, [isSub, rate])
-
+   
+const [statusComment, setStatusComment]=useState('video')
+const [idreplyComment, setIdReplyComment]=useState('')
     //change data sub,like/dislike
     const addSub = async () => {
         try {
             const data = await SubscribeAPI.addSub(`/addsub?iduser=${userData.Iduser}&idchannel=${props.channel.idchannel}`);
             if (data.status == 201) {
                 setIsSub(true)
+                setStatusComment('sub')
+                setDataNotification({
+                    ...dataNotification,
+                    title: `New customer subscriber`,
+                    contents: `${userData.Email} has become a subscriber`,
+                    redirecturl: "http://localhost:3000/studio/home",
+                  });
+
             }
         } catch (error) {
             if (error.response) {
@@ -146,6 +157,7 @@ export default function ContentBar({ props }) {
     const deleteSub = async () => {
         try {
             const data = await SubscribeAPI.deleteSub(`/deletesub?iduser=${userData.Iduser}&idchannel=${props.channel.idchannel}`);
+
             if (data.status == 200) {
                 setIsSub(false)
             }
@@ -153,6 +165,48 @@ export default function ContentBar({ props }) {
 
         }
     }
+    
+    const [dataNotification,setDataNotification] =  useState({
+        Idnotification: "",
+        Iduser: "",
+        title: ``,
+        contents: ``,
+        datecreate: "",
+        checked: false,
+        redirecturl: '',
+        status: true,
+    });
+  
+
+
+        const addNotificationOnetoOne = async (dataNotifications) => {
+          const jsonData = JSON.stringify(dataNotifications);
+          const iduser  = props.channel.users.iduser;
+            if(statusComment==="replycomment"){
+                try {
+                    const data = await NotificationAPI.addnotificationOnetoOne(
+                      `/addNotificationRatingorSub?Idsend=${userData.Iduser}&idreceive=${idreplyComment}&idvideo=${props.idvideo}&idchannel=${props.channel.idchannel}&issub=${statusComment}`,
+                      jsonData
+                    );
+                    console.log("success:", jsonData);
+                  } catch (error) {
+                    console.log("Error reply", error);
+                  }
+            }else{
+                try {
+                    const data = await NotificationAPI.addnotificationOnetoOne(
+                      `/addNotificationRatingorSub?Idsend=${userData.Iduser}&idreceive=${iduser}&idvideo=${props.idvideo}&idchannel=${props.channel.idchannel}&issub=${statusComment}`,
+                      jsonData
+                    );
+                    console.log("success:", jsonData);
+                  } catch (error) {
+                    console.log("Error", error);
+                  }
+            }
+
+        };
+    
+
 
     const modifyRate = async (inputRate) => {
         if (rate != null) {
@@ -169,6 +223,13 @@ export default function ContentBar({ props }) {
         } else {
             try {
                 const data = await RatingAPI.addRate(`/addrate?iduser=${userData.Iduser}&idvideo=${props.idvideo}&rate=${inputRate}`);
+                setDataNotification({
+                    ...dataNotification,
+                    title: `New customer like video ${props.title}`,
+                    contents: `${userData.Email} like video`,
+                    redirecturl: "http://localhost:3000/studio/home",
+                  });
+                  setStatusComment('video');
                 if (data.status == 201) {
                     setRate(inputRate)
                 }
@@ -179,6 +240,14 @@ export default function ContentBar({ props }) {
             }
         }
     }
+useEffect((
+) => {
+    if(dataNotification.title!==""){
+        addNotificationOnetoOne(dataNotification);
+    }
+
+  }, [dataNotification]);
+
 
     const deleteRate = async () => {
         try {
@@ -309,13 +378,30 @@ export default function ContentBar({ props }) {
             await CommentAPI.postComment(`/postcomment?idvideo=${props.idvideo}&iduser=${userData.Iduser}&contents=${inputComment}`);
             fetchBaseCmt();
             setInputComment('');
+            setStatusComment('comment');
+            setDataNotification({
+                ...dataNotification,
+                title: `${userData.Email} post comment this  video ${props.title}`,
+                contents: `${inputComment}`,
+                redirecturl:    `http://localhost:3000/watch?id=${props.idvideo}`,
+              });
+             
         }
     };
     const handleEnterReplyCmt = async (event, idbasecmt) => {
         if (event.key === 'Enter') {
             await CommentAPI.postComment(`/postreplycomment?idvideo=${props.idvideo}&iduser=${userData.Iduser}&contents=${inputReplyComment}&idbasecmt=${idbasecmt.idcomment}`);
             fetchReplyCmt(idbasecmt.idcomment);
+            
             setInputReplyComment('');
+            setIdReplyComment(idbasecmt.users.iduser)
+            setStatusComment('replycomment');
+            setDataNotification({
+                ...dataNotification,
+                title: `${userData.Email} reply comment this  video ${idbasecmt.contents}`,
+                contents: `${inputReplyComment}`,
+                redirecturl:    `http://localhost:3000/watch?id=${props.idvideo}`,
+              });
         }
     };
     const handleComment = (event) => {
